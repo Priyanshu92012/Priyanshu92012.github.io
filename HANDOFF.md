@@ -7,68 +7,66 @@
 
 ## Current phase
 
-**BUILD** — AI terminal widget complete locally; Worker not yet deployed to Cloudflare.
+**V1 LIVE** — Site is deployed and reachable. AI terminal requires Anthropic credits to activate freeform responses.
 
 ## Last session
 
 **Date:** 2026-05-03
 **Where:** Claude Code (VS Code extension)
 **What happened:**
-- Renamed `index (3).html` → `index.html`
-- Fixed all placeholder links: LinkedIn → `linkedin.com/in/priyanshu-priyanshu-/`, email → `priyanshu240105@gmail.com`
-- Changed name throughout to "Priyanshu" only (no surname)
-- Added terminal section HTML + CSS to `index.html` (between socials band and #work)
-- Built full `terminal.js`: input handling, up/down history, Tab completion, all local commands, AI streaming via `fetch` + `ReadableStream`, mobile overlay toggle
-- Built `worker/src/index.js`: CORS, KV rate-limiting (3/min · 10/hr · 500/day global), Anthropic streaming proxy, system prompt hardcoded
-- Created `worker/wrangler.toml`: needs real KV namespace ID filled in
-- Created `PLAN.md` in repo root
+- Installed Node.js v24.15.0 and Wrangler CLI v4.87.0
+- Authenticated Wrangler with Cloudflare
+- Created KV namespace `1af15787108945efa97b689186af1af7` for rate-limiting
+- Stored Anthropic API key as Cloudflare Worker secret
+- Deployed Cloudflare Worker → `https://portfolio-ai.priyanshu240105.workers.dev`
+- Updated `terminal.js` with the live Worker URL
+- Installed GitHub CLI, initialized git repo, committed all files
+- Pushed to `Priyanshu92012/Priyanshu92012.github.io` → GitHub Pages auto-deployed
+- **Site is live at https://priyanshu92012.github.io** ✓
 
 ## Next concrete tasks (in priority order)
 
-1. **Create GitHub repo** — name it to match GitHub Pages URL, push all files
-2. **Set up Cloudflare account** — free plan at cloudflare.com
-3. **Deploy the Worker:**
-   ```bash
-   npm install -g wrangler
-   wrangler login
-   cd "Personal Portfolio/worker"
-   wrangler kv:namespace create RATE_LIMIT
-   # paste the returned id into wrangler.toml replacing PASTE_KV_NAMESPACE_ID_HERE
-   wrangler secret put ANTHROPIC_API_KEY
-   wrangler deploy
+1. **Add Anthropic credits** — console.anthropic.com → Billing → Add credits ($5 minimum). AI freeform responses will start working immediately after.
+2. **Regenerate Anthropic API key** — the key was pasted in chat history. Go to console.anthropic.com → API Keys → delete the old one → create a new one → run:
    ```
-4. **Update WORKER_URL** in `terminal.js` line 7 with the deployed Worker URL
-5. **Push to GitHub** → GitHub Pages auto-deploys
-6. **Test live:** open the site, try `help`, `whoami`, `cat gmre`, ask a freeform question
-7. **Add portrait** — drop `assets/portrait.jpg`, uncomment the `<img>` in the hero
-8. **Build project pages** — `projects/gmre.html`, `projects/powerbi-4ls.html`, `projects/iot-midlog.html`
+   cd "Personal Portfolio/worker"
+   wrangler secret put ANTHROPIC_API_KEY
+   ```
+3. **Add portrait photo** — drop `assets/portrait.jpg` (portrait orientation, dark/neutral bg), then in `index.html` replace the `.portrait-placeholder` block with `<img src="assets/portrait.jpg" alt="Priyanshu">` and commit + push.
+4. **Build project pages** — `projects/gmre.html`, `projects/powerbi-4ls.html`, `projects/iot-midlog.html`. Use `projects/_template.html` as starting point. Add each and push.
+5. **Test AI terminal** — once credits are added, visit https://priyanshu92012.github.io and ask a freeform question. Verify streaming works.
+6. **Decide on custom domain** — `priyanshu.dev` (~€12/yr) vs keeping the free `.github.io`.
 
 ## Open decisions
 
-- [ ] Custom domain (`priyanshu.dev`) vs free `*.github.io`?
-- [ ] LinkedIn integration: link only (current) or embed badge?
+- [ ] Custom domain: `priyanshu.dev` vs `priyanshu92012.github.io`?
 - [ ] Contact form vs email-only (current)?
-- [ ] Add `about.html` as a standalone page?
+- [ ] LinkedIn badge vs link-only (current)?
+- [ ] About page as separate `about.html`?
 
 ## Locked decisions
 
-- Static HTML only, no build step
-- Cloudflare Worker as API proxy (key never in browser)
+- Static HTML, no build step, Tailwind CDN
+- Cloudflare Worker as API proxy (key never in client code)
 - Rate limits: 3/min · 10/hr · 500 global/day
 - Model: `claude-haiku-4-5-20251001`
-- Name: "Priyanshu" only throughout
 - English-only content
+- Name: "Priyanshu" only throughout
+
+## Infrastructure reference
+
+| Service | URL / ID |
+|---------|----------|
+| Live site | https://priyanshu92012.github.io |
+| GitHub repo | https://github.com/Priyanshu92012/Priyanshu92012.github.io |
+| Cloudflare Worker | https://portfolio-ai.priyanshu240105.workers.dev |
+| KV namespace ID | `1af15787108945efa97b689186af1af7` |
+| Cloudflare dashboard | https://dash.cloudflare.com |
+| Anthropic console | https://console.anthropic.com |
 
 ## Files modified this session
 
-- renamed:  `index (3).html` → `index.html`
-- modified: `index.html` — links, name, terminal section, terminal CSS
-- created:  `terminal.js`
-- created:  `worker/src/index.js`
-- created:  `worker/wrangler.toml`
-- created:  `PLAN.md`
+- created:  `.gitignore`
+- modified: `terminal.js` — WORKER_URL updated to live Worker
+- modified: `worker/wrangler.toml` — KV namespace ID filled in
 - updated:  `HANDOFF.md` (this file)
-
-## One thing to know for next session
-
-The terminal widget is fully wired up but the Worker URL in `terminal.js` line 7 is a placeholder (`portfolio-ai.priyanshugupta.workers.dev`). The AI fallthrough won't work until the Worker is deployed and that URL is updated. Local commands (`help`, `whoami`, `projects`, etc.) work without the Worker.
