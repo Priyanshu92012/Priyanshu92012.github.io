@@ -1,0 +1,12 @@
+name = "portfolio-ai"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+
+# After running: wrangler kv:namespace create RATE_LIMIT
+# paste the returned id below and remove the placeholder.
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "1af15787108945efa97b689186af1af7"
+
+# ANTHROPIC_API_KEY is stored as a secret — never in this file.
+# Set it once with: wrangler secret put ANTHROPIC_API_KEY
