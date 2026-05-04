@@ -364,6 +364,27 @@
         }
         .term-input::placeholder { color: var(--fg-mute); font-style: italic; }
 
+        /* ─── TERMINAL GREEN THEME (always dark, ignores color scheme) ──── */
+        .term-window     { background: #0d1117; border-color: #1a2e1a; }
+        .term-bar        { background: #0d1117; border-bottom-color: #1a2e1a; }
+        .term-input-row  { border-top-color: #1a2e1a; }
+        .term-output::-webkit-scrollbar-thumb { background: #1a3a1a; }
+        .term-mobile-btn { background: #0d1117; border-color: #1a2e1a; color: #4ade80; }
+        .term-mobile-btn:hover { border-color: #4ade80; color: #86efac; }
+        .term-header-text  { color: #2d5a2d; }
+        .term-close-btn    { color: #2d5a2d; }
+        .term-close-btn:hover { color: #4ade80; background: rgba(74,222,128,0.08); }
+        .term-line.cmd     { color: #86efac; }
+        .term-line.cmd::before { color: #4ade80; }
+        .term-line.out     { color: #4ade80; }
+        .term-line.ai      { color: #4ade80; }
+        .term-line.muted   { color: #2d6a2d; }
+        .term-line.err     { color: #f87171; }
+        .term-line a       { color: #86efac; }
+        .term-prompt       { color: #4ade80; }
+        .term-input        { color: #86efac; caret-color: #4ade80; }
+        .term-input::placeholder { color: #1f4d1f; font-style: italic; }
+
         /* ─── MOBILE ────────────────────────────────────────────────────── */
         @media (max-width: 768px) {
             .hero { padding: 48px 0 40px; }

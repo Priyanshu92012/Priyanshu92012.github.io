@@ -184,10 +184,13 @@ Rules: Only answer questions about Priyanshu. Be concise (3-5 sentences unless m
 
   // ─── BOOT MESSAGE ─────────────────────────────────────────────────────────
   printLines([
-    { cls: 'muted', text: 'priyanshu@portfolio ~ %' },
-    { cls: 'blank' },
-    { cls: 'out',   text: 'welcome. type ‘help’ for commands, or ask me anything.' },
-    { cls: 'blank' },
+    { cls: ‘muted’, text: ‘╔══════════════════════════════════════════╗’ },
+    { cls: ‘muted’, text: ‘║  priyanshu@portfolio  ~  v1.0            ║’ },
+    { cls: ‘muted’, text: ‘║  Software Engineer · Nokia · Stuttgart   ║’ },
+    { cls: ‘muted’, text: ‘╚══════════════════════════════════════════╝’ },
+    { cls: ‘blank’ },
+    { cls: ‘out’,   text: "type ‘help’ for commands, or ask me anything." },
+    { cls: ‘blank’ },
   ]);
 
   // ─── AI STREAMING ─────────────────────────────────────────────────────────
