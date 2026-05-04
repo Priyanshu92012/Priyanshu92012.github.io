@@ -120,50 +120,6 @@
             text-underline-offset: 4px;
         }
 
-        /* PORTRAIT */
-        .portrait-wrap {
-            position: relative;
-            width: clamp(280px, 36vw, 440px);
-            aspect-ratio: 3 / 4;
-        }
-        .portrait-glow {
-            position: absolute;
-            inset: -25%;
-            background:
-                radial-gradient(ellipse 50% 40% at 50% 35%, rgba(167, 139, 250, 0.55), transparent 65%),
-                radial-gradient(ellipse 70% 60% at 50% 50%, rgba(124, 92, 255, 0.18), transparent 70%);
-            filter: blur(28px);
-            z-index: 0;
-            animation: glowPulse 6s ease-in-out infinite;
-        }
-        @keyframes glowPulse {
-            0%, 100% { opacity: 0.85; transform: scale(1); }
-            50%      { opacity: 1; transform: scale(1.05); }
-        }
-        .portrait {
-            position: relative; z-index: 1;
-            width: 100%; height: 100%;
-            display: flex; align-items: flex-end; justify-content: center;
-            overflow: hidden;
-        }
-        .portrait img {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            -webkit-mask-image: radial-gradient(ellipse at 50% 45%, black 55%, transparent 92%);
-                    mask-image: radial-gradient(ellipse at 50% 45%, black 55%, transparent 92%);
-        }
-        .portrait-placeholder {
-            width: 100%; height: 100%;
-            display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 14px;
-            background: radial-gradient(ellipse at 50% 40%, rgba(167, 139, 250, 0.1), transparent 70%);
-            color: var(--fg-mute);
-            font-family: 'JetBrains Mono', monospace; font-size: 11px;
-            letter-spacing: 0.2em; text-transform: uppercase;
-        }
-        .portrait-placeholder svg {
-            width: 80px; height: 80px; opacity: 0.3;
-        }
-
         .socials {
             display: flex; gap: 18px;
             margin-top: 36px;
@@ -328,10 +284,6 @@
         .reveal.in { opacity: 1; transform: translateY(0); }
 
         /* HERO INTRO ANIMATION */
-        .hero > * { opacity: 0; animation: rise 1100ms cubic-bezier(0.22,1,0.36,1) forwards; }
-        .hero-left  { animation-delay: 200ms; }
-        .portrait-wrap { animation-delay: 100ms; }
-        .hero-right { animation-delay: 400ms; }
         @keyframes rise {
             from { opacity: 0; transform: translateY(20px); }
             to   { opacity: 1; transform: translateY(0); }
@@ -722,16 +674,6 @@
     }, { threshold: 0.1, rootMargin: '0px 0px -80px 0px' });
 
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-    // Subtle cursor parallax on portrait glow only
-    const glow = document.querySelector('.portrait-glow');
-    if (glow) {
-        document.addEventListener('mousemove', (e) => {
-            const x = (e.clientX / window.innerWidth - 0.5) * 16;
-            const y = (e.clientY / window.innerHeight - 0.5) * 16;
-            glow.style.transform = `translate(${x}px, ${y}px)`;
-        });
-    }
 
     // Terminal mobile overlay toggle
     document.getElementById('termMobileBtn')?.addEventListener('click', () => {
