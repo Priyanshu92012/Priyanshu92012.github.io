@@ -19,6 +19,11 @@
 **Date:** 2026-05-04
 **What changed:** Rebalanced the hero layout again to keep the terminal clear of the name, and added the new in-progress `AI Incident Copilot` project to the work list.
 
+## Current session 3
+
+**Date:** 2026-05-04
+**What changed:** Fixed the hero collision by giving the name column protected desktop width, capping the terminal at 460px, stacking earlier on narrow screens, and placing the About text/skills inside a theme-aware panel.
+
 ## Last session
 
 **Date:** 2026-05-04
