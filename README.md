@@ -1,8 +1,8 @@
-# priyanshugupta.github.io
+# https://priyanshu92012.github.io/
 
-Personal portfolio — Priyanshu Gupta, DHBW Stuttgart / Nokia Stuttgart (Optics).
+Personal portfolio — Priyanshu, DHBW Stuttgart / Nokia Stuttgart (Optics).
 
-🔗 **Live:** https://priyanshugupta.github.io *(replace with custom domain if used)*
+🔗 **Live:** https://priyanshu92012.github.io/ *(replace with custom domain if used)*
 
 ## Stack
 
