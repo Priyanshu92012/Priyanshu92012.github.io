@@ -272,7 +272,7 @@
 
         .term-window {
             border: 1px solid var(--line);
-            border-radius: 12px;
+            border-radius: 8px;
             overflow: hidden;
             background: var(--bg-elev);
         }
@@ -280,31 +280,20 @@
         .term-bar {
             display: flex;
             align-items: center;
-            padding: 12px 16px;
-            background: rgba(255,255,255,0.025);
+            justify-content: space-between;
+            padding: 14px 20px;
             border-bottom: 1px solid var(--line);
-            position: relative;
         }
-        .term-dots { display: flex; gap: 6px; flex-shrink: 0; }
-        .term-dot { width: 12px; height: 12px; border-radius: 50%; }
-        .term-dot.r { background: #ff5f57; }
-        .term-dot.y { background: #ffbd2e; }
-        .term-dot.g { background: #28c941; }
 
-        .term-title {
-            position: absolute;
-            left: 50%; transform: translateX(-50%);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-            color: var(--fg-mute);
-            letter-spacing: 0.04em;
+        .term-header-text {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--fg-soft);
             user-select: none;
-            pointer-events: none;
         }
 
         .term-close-btn {
             display: none;
-            margin-left: auto;
             background: none;
             border: none;
             color: var(--fg-mute);
@@ -313,9 +302,9 @@
             cursor: pointer;
             padding: 2px 8px;
             border-radius: 4px;
-            transition: color 250ms, background 250ms;
+            transition: color 200ms, background 200ms;
         }
-        .term-close-btn:hover { color: var(--accent); background: rgba(167,139,250,0.08); }
+        .term-close-btn:hover { color: var(--accent); background: rgba(37,99,235,0.08); }
 
         .term-output {
             padding: 20px 24px;
@@ -447,17 +436,11 @@
     <!-- TERMINAL -->
     <div class="term-wrapper reveal">
         <button class="term-mobile-btn" id="termMobileBtn" aria-label="Open terminal">
-            <span>~ % open interactive terminal</span>
-            <span>↗</span>
+            <span>Ask AI ↗</span>
         </button>
         <div class="term-window" id="termWindow">
             <div class="term-bar">
-                <div class="term-dots">
-                    <span class="term-dot r"></span>
-                    <span class="term-dot y"></span>
-                    <span class="term-dot g"></span>
-                </div>
-                <span class="term-title">priyanshu@portfolio ~ %</span>
+                <span class="term-header-text">Ask anything about Priyanshu</span>
                 <button class="term-close-btn" id="termCloseBtn">&#x2715; close</button>
             </div>
             <div class="term-output" id="termOutput"></div>
