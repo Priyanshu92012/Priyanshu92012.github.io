@@ -12,12 +12,12 @@
 
     <style>
         :root {
-            --bg:       #ffffff;
-            --bg-elev:  #f7f7f8;
+            --bg:       #f5f7ff;
+            --bg-elev:  #eef0f8;
             --fg:       #0f1117;
-            --fg-soft:  #4b5563;
-            --fg-mute:  #9ca3af;
-            --line:     #e5e7eb;
+            --fg-soft:  #44506b;
+            --fg-mute:  #8892a4;
+            --line:     #dde1f0;
             --accent:   #2563eb;
         }
         @media (prefers-color-scheme: dark) {
@@ -35,11 +35,15 @@
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
         html { scroll-behavior: smooth; font-size: 16px; }
         body {
-            background: var(--bg);
+            background: linear-gradient(160deg, #f5f7ff 0%, #eef1ff 50%, #f8f5ff 100%);
+            background-attachment: fixed;
             color: var(--fg);
             font-family: 'Inter', system-ui, sans-serif;
             line-height: 1.55;
             overflow-x: hidden;
+        }
+        @media (prefers-color-scheme: dark) {
+            body { background: var(--bg); }
         }
 
         a { color: inherit; text-decoration: none; }
@@ -67,6 +71,16 @@
             padding: 80px 0 64px;
             max-width: 680px;
         }
+        .hero-avatar {
+            width: 88px;
+            height: 88px;
+            border-radius: 50%;
+            object-fit: cover;
+            object-position: center top;
+            margin-bottom: 28px;
+            border: 2px solid var(--line);
+            display: block;
+        }
 
         .hero-eyebrow {
             font-family: 'JetBrains Mono', monospace;
@@ -81,8 +95,18 @@
             font-weight: 700;
             letter-spacing: -0.04em;
             line-height: 1;
-            color: var(--fg);
             margin-bottom: 20px;
+            background: linear-gradient(135deg, #0f1117 0%, #2563eb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        @media (prefers-color-scheme: dark) {
+            .hero-name {
+                background: none;
+                -webkit-text-fill-color: var(--fg);
+                color: var(--fg);
+            }
         }
 
         .hero-sub {
@@ -148,7 +172,7 @@
             cursor: pointer;
         }
         .work-row:last-child { border-bottom: 1px solid var(--line); }
-        .work-row:hover { border-top-color: var(--accent); }
+        .work-row:hover { border-top-color: var(--accent); background: rgba(37,99,235,0.03); }
         .work-row h3 {
             font-size: 20px; font-weight: 600;
             letter-spacing: -0.01em; line-height: 1.2;
@@ -229,6 +253,12 @@
             color: var(--fg-mute); transition: all 200ms ease;
         }
         .contact-row:hover .arr { color: var(--accent); transform: translateX(4px); }
+
+        /* TOP STRIP */
+        .top-strip {
+            height: 3px;
+            background: linear-gradient(90deg, #2563eb, #7c3aed, #0891b2);
+        }
 
         /* FOOTER */
         footer {
@@ -431,10 +461,11 @@
 </head>
 <body>
 
+<div class="top-strip"></div>
 <div class="page">
 
     <nav class="top">
-        <a href="/" class="logo">Priyanshu</a>
+        <a href="/" class="logo">My Portfolio</a>
         <div class="links">
             <a href="#work">Work</a>
             <a href="#about">About</a>
@@ -444,6 +475,7 @@
 
     <!-- HERO -->
     <section class="hero">
+        <img src="portrait.png" class="hero-avatar" alt="Priyanshu">
         <p class="hero-eyebrow">Software Engineer · Nokia Optics · Stuttgart</p>
         <h1 class="hero-name">Priyanshu</h1>
         <p class="hero-sub">Building intelligent systems on top of telecom data.</p>
@@ -482,7 +514,7 @@
 
         <div class="work-list">
 
-            <a href="projects/gmre.html" class="work-row">
+            <a href="gmre_architecture_v3.html" class="work-row">
                 <div>
                     <h3>GMRE Log Parser</h3>
                     <p class="desc">Plugin-based ingestion engine for nested customer log archives. 8-level deep extraction, SHA256 dedup, 14+ Alembic migrations, 77+ tests. Feeds Power BI dashboards across the Nokia 4LS team.</p>
