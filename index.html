@@ -114,15 +114,15 @@
         /* HERO LAYOUT — two-column: hero text left, terminal right */
         .hero-layout {
             display: grid;
-            grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
-            gap: 88px;
+            grid-template-columns: minmax(420px, 0.9fr) minmax(420px, 1.1fr);
+            gap: clamp(48px, 5vw, 80px);
             align-items: start;
             padding: 72px 0 64px;
         }
 
         /* HERO */
         .hero {
-            max-width: none;
+            max-width: 420px;
             min-width: 0;
         }
         .hero-avatar {
@@ -323,11 +323,10 @@
 
         /* ─── TERMINAL ─────────────────────────────────────────────────── */
         .term-wrapper {
-            padding: 0 0 0 16px;
-            width: 100%;
-            max-width: 640px;
+            padding: 0;
+            width: min(100%, 600px);
+            max-width: 600px;
             justify-self: end;
-            margin-left: auto;
             min-width: 0;
         }
 
@@ -486,7 +485,7 @@
 
             .term-window     { display: none; }
             .term-mobile-btn { display: flex; }
-            .term-wrapper { max-width: none; margin-left: 0; padding-left: 0; }
+            .term-wrapper { max-width: none; margin-left: 0; padding-left: 0; width: 100%; }
         }
 
         @media (max-width: 480px) {
