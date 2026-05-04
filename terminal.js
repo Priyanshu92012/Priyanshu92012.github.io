@@ -141,6 +141,7 @@ Rules: Only answer questions about Priyanshu. Be concise (3-5 sentences unless m
 
   const output = document.getElementById('termOutput');
   const input = document.getElementById('termInput');
+  const form = document.getElementById('termForm');
   if (!output || !input) return;
 
   const history = [];
@@ -286,21 +287,24 @@ Rules: Only answer questions about Priyanshu. Be concise (3-5 sentences unless m
     streamAI(raw.trim());
   }
 
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      if (aiRunning) return;
+  function submitCurrentInput() {
+    if (aiRunning) return;
 
-      const val = input.value;
-      if (val.trim()) {
-        history.unshift(val);
-        histIdx = -1;
-        input.value = '';
-      }
-      dispatch(val);
-      return;
+    const val = input.value;
+    if (val.trim()) {
+      history.unshift(val);
+      histIdx = -1;
+      input.value = '';
     }
+    dispatch(val);
+  }
 
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    submitCurrentInput();
+  });
+
+  input.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowUp') {
       e.preventDefault();
       if (history.length === 0) return;
