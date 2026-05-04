@@ -14,6 +14,11 @@
 **Date:** 2026-05-04
 **What changed:** Added a richer light theme, a manual light/dark toggle with persistence, wider terminal layout, and darker green terminal text.
 
+## Current session 2
+
+**Date:** 2026-05-04
+**What changed:** Rebalanced the hero layout again to keep the terminal clear of the name, and added the new in-progress `AI Incident Copilot` project to the work list.
+
 ## Last session
 
 **Date:** 2026-05-04

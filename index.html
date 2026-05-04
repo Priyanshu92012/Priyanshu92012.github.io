@@ -114,8 +114,8 @@
         /* HERO LAYOUT — two-column: hero text left, terminal right */
         .hero-layout {
             display: grid;
-            grid-template-columns: minmax(0, 0.84fr) minmax(0, 1.16fr);
-            gap: 72px;
+            grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+            gap: 88px;
             align-items: start;
             padding: 72px 0 64px;
         }
@@ -123,6 +123,7 @@
         /* HERO */
         .hero {
             max-width: none;
+            min-width: 0;
         }
         .hero-avatar {
             width: 88px;
@@ -321,7 +322,14 @@
         }
 
         /* ─── TERMINAL ─────────────────────────────────────────────────── */
-        .term-wrapper { padding: 0; width: 100%; max-width: 720px; justify-self: end; margin-left: auto; }
+        .term-wrapper {
+            padding: 0 0 0 16px;
+            width: 100%;
+            max-width: 640px;
+            justify-self: end;
+            margin-left: auto;
+            min-width: 0;
+        }
 
         .term-mobile-btn {
             display: none;
@@ -478,7 +486,7 @@
 
             .term-window     { display: none; }
             .term-mobile-btn { display: flex; }
-            .term-wrapper { max-width: none; margin-left: 0; }
+            .term-wrapper { max-width: none; margin-left: 0; padding-left: 0; }
         }
 
         @media (max-width: 480px) {
@@ -600,6 +608,18 @@
                 </span>
                 <span class="arr">↗</span>
             </a>
+
+            <div class="work-row work-row--static">
+                <div>
+                    <h3>AI Incident Copilot</h3>
+                    <p class="desc">Agentic incident assistant that ingests docs, logs, and tickets, calls tools through MCP, and drafts likely root cause, blast radius, and next actions for faster triage.</p>
+                </div>
+                <span class="stack">
+                    <span>In progress</span>
+                    <span>Python Â· FastAPI</span>
+                    <span>RAG Â· MCP Â· Evals</span>
+                </span>
+            </div>
 
             <div class="work-row work-row--static">
                 <div>
