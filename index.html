@@ -201,39 +201,32 @@
         .stack-group .items span { color: var(--fg-mute); }
 
         /* CONTACT */
-        .contact-wrap {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 64px;
-            align-items: end;
+        .contact-intro {
+            font-size: 16px;
+            color: var(--fg-soft);
+            margin-bottom: 32px;
         }
-        .contact-lead h2 {
-            font-family: 'Bricolage Grotesque', sans-serif;
-            font-size: clamp(48px, 7vw, 96px); font-weight: 700;
-            letter-spacing: -0.035em; line-height: 0.95;
-        }
-        .contact-lead h2 em { font-style: italic; color: var(--accent); font-weight: 500; }
         .contact-list { display: flex; flex-direction: column; }
         .contact-row {
             display: grid;
             grid-template-columns: 80px 1fr auto;
             gap: 16px; align-items: baseline;
-            padding: 20px 0; border-top: 1px solid var(--line);
-            transition: padding 250ms ease;
+            padding: 16px 0; border-top: 1px solid var(--line);
+            transition: border-top-color 200ms ease;
         }
-        .contact-row:last-child { border-bottom: 1px solid var(--line); }
-        .contact-row:hover { padding-left: 12px; }
+        .contact-row:hover { border-top-color: var(--accent); }
         .contact-row .k {
             font-family: 'JetBrains Mono', monospace; font-size: 10px;
             color: var(--fg-mute); letter-spacing: 0.18em; text-transform: uppercase;
         }
         .contact-row .v {
             font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--fg);
+            transition: color 200ms ease;
         }
         .contact-row:hover .v { color: var(--accent); }
         .contact-row .arr {
             font-family: 'JetBrains Mono', monospace; font-size: 13px;
-            color: var(--fg-mute); transition: all 250ms ease;
+            color: var(--fg-mute); transition: all 200ms ease;
         }
         .contact-row:hover .arr { color: var(--accent); transform: translateX(4px); }
 
@@ -571,28 +564,23 @@
             <h2>Contact</h2>
         </div>
 
-        <div class="contact-wrap">
-            <div class="contact-lead">
-                <h2 class="display">Let's build<br>something <em><i>good</i></em>.</h2>
-            </div>
-
-            <div class="contact-list">
-                <a href="mailto:priyanshu240105@gmail.com" class="contact-row">
-                    <span class="k">Email</span>
-                    <span class="v">priyanshu240105@gmail.com</span>
-                    <span class="arr">→</span>
-                </a>
-                <a href="https://github.com/Priyanshu92012" target="_blank" rel="noopener" class="contact-row">
-                    <span class="k">GitHub</span>
-                    <span class="v">github.com/Priyanshu92012</span>
-                    <span class="arr">→</span>
-                </a>
-                <a href="https://www.linkedin.com/in/priyanshu-priyanshu-/" target="_blank" rel="noopener" class="contact-row">
-                    <span class="k">LinkedIn</span>
-                    <span class="v">linkedin.com/in/priyanshu-priyanshu-</span>
-                    <span class="arr">→</span>
-                </a>
-            </div>
+        <p class="contact-intro">The fastest way to reach me is email.</p>
+        <div class="contact-list">
+            <a href="mailto:priyanshu240105@gmail.com" class="contact-row">
+                <span class="k">Email</span>
+                <span class="v">priyanshu240105@gmail.com</span>
+                <span class="arr">→</span>
+            </a>
+            <a href="https://github.com/Priyanshu92012" target="_blank" rel="noopener" class="contact-row">
+                <span class="k">GitHub</span>
+                <span class="v">github.com/Priyanshu92012</span>
+                <span class="arr">→</span>
+            </a>
+            <a href="https://www.linkedin.com/in/priyanshu-priyanshu-/" target="_blank" rel="noopener" class="contact-row">
+                <span class="k">LinkedIn</span>
+                <span class="v">linkedin.com/in/priyanshu-priyanshu-</span>
+                <span class="arr">→</span>
+            </a>
         </div>
     </section>
 
