@@ -364,31 +364,29 @@
         .term-input::placeholder { color: var(--fg-mute); font-style: italic; }
 
         /* ─── MOBILE ────────────────────────────────────────────────────── */
-        @media (max-width: 920px) {
-            .hero {
-                grid-template-columns: 1fr;
-                gap: 32px;
-                text-align: center;
-                padding: 20px 0 60px;
-                min-height: auto;
-            }
-            .hero-left, .hero-right { text-align: center; padding: 0; }
-            .hero-left .hero-tag { margin: 0 auto; }
-            .hero-name, .hero-role { font-size: clamp(40px, 11vw, 72px); }
-            .portrait-wrap { width: 240px; margin: 0 auto; order: -1; }
-            .socials { justify-content: center; }
-            section.block { padding: 80px 0; }
+        @media (max-width: 768px) {
+            .hero { padding: 48px 0 40px; }
+            .hero-name { font-size: clamp(44px, 14vw, 72px); }
+            .hero-links { gap: 16px; font-size: 14px; }
+            section.block { padding: 64px 0; }
             .section-head { margin-bottom: 40px; }
-            .work-row { grid-template-columns: auto 1fr 24px; gap: 16px; padding: 24px 0; }
+            .work-row { gap: 12px; padding: 20px 0; }
             .work-row .stack { display: none; }
-            .work-row:hover { padding-left: 8px; padding-right: 8px; }
-            .about-grid { grid-template-columns: 1fr; gap: 48px; }
-            .contact-wrap { grid-template-columns: 1fr; gap: 40px; }
-            nav.top .links { gap: 20px; font-size: 13px; }
+            .about-stack { flex-direction: column; gap: 24px; }
+            nav.top .links { gap: 16px; }
             footer { flex-direction: column; gap: 8px; text-align: center; }
 
             .term-window     { display: none; }
             .term-mobile-btn { display: flex; }
+        }
+
+        @media (max-width: 480px) {
+            .page { padding: 0 16px; }
+            .hero-name { font-size: clamp(40px, 12vw, 56px); }
+            section.block { padding: 48px 0; }
+            .about-stack { gap: 16px; }
+            nav.top .links { font-size: 12px; gap: 12px; }
+            .contact-row { grid-template-columns: 56px 1fr auto; }
         }
 
         /* Terminal full-screen overlay (mobile, toggled via JS) */
