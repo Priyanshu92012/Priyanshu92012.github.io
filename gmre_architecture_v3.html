@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GMRE_logparser — Production Architecture</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f0f2f5;
+  --white: #ffffff;
+  --ink: #0d1117;
+  --muted: #6b7280;
+  --border: #d1d5db;
+  --mono: 'Courier New', 'Lucida Console', monospace;
+  --sans: 'Segoe UI', 'Arial', sans-serif;
+  --radius: 10px;
+  --radius-sm: 6px;
+
+  /* layer colors */
+  --entry:    #d97706;  --entry-bg:  #fffbeb;  --entry-bd:  #fcd34d;
+  --orch:     #2563eb;  --orch-bg:   #eff6ff;  --orch-bd:   #93c5fd;
+  --domain:   #16a34a;  --domain-bg: #f0fdf4;  --domain-bd: #86efac;
+  --infra:    #7c3aed;  --infra-bg:  #faf5ff;  --infra-bd:  #c4b5fd;
+  --data:     #0369a1;  --data-bg:   #f0f9ff;  --data-bd:   #7dd3fc;
+  --test:     #0f766e;  --test-bg:   #f0fdfa;  --test-bd:   #5eead4;
+
+  --shadow: 0 1px 3px rgba(0,0,0,.08);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,.10);
+}
+
+body {
+  background: var(--bg);
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--ink);
+  padding: 28px 24px 56px;
+  min-width: 1680px;
+}
+
+/* ══ HEADER ══════════════════════════════════════════════════════════ */
+.hdr { text-align: center; margin-bottom: 26px; }
+.hdr-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #3b82f6 100%);
+  color: white;
+  font-size: 10px;
+  font-family: var(--mono);
+  letter-spacing: .8px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  margin-bottom: 10px;
+}
+.hdr h1 {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0d1117;
+  letter-spacing: -.6px;
+  line-height: 1.1;
+}
+.hdr h1 span { color: #2563eb; }
+.hdr-sub {
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 6px;
+  font-family: var(--mono);
+}
+.stats-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.stat-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 99px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: #374151;
+  box-shadow: var(--shadow);
+}
+.stat-pill .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+/* ══ MAIN GRID ════════════════════════════════════════════════════════ */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 192px;
+  gap: 12px;
+  max-width: 1640px;
+  margin: 0 auto;
+}
+
+/* ══ LAYER ════════════════════════════════════════════════════════════ */
+.layer {
+  border-radius: var(--radius);
+  padding: 13px 15px 15px;
+  margin-bottom: 0;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+}
+.layer + .layer { margin-top: 8px; }
+
+.lyr-entry  { background: var(--entry-bg);  border: 2px solid var(--entry-bd); }
+.lyr-orch   { background: var(--orch-bg);   border: 2px solid var(--orch-bd); }
+.lyr-mid    { background: #f8f8fc;          border: 2px solid #ddd8f0; }
+.lyr-data   { background: var(--data-bg);   border: 2px solid var(--data-bd); }
+.lyr-test   { background: var(--test-bg);   border: 2px dashed var(--test-bd); }
+
+.lyr-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.lyr-head-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink:0; }
+.lyr-head-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+.lyr-head-path {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  background: rgba(0,0,0,.06);
+  border-radius: 4px;
+  padding: 2px 7px;
+  color: var(--muted);
+}
+.lyr-head-right { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+
+/* ══ BOX ══════════════════════════════════════════════════════════════ */
+.box {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  box-shadow: var(--shadow);
+}
+.box-title {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
+}
+.box-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.box-desc { font-size: 10.5px; color: #374151; line-height: 1.55; }
+.box-files { margin-top: 6px; }
+.bf { font-family: var(--mono); font-size: 9.5px; color: #6b7280; line-height: 1.7; display: flex; align-items: baseline; gap: 3px; }
+.bf-acc  { color: #7c3aed; }
+.bf-blue { color: #2563eb; }
+.bf-grn  { color: #16a34a; }
+.bf-red  { color: #dc2626; }
+.bf-org  { color: #d97706; }
+
+.divider { height:1px; background:#f1f5f9; margin: 6px 0; }
+.sep     { height:1px; background:#e5e7eb; margin: 5px 0; }
+
+/* ══ FLEX UTILS ══════════════════════════════════════════════════════ */
+.row   { display:flex; gap:8px; align-items:flex-start; }
+.col   { display:flex; flex-direction:column; gap:7px; }
+.grow  { flex:1; min-width:0; }
+.iwrap { display:flex; flex-wrap:wrap; gap:4px; }
+
+/* ══ CONNECTOR ══════════════════════════════════════════════════════ */
+.conn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  position: relative;
+  margin: 2px 0;
+}
+.conn::before {
+  content:''; position:absolute;
+  top:0; bottom:8px; left:50%;
+  width:2px; background: var(--orch);
+}
+.conn::after {
+  content:''; position:absolute;
+  bottom:0; left:50%;
+  transform: translateX(-50%);
+  width:0; height:0;
+  border-left:6px solid transparent;
+  border-right:6px solid transparent;
+  border-top: 9px solid var(--orch);
+}
+.conn-pill {
+  position:relative; z-index:2;
+  background: white;
+  border: 1.5px solid var(--orch-bd);
+  border-radius: 99px;
+  padding: 2px 11px;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--orch);
+  font-weight: 700;
+  letter-spacing: .3px;
+  white-space: nowrap;
+  box-shadow: var(--shadow);
+}
+
+/* ══ ORCH STEPS ══════════════════════════════════════════════════════ */
+.orch-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-top: 4px;
+}
+.os {
+  background: #eff6ff;
+  border: 1.5px solid #bfdbfe;
+  border-radius: var(--radius-sm);
+  padding: 8px 7px;
+  text-align: center;
+  position: relative;
+}
+.os::after {
+  content:'→';
+  position:absolute;
+  right:-10px; top:50%;
+  transform:translateY(-50%);
+  color: var(--orch);
+  font-size:11px;
+  font-weight:700;
+  z-index:2;
+}
+.os:last-child::after { display:none; }
+.os-num {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:16px; height:16px; border-radius:50%;
+  background: var(--orch); color:white;
+  font-size:9px; font-weight:800; font-family:var(--mono);
+  margin-bottom:4px;
+}
+.os-label { font-weight:700; font-size:10px; color:#1e3a8a; margin-bottom:3px; }
+.os-file  { font-family:var(--mono); font-size:8.5px; color:#6b7280; line-height:1.4; }
+.os-badge {
+  display:inline-block; background:#dbeafe; color:#1e40af;
+  border-radius:3px; padding:1px 4px; font-size:7.5px; font-family:var(--mono);
+  font-weight:700; margin-top:3px; letter-spacing:.3px;
+}
+
+/* ══ INFRA SECTION ════════════════════════════════════════════════════ */
+.infra-cols {
+  display: grid;
+  grid-template-columns: 210px 1fr 215px;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.sub-section {
+  border-radius: 8px;
+  padding: 10px 11px;
+}
+.sub-head {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding-bottom: 5px;
+  margin-bottom: 8px;
+  border-bottom: 2px solid;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sub-head .sh-icon {
+  font-size: 12px;
+}
+
+/* archive */
+.ss-arch { background: #fdf4ff; border: 1.5px solid #e9d5ff; }
+.sh-arch  { color: #6d28d9; border-color: #c4b5fd; }
+
+/* parse */
+.ss-parse { background: #ecfeff; border: 1.5px solid #a5f3fc; }
+.sh-parse  { color: #0e7490; border-color: #67e8f9; }
+
+/* config/io */
+.ss-cfg   { background: #fff1f2; border: 1.5px solid #fecdd3; }
+.sh-cfg    { color: #be123c; border-color: #fca5a5; }
+
+/* domain */
+.ss-dom   { background: var(--domain-bg); border: 1.5px solid var(--domain-bd); }
+.sh-dom    { color: #15803d; border-color: #4ade80; }
+
+/* ══ PLUGIN SYSTEM ════════════════════════════════════════════════════ */
+.plugin-system {
+  background: #fdf8ff;
+  border: 1.5px solid #c4b5fd;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-top: 7px;
+}
+.ps-title {
+  font-size: 9px;
+  font-weight: 800;
+  color: #5b21b6;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 7px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ps-title::after {
+  content:'';
+  flex:1;
+  height:1px;
+  background: #e9d5ff;
+}
+.plugin-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+.pc {
+  background: white;
+  border: 1px solid #ede9fe;
+  border-radius: 5px;
+  padding: 6px 7px;
+  border-left: 3px solid;
+}
+.pc-node  { border-left-color: #7c3aed; }
+.pc-dpr   { border-left-color: #0891b2; }
+.pc-lsp   { border-left-color: #16a34a; }
+.pc-nea   { border-left-color: #d97706; }
+.pc-ma    { border-left-color: #db2777; }
+.pc-alarm { border-left-color: #dc2626; }
+.pc-3r    { border-left-color: #0369a1; }
+.pc-dummy { border-left-color: #9ca3af; background:#f9fafb; }
+
+.pc-name  { font-family:var(--mono); font-size:9.5px; font-weight:700; color:#1e1b4b; }
+.pc-desc  { font-size:9px; color:#6b7280; margin-top:2px; line-height:1.4; }
+.pc-file  { font-family:var(--mono); font-size:8.5px; color:#a78bfa; margin-top:2px; }
+.pc-tag {
+  display:inline-block;
+  font-size:7.5px; font-family:var(--mono); font-weight:700;
+  padding:1px 4px; border-radius:3px;
+  background:#f5f3ff; color:#5b21b6;
+  margin-top:3px; letter-spacing:.3px;
+}
+.pc-tag.core  { background:#ecfdf5; color:#14532d; }
+.pc-tag.ext   { background:#eff6ff; color:#1e40af; }
+.pc-tag.test  { background:#f1f5f9; color:#475569; }
+
+/* ══ FEATURE CALLOUTS ════════════════════════════════════════════════ */
+.feature-strip {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.feat {
+  flex: 1;
+  min-width: 140px;
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  border-top: 3px solid;
+}
+.feat-stream { border-top-color: #7c3aed; }
+.feat-sha    { border-top-color: #dc2626; }
+.feat-ledger { border-top-color: #d97706; }
+.feat-guard  { border-top-color: #0891b2; }
+.feat-title {
+  font-size: 10px;
+  font-weight: 800;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.feat-body {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: #4b5563;
+  line-height: 1.65;
+}
+
+/* ══ DATABASE ════════════════════════════════════════════════════════ */
+.db-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.cyl-wrap { display:flex; flex-direction:column; align-items:center; }
+.cyl { width:130px; position:relative; }
+.cyl-top {
+  width:130px; height:16px;
+  background: #bfdbfe;
+  border:1.5px solid #3b82f6;
+  border-radius:50%;
+  z-index:2; position:relative;
+}
+.cyl-body {
+  width:130px;
+  background: #dbeafe;
+  border:1.5px solid #3b82f6;
+  border-top:none; border-bottom:none;
+  padding: 6px 8px 7px;
+  font-family:var(--mono);
+  font-size:9px; color:#1e40af;
+  text-align:center; line-height:1.55;
+  position:relative; z-index:1;
+  margin-top:-3px;
+}
+.cyl-bot {
+  width:130px; height:12px;
+  background:#bfdbfe;
+  border:1.5px solid #3b82f6;
+  border-top:none;
+  border-radius:0 0 50% 50% / 0 0 6px 6px;
+  margin-top:-3px; z-index:2; position:relative;
+}
+.cyl-lbl {
+  font-family:var(--mono); font-size:9px; font-weight:700;
+  color:#1e40af; text-align:center; margin-top:5px;
+}
+/* ledger = orange */
+.cyl.ledger .cyl-top  { background:#fed7aa; border-color:#f97316; }
+.cyl.ledger .cyl-body { background:#ffedd5; border-color:#f97316; color:#9a3412; }
+.cyl.ledger .cyl-bot  { background:#fed7aa; border-color:#f97316; }
+
+/* migration table */
+.mig-box {
+  flex: 1; min-width: 280px;
+}
+.mig-inner {
+  background:white; border:1.5px solid var(--data-bd);
+  border-radius:6px; overflow:hidden;
+}
+.mig-table {
+  width:100%; border-collapse:collapse;
+  font-family:var(--mono); font-size:9px;
+}
+.mig-table th {
+  background:#e0f2fe; color:#0369a1;
+  padding:4px 7px; text-align:left;
+  font-size:8.5px; font-weight:800; letter-spacing:.5px;
+  border-bottom:1.5px solid #7dd3fc;
+}
+.mig-table td { padding:3px 7px; border-bottom:1px solid #f0f9ff; color:#374151; }
+.mig-table td:first-child { color:#0369a1; font-weight:600; }
+.mig-table tr:last-child td { border-bottom:none; }
+.mig-table tr.key-mig { background:#fffbeb; }
+.mig-table tr.key-mig td:first-child { color:#92400e; }
+.key-badge {
+  display:inline-block; background:#fef3c7; color:#92400e;
+  border-radius:3px; padding:0 4px; font-size:7.5px; font-weight:800; vertical-align:middle;
+}
+
+/* ══ SCRIPTS STRIP ════════════════════════════════════════════════════ */
+.scripts-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+}
+.sc {
+  background: white;
+  border: 1px solid #fcd34d;
+  border-left: 3px solid var(--entry);
+  border-radius: 5px;
+  padding: 6px 8px;
+}
+.sc-name  { font-family:var(--mono); font-size:9.5px; font-weight:700; color:#92400e; }
+.sc-desc  { font-size:9px; color:#78350f; margin-top:2px; line-height:1.4; }
+.sc-type  {
+  display:inline-block;
+  font-size:7.5px; font-family:var(--mono); font-weight:700;
+  padding:1px 4px; border-radius:3px; margin-top:3px;
+}
+.sc-batch   { background:#fef3c7; color:#92400e; }
+.sc-db      { background:#dbeafe; color:#1e40af; }
+.sc-util    { background:#dcfce7; color:#166534; }
+.sc-dry     { background:#f3e8ff; color:#5b21b6; }
+
+/* ══ TEST HARNESS ════════════════════════════════════════════════════ */
+.test-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr 230px 240px;
+  gap: 8px;
+}
+.chip {
+  display: inline-block;
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-family: var(--mono);
+  font-size: 8.5px;
+  margin: 2px 2px;
+  border: 1px solid;
+  line-height: 1.5;
+}
+.chip-unit   { background:#f5f3ff; color:#4c1d95; border-color:#ddd6fe; }
+.chip-int    { background:#eff6ff; color:#1e3a8a; border-color:#bfdbfe; }
+.chip-db     { background:#f0fdf4; color:#14532d; border-color:#bbf7d0; }
+.chip-fix    { background:#fdf4ff; color:#5b21b6; border-color:#e9d5ff; }
+
+.test-cov-bar {
+  display:flex; gap:3px; margin-top:6px;
+  font-family:var(--mono); font-size:9px;
+}
+.cov-seg {
+  flex:1; padding:4px 6px; border-radius:4px; text-align:center;
+  font-weight:700; font-size:8.5px;
+}
+.cov-unit { background:#f5f3ff; color:#4c1d95; border:1px solid #ddd6fe; }
+.cov-int  { background:#eff6ff; color:#1e3a8a; border:1px solid #bfdbfe; }
+.cov-db   { background:#f0fdf4; color:#14532d; border:1px solid #bbf7d0; }
+.cov-fix  { background:#fdf4ff; color:#5b21b6; border:1px solid #e9d5ff; }
+
+/* ══ SIDE PANEL ══════════════════════════════════════════════════════ */
+.side { display:flex; flex-direction:column; gap:9px; }
+
+.card {
+  background: white;
+  border:1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 11px;
+  box-shadow: var(--shadow);
+}
+.card-title {
+  font-size:10px; font-weight:800;
+  margin-bottom:7px; letter-spacing:.3px;
+  display:flex; align-items:center; gap:5px;
+}
+
+/* flow steps */
+.flow-step {
+  display:flex; align-items:flex-start; gap:6px;
+  font-size:9.5px; font-family:var(--mono);
+  color:#374151; line-height:1.4; margin-bottom:2px;
+}
+.flow-n {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:15px; height:15px; border-radius:50%;
+  background: var(--orch); color:white;
+  font-size:8px; font-weight:800; flex-shrink:0; margin-top:1px;
+}
+.flow-arr { font-size:9px; color:#9ca3af; padding-left:9px; line-height:1; margin-bottom:1px; }
+
+/* concerns */
+.concern {
+  border-radius: 6px;
+  padding: 8px 9px;
+  border: 1.5px solid;
+}
+.concern + .concern { margin-top:7px; }
+.concern-title {
+  font-size:9.5px; font-weight:800;
+  margin-bottom:4px; display:flex; align-items:center; gap:4px;
+}
+.concern-body {
+  font-family:var(--mono); font-size:8.5px;
+  line-height:1.7;
+}
+.c-dedup { background:#fffbeb; border-color:#fde68a; }
+.c-dedup .concern-title { color:#92400e; }
+.c-dedup .concern-body  { color:#78350f; }
+.c-guard { background:#fef2f2; border-color:#fca5a5; }
+.c-guard .concern-title { color:#991b1b; }
+.c-guard .concern-body  { color:#7f1d1d; }
+.c-err   { background:#f0f9ff; border-color:#bae6fd; }
+.c-err .concern-title   { color:#0c4a6e; }
+.c-err .concern-body    { color:#1e40af; }
+
+/* legend */
+.leg-row { display:flex; align-items:center; gap:7px; font-size:9.5px; color:#374151; margin-bottom:5px; }
+.leg-line { width:32px; flex-shrink:0; }
+.leg-solid  { border-top:2.5px solid var(--orch); }
+.leg-dash   { border-top:2px dashed var(--infra); }
+.leg-green  { border-top:2px solid var(--domain); }
+.leg-orange { border-top:2px dashed var(--entry); }
+.leg-cyl {
+  width:18px; height:13px; flex-shrink:0;
+  background:#bfdbfe; border:1.5px solid #3b82f6;
+  border-radius:0 0 50% 50%/0 0 5px 5px;
+  position:relative;
+}
+.leg-cyl::before {
+  content:''; position:absolute;
+  top:-7px; left:-2px;
+  width:18px; height:8px;
+  background:#bfdbfe; border:1.5px solid #3b82f6; border-radius:50%;
+}
+
+/* layer color ribbon */
+.ribbon {
+  position:absolute; left:0; top:12px; bottom:12px;
+  width:4px; border-radius:0 3px 3px 0;
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════ HEADER ════════════════════ -->
+<div class="hdr">
+  <div class="hdr-badge">NOKIA GMRE · PRODUCTION-GRADE SOFTWARE</div>
+  <h1>GMRE_logparser — <span>Production Architecture</span> (V2)</h1>
+  <div class="hdr-sub">Nokia GMRE archive ingestion · plugin-based parsing pipeline · MariaDB with idempotency, sha256 dedup &amp; state-machine ledger</div>
+  <div class="stats-row">
+    <div class="stat-pill"><span class="dot" style="background:#e67e22"></span>490 source files</div>
+    <div class="stat-pill"><span class="dot" style="background:#2563eb"></span>42 directories</div>
+    <div class="stat-pill"><span class="dot" style="background:#7c3aed"></span>12 plugins</div>
+    <div class="stat-pill"><span class="dot" style="background:#0369a1"></span>13 DB migrations</div>
+    <div class="stat-pill"><span class="dot" style="background:#16a34a"></span>55+ test files</div>
+    <div class="stat-pill"><span class="dot" style="background:#0f766e"></span>Python 3.9 / 3.12</div>
+    <div class="stat-pill"><span class="dot" style="background:#dc2626"></span>sha256 idempotency</div>
+    <div class="stat-pill"><span class="dot" style="background:#d97706"></span>plugin ledger state machine</div>
+    <div class="stat-pill"><span class="dot" style="background:#6b7280"></span>stream-read · no full extract</div>
+  </div>
+</div>
+
+<div class="main-grid">
+<div><!-- LEFT COLUMN -->
+
+<!-- ══════════════════════════════════════════════════════════════
+     LAYER 1 · ENTRY POINTS
+══════════════════════════════════════════════════════════════ -->
+<div class="layer lyr-entry">
+  <div class="lyr-head">
+    <div class="lyr-head-dot" style="background:var(--entry)"></div>
+    <div class="lyr-head-title" style="color:#92400e;">Layer 1 — Entry Points / Interfaces</div>
+    <div class="lyr-head-path">cli/ · scripts/</div>
+    <div class="lyr-head-right">
+      <span style="font-size:9px; font-family:var(--mono); color:#b45309; background:#fef3c7; border-radius:4px; padding:2px 7px; border:1px solid #fcd34d;">OUTPUT → logs/gmre-core.log + exit code</span>
+    </div>
+  </div>
+
+  <div class="row">
+
+    <!-- CLI -->
+    <div class="box" style="width:280px; flex-shrink:0; border-top:3px solid var(--entry);">
+      <div class="box-title"><span class="box-dot" style="background:var(--entry)"></span>cli/main.py — User Entrypoint</div>
+      <div class="box-desc">Interactive &amp; non-interactive modes. Argument parsing, delegates to input collection, invokes pipeline. Catches exit codes and writes final summary.</div>
+      <div class="divider"></div>
+      <div class="box-files">
+        <div class="bf"><span class="bf-blue">↳</span>cli/input.py — collect ticket / customer / country / network / HC-ID via prompts or flags</div>
+        <div class="bf"><span class="bf-acc">↳</span>cli/services/db_suggest.py — live DB autocomplete for customer &amp; network selection</div>
+        <div class="bf" style="margin-top:3px; color:#d97706;"><span class="bf-org">→</span>cli/logs/gmre-core.log (structured JSON)</div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <div class="grow">
+      <div class="box-title" style="margin-bottom:6px;"><span class="box-dot" style="background:#b45309"></span>scripts/ — Batch, Maintenance &amp; Utility Scripts</div>
+      <div class="scripts-grid">
+        <div class="sc"><div class="sc-name">backfill_or_ingest_by_tree.py</div><div class="sc-desc">Walk a directory tree, ingest every valid archive found recursively</div><span class="sc-type sc-batch">BATCH INGEST</span></div>
+        <div class="sc"><div class="sc-name">ingest_ticket_folders.py</div><div class="sc-desc">Per-ticket folder ingestion — maps folder names to ticket metadata</div><span class="sc-type sc-batch">BATCH INGEST</span></div>
+        <div class="sc"><div class="sc-name">dry_run_archive.py</div><div class="sc-desc">Run reader + parsers, print records — zero DB writes. Safe dev tool.</div><span class="sc-type sc-dry">DRY RUN</span></div>
+        <div class="sc"><div class="sc-name">dry_run_nea_buckets.py</div><div class="sc-desc">NEA-specific dry run; inspect bucket count extraction only</div><span class="sc-type sc-dry">DRY RUN</span></div>
+        <div class="sc"><div class="sc-name">backfill_plugins.py / backfill_plugins1.py</div><div class="sc-desc">Re-run new plugins against already-ingested dumps (no re-parse of node/DPR)</div><span class="sc-type sc-batch">BACKFILL</span></div>
+        <div class="sc" style="border-left-color:#3b82f6;"><div class="sc-name">db_check.py</div><div class="sc-desc">Validate DB connectivity &amp; schema sanity checks against live DB</div><span class="sc-type sc-db">DB TOOL</span></div>
+        <div class="sc" style="border-left-color:#3b82f6;"><div class="sc-name">db_migrate.py / db_migrate2.py / db_reset.py</div><div class="sc-desc">Alembic migration runners + hard DB reset for dev environments</div><span class="sc-type sc-db">DB TOOL</span></div>
+        <div class="sc" style="border-left-color:#16a34a;"><div class="sc-name">sync_customers_from_excel.py</div><div class="sc-desc">Read Nokia customer Excel sheet, upsert into customers_db table</div><span class="sc-type sc-util">SYNC UTIL</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CONNECTOR -->
+<div class="conn"><span class="conn-pill">① invoke pipeline(config, archive_path, ticket_params)</span></div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     LAYER 2 · ORCHESTRATION
+══════════════════════════════════════════════════════════════ -->
+<div class="layer lyr-orch" style="border-top:3px solid var(--orch);">
+  <div class="lyr-head">
+    <div class="lyr-head-dot" style="background:var(--orch)"></div>
+    <div class="lyr-head-title" style="color:#1e3a8a;">Layer 2 — Application / Orchestration</div>
+    <div class="lyr-head-path">app/run_pipeline_v2.py · app/service.py</div>
+    <div class="lyr-head-right">
+      <span style="font-size:9px; font-family:var(--mono); color:#1e40af; background:#dbeafe; border-radius:4px; padding:2px 7px; border:1px solid #93c5fd;">returns RunResult(ok, inserted, errors, run_id)</span>
+    </div>
+  </div>
+
+  <div class="box" style="width:100%; border:1.5px solid #93c5fd; background:#f8fbff;">
+    <div class="box-title" style="font-size:12.5px; margin-bottom:8px;"><span class="box-dot" style="background:var(--orch)"></span>run_pipeline_v2.py — Main Pipeline Coordinator (7 sequential stages)</div>
+    <div class="orch-grid">
+      <div class="os">
+        <div class="os-num">a</div>
+        <div class="os-label">Config &amp; Logging</div>
+        <div class="os-file">app_config.py<br>logging_setup.py<br>config/env.py</div>
+        <div class="os-badge">STARTUP</div>
+      </div>
+      <div class="os">
+        <div class="os-num">b</div>
+        <div class="os-label">Inspect Archive</div>
+        <div class="os-file">archives/plan.py<br>archives/timestamp.py<br>→ ArchivePlan</div>
+        <div class="os-badge">PLAN</div>
+      </div>
+      <div class="os">
+        <div class="os-num">c</div>
+        <div class="os-label">Stream Members</div>
+        <div class="os-file">archives/reader.py<br>NO full extract<br>spool limits</div>
+        <div class="os-badge">STREAM</div>
+      </div>
+      <div class="os">
+        <div class="os-num">d</div>
+        <div class="os-label">Match Plugins</div>
+        <div class="os-file">parse/registry.py<br>parse/targets.py<br>overlap contract</div>
+        <div class="os-badge">DISPATCH</div>
+      </div>
+      <div class="os">
+        <div class="os-num">e</div>
+        <div class="os-label">Run Plugins</div>
+        <div class="os-file">parse/engine.py<br>plugin.parse(stream)<br>parse/spool.py</div>
+        <div class="os-badge">PARSE</div>
+      </div>
+      <div class="os">
+        <div class="os-num">f</div>
+        <div class="os-label">Route Records</div>
+        <div class="os-file">parse/router.py<br>domain/records.py<br>normalize + validate</div>
+        <div class="os-badge">ROUTE</div>
+      </div>
+      <div class="os">
+        <div class="os-num">g</div>
+        <div class="os-label">Persist + Dedup</div>
+        <div class="os-file">DB/inserter.py<br>sha256 + ledger<br>sessions + models</div>
+        <div class="os-badge">COMMIT</div>
+      </div>
+    </div>
+
+    <!-- PRODUCTION FEATURE CALLOUTS -->
+    <div class="feature-strip">
+      <div class="feat feat-stream">
+        <div class="feat-title" style="color:#5b21b6;">⚡ Stream-Read Design</div>
+        <div class="feat-body">Archives are <b>never fully extracted to disk</b>.<br>reader.py yields file members as IO streams.<br>spool.py enforces byte limits per member.<br>Memory-safe for &gt;5GB nested .tgz files.</div>
+      </div>
+      <div class="feat feat-sha">
+        <div class="feat-title" style="color:#dc2626;">🔒 SHA-256 Fingerprinting</div>
+        <div class="feat-body">Every archive is fingerprinted before pipeline runs.<br>fingerprint.py → archive_sha256 DB table.<br><b>Exact duplicate archives are skipped instantly</b>.<br>Re-runs are safe — zero double-inserts.</div>
+      </div>
+      <div class="feat feat-ledger">
+        <div class="feat-title" style="color:#92400e;">📋 Plugin Ledger State Machine</div>
+        <div class="feat-body">Each plugin's result is tracked per-dump in plugin_ledger.<br>States: PENDING → RUNNING → DONE / FAILED.<br>Enables <b>partial backfill</b>: add a new plugin, re-run only that plugin against all existing dumps.</div>
+      </div>
+      <div class="feat feat-guard">
+        <div class="feat-title" style="color:#0369a1;">🛡️ Guardrail System</div>
+        <div class="feat-body">Same-day snapshot guards (6h window).<br>Overwrite purges child records atomically.<br>HC-ID overwrite policy matrix enforced.<br>DB unique constraints as final safety net.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONNECTOR -->
+<div class="conn"><span class="conn-pill">② typed domain records + archive streams + ParseContext</span></div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     MIDDLE: DOMAIN + INFRASTRUCTURE
+══════════════════════════════════════════════════════════════ -->
+<div style="display:flex; gap:8px; align-items:stretch;">
+
+  <!-- DOMAIN -->
+  <div style="width:220px; flex-shrink:0;">
+    <div class="layer" style="background:var(--domain-bg); border:2px solid var(--domain-bd); height:100%;">
+      <div class="lyr-head">
+        <div class="lyr-head-dot" style="background:var(--domain)"></div>
+        <div class="lyr-head-title" style="color:#14532d;">Layer 3 — Domain</div>
+      </div>
+      <div class="lyr-head-path" style="margin-top:-8px; margin-bottom:10px; display:inline-block;">domain/</div>
+      <div class="col">
+
+        <div class="box" style="border-top:2px solid var(--domain);">
+          <div class="box-title"><span class="box-dot" style="background:var(--domain)"></span>domain/records.py</div>
+          <div class="box-desc">Typed Python dataclasses for every record kind. Pure data — no I/O.</div>
+          <div class="divider"></div>
+          <div class="box-files">
+            <div class="bf"><span class="bf-grn">·</span>NodeRecord</div>
+            <div class="bf"><span class="bf-grn">·</span>LspRecord</div>
+            <div class="bf"><span class="bf-grn">·</span>NeaBucketRecord</div>
+            <div class="bf"><span class="bf-grn">·</span>MaNotifRecord</div>
+            <div class="bf"><span class="bf-grn">·</span>AlarmRecord</div>
+            <div class="bf"><span class="bf-grn">·</span>DprRecord / 3RRecord</div>
+          </div>
+        </div>
+
+        <div class="box">
+          <div class="box-title"><span class="box-dot" style="background:var(--domain)"></span>domain/dto.py</div>
+          <div class="box-desc">DTOs crossing layer boundaries.</div>
+          <div class="divider"></div>
+          <div class="box-files">
+            <div class="bf"><span class="bf-grn">·</span>RunConfig</div>
+            <div class="bf"><span class="bf-grn">·</span>ArchiveMeta</div>
+            <div class="bf"><span class="bf-grn">·</span>ParseContext</div>
+            <div class="bf"><span class="bf-grn">·</span>InsertResult</div>
+          </div>
+        </div>
+
+        <div class="box" style="background:#ecfdf5; border-color:#6ee7b7; border-top:2px solid #4ade80;">
+          <div class="box-title" style="color:#14532d;"><span class="box-dot" style="background:#22c55e"></span>Normalization</div>
+          <div class="box-files">
+            <div class="bf bf-grn">✓ version string normalization</div>
+            <div class="bf bf-grn">✓ missing mgmt_ip fallback</div>
+            <div class="bf bf-grn">✓ router_id consistency</div>
+            <div class="bf bf-grn">✓ NE identity dedup key</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- INFRA -->
+  <div class="grow">
+    <div class="layer" style="background:#faf9ff; border:2px solid #c4b5fd; height:100%;">
+      <div class="lyr-head">
+        <div class="lyr-head-dot" style="background:var(--infra)"></div>
+        <div class="lyr-head-title" style="color:#4c1d95;">Layer 4 — Infrastructure</div>
+        <div class="lyr-head-path">infra/</div>
+      </div>
+
+      <div class="infra-cols">
+
+        <!-- 4.1 ARCHIVE -->
+        <div class="sub-section ss-arch">
+          <div class="sub-head sh-arch"><span class="sh-icon">📦</span>4.1 Archive Handling</div>
+          <div class="col">
+            <div class="box">
+              <div class="box-title"><span class="box-dot" style="background:#6d28d9"></span>archives/plan.py</div>
+              <div class="box-desc">inspect_archive() → ArchivePlan. Determines which inner archive chain to use.</div>
+              <div class="divider"></div>
+              <div class="box-files">
+                <div class="bf"><span class="bf-acc">·</span>chain / extra_chains detection</div>
+                <div class="bf"><span class="bf-acc">·</span>ECS81 over non-ECS81 preference</div>
+                <div class="bf"><span class="bf-acc">·</span>ACT-preferred over STDBY</div>
+                <div class="bf"><span class="bf-acc">·</span>active_only_fallback logic</div>
+                <div class="bf"><span class="bf-acc">·</span>depth-limited nested .tgz walk</div>
+              </div>
+            </div>
+            <div class="box">
+              <div class="box-title"><span class="box-dot" style="background:#6d28d9"></span>archives/reader.py</div>
+              <div class="box-desc"><b>Stream-first design</b> — yields IO streams for each matched member, never writes to disk.</div>
+              <div class="divider"></div>
+              <div class="box-files">
+                <div class="bf"><span class="bf-acc">·</span>iter_streams() lazy generator</div>
+                <div class="bf"><span class="bf-acc">·</span>spool limits per-member</div>
+                <div class="bf"><span class="bf-acc">·</span>path-aware basename matching</div>
+                <div class="bf"><span class="bf-acc">·</span>Windows backslash path handling</div>
+                <div class="bf"><span class="bf-acc">·</span>corrupt inner member recovery</div>
+                <div class="bf"><span class="bf-acc">·</span>case-insensitive filename match</div>
+                <div class="bf"><span class="bf-acc">·</span>multi-target single-pass read</div>
+              </div>
+            </div>
+            <div class="box">
+              <div class="box-title"><span class="box-dot" style="background:#6d28d9"></span>archives/timestamp.py</div>
+              <div class="box-desc">Two-strategy timestamp inference — name hints win, log hints as fallback.</div>
+              <div class="divider"></div>
+              <div class="box-files">
+                <div class="bf"><span class="bf-blue">1.</span>Name: datetime regex on filename</div>
+                <div class="bf"><span class="bf-acc">2.</span>Log: first-line log timestamp scan</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4.2 PARSE + PLUGINS -->
+        <div class="sub-section ss-parse">
+          <div class="sub-head sh-parse"><span class="sh-icon">🔌</span>4.2 Parsing &amp; Plugin Framework</div>
+
+          <div class="row gap-6" style="gap:6px;">
+            <!-- Core engine -->
+            <div class="col" style="width:160px; flex-shrink:0; gap:5px;">
+              <div class="box">
+                <div class="box-title"><span class="box-dot" style="background:#0891b2"></span>plugin_api.py</div>
+                <div class="box-desc">PluginBase ABC: name, targets[], priority, parse(stream) → List[Record]</div>
+              </div>
+              <div class="box">
+                <div class="box-title"><span class="box-dot" style="background:#0891b2"></span>registry.py</div>
+                <div class="box-desc">match_plugins(basename) → ordered list. Overlap contract enforced at registration.</div>
+              </div>
+              <div class="box">
+                <div class="box-title"><span class="box-dot" style="background:#0891b2"></span>engine.py</div>
+                <div class="box-desc">Drives each plugin over its stream. Collects ParseResult list.</div>
+              </div>
+              <div class="box">
+                <div class="box-title"><span class="box-dot" style="background:#0891b2"></span>router.py</div>
+                <div class="box-desc">Routes typed records to correct inserter method by record type discriminator.</div>
+              </div>
+              <div class="box">
+                <div class="box-title"><span class="box-dot" style="background:#0891b2"></span>targets.py · spool.py</div>
+                <div class="box-desc">File pattern registry. Stream spooling with configurable byte limit safety valve.</div>
+              </div>
+              <div class="box" style="background:#f8fafc; border-style:dashed;">
+                <div class="box-title"><span class="box-dot" style="background:#94a3b8"></span>Low-level Parsers</div>
+                <div class="box-files">
+                  <div class="bf">parsers.py (base)</div>
+                  <div class="bf">parsers_nea.py</div>
+                  <div class="bf">parsers_ma.py</div>
+                  <div class="bf">parsers_3r.py</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Plugin grid -->
+            <div class="grow">
+              <div class="plugin-system">
+                <div class="ps-title">Plugin Registry (12 registered plugins)</div>
+                <div class="plugin-grid">
+                  <div class="pc pc-node">
+                    <div class="pc-name">node_plugin.py</div>
+                    <div class="pc-desc">Parse Node state: version, mgmt_ip, router_id, NE identity</div>
+                    <div class="pc-file">CLI_Show_Node.out</div>
+                    <span class="pc-tag core">CORE</span>
+                  </div>
+                  <div class="pc pc-dpr">
+                    <div class="pc-name">dpr_db_plugin.py</div>
+                    <div class="pc-desc">DPR database table extraction and structured record mapping</div>
+                    <div class="pc-file">CLI_Show_DPR_DB.out</div>
+                    <span class="pc-tag core">CORE</span>
+                  </div>
+                  <div class="pc pc-lsp">
+                    <div class="pc-name">plugins/lsp.py</div>
+                    <div class="pc-desc">LSP entry ingestion with unique constraint (dump×NE×from×to×label)</div>
+                    <div class="pc-file">CLI_Show_LSP.out</div>
+                    <span class="pc-tag ext">PLUGIN</span>
+                  </div>
+                  <div class="pc pc-nea">
+                    <div class="pc-name">plugins/nea_trace.py</div>
+                    <div class="pc-desc">NEA trace file parsing — extract trace events per timestamp</div>
+                    <div class="pc-file">NEA trace files</div>
+                    <span class="pc-tag ext">PLUGIN</span>
+                  </div>
+                  <div class="pc pc-nea">
+                    <div class="pc-name">plugins/nea_bucket_counts.py</div>
+                    <div class="pc-desc">NEA bucket counter ingestion for capacity &amp; utilization analysis</div>
+                    <div class="pc-file">NEA bucket files</div>
+                    <span class="pc-tag ext">PLUGIN</span>
+                  </div>
+                  <div class="pc pc-ma">
+                    <div class="pc-name">plugins/ma_notif_bucket_counts.py</div>
+                    <div class="pc-desc">MA notification bucket counters — maps to ma_notif_bucket_count table</div>
+                    <div class="pc-file">MA notif files</div>
+                    <span class="pc-tag ext">PLUGIN</span>
+                  </div>
+                  <div class="pc pc-alarm">
+                    <div class="pc-name">plugins/alarm_state.py</div>
+                    <div class="pc-desc">Active alarm state snapshot ingestion per CaptureDump</div>
+                    <div class="pc-file">alarm state output</div>
+                    <span class="pc-tag ext">PLUGIN</span>
+                  </div>
+                  <div class="pc pc-3r">
+                    <div class="pc-name">plugins/dpr_3r_plugin.py</div>
+                    <div class="pc-desc">3R group extraction — redundancy group membership per NE</div>
+                    <div class="pc-file">DPR 3R output</div>
+                    <span class="pc-tag ext">PLUGIN</span>
+                  </div>
+                  <div class="pc pc-3r">
+                    <div class="pc-name">plugins/dpr_links.py</div>
+                    <div class="pc-desc">DPR inter-NE link mapping — source/dest/type per CaptureDump</div>
+                    <div class="pc-file">DPR link file</div>
+                    <span class="pc-tag ext">PLUGIN</span>
+                  </div>
+                  <div class="pc pc-3r">
+                    <div class="pc-name">plugins/dpr_router_map.py</div>
+                    <div class="pc-desc">Router-ID to NE mapping table for cross-reference resolution</div>
+                    <div class="pc-file">DPR router map</div>
+                    <span class="pc-tag ext">PLUGIN</span>
+                  </div>
+                  <div class="pc pc-alarm" style="border-left-color:#dc2626;">
+                    <div class="pc-name">infra/parse/alarm_state.py</div>
+                    <div class="pc-desc">Root-level alarm parser (legacy path, kept for backward compat)</div>
+                    <div class="pc-file">alarm_state (root)</div>
+                    <span class="pc-tag">LEGACY</span>
+                  </div>
+                  <div class="pc pc-dummy">
+                    <div class="pc-name">dummy_plugin.py ⚗️</div>
+                    <div class="pc-desc">Null plugin — test scaffold, used to verify registry &amp; engine plumbing</div>
+                    <div class="pc-file">testing only</div>
+                    <span class="pc-tag test">TEST ONLY</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4.3 CONFIG / IO -->
+        <div class="sub-section ss-cfg">
+          <div class="sub-head sh-cfg"><span class="sh-icon">⚙️</span>4.3 Config + IO + Observability</div>
+          <div class="col">
+            <div class="box" style="border-top:2px solid #be123c;">
+              <div class="box-title"><span class="box-dot" style="background:#be123c"></span>infra/config/env.py</div>
+              <div class="box-desc">Loads .env / environment. Provides DB_URL, LOG_LEVEL, SPOOL_LIMIT, dry_run flag.</div>
+            </div>
+            <div class="box">
+              <div class="box-title"><span class="box-dot" style="background:#be123c"></span>infra/app_config.py</div>
+              <div class="box-desc">AppConfig dataclass. Validated at startup. Controls overwrite, active_only, dry_run flags. Single source of truth for run behaviour.</div>
+            </div>
+            <div class="box">
+              <div class="box-title"><span class="box-dot" style="background:#be123c"></span>io/run_cfg.py · legacy_cfg.py</div>
+              <div class="box-desc">Per-run config. Legacy shim for older CLI invocations — bridges old arg format to AppConfig.</div>
+            </div>
+            <div class="box">
+              <div class="box-title"><span class="box-dot" style="background:#be123c"></span>io/customers_db.py</div>
+              <div class="box-desc">Customer lookup &amp; upsert from DB. Powers db_suggest.py autocomplete. Handles Excel sync.</div>
+            </div>
+            <div class="box">
+              <div class="box-title"><span class="box-dot" style="background:#be123c"></span>io/customers_sheet.py</div>
+              <div class="box-desc">Read Nokia customer records from Excel workbook for initial DB seeding.</div>
+            </div>
+            <div class="box">
+              <div class="box-title"><span class="box-dot" style="background:#be123c"></span>io/local_store.py</div>
+              <div class="box-desc">Local filesystem cache / staging for downloaded or temporary archives.</div>
+            </div>
+            <div class="box" style="background:#fff1f2; border-color:#fca5a5; border-top:2px solid #dc2626;">
+              <div class="box-title"><span class="box-dot" style="background:#dc2626"></span>io/fingerprint.py</div>
+              <div class="box-desc"><b>Core of idempotency.</b> Computes SHA-256 of archive before any parsing. Writes to archive_sha256 table. If hash seen → skip.</div>
+            </div>
+            <div class="box">
+              <div class="box-title"><span class="box-dot" style="background:#be123c"></span>logging_setup.py · timeutils.py</div>
+              <div class="box-desc">Structured JSON logging to gmre-core.log. ISO timestamp normalization across log events.</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /infra-cols -->
+    </div><!-- /infra layer -->
+  </div><!-- /grow -->
+
+</div><!-- /middle row -->
+
+<!-- CONNECTOR -->
+<div class="conn"><span class="conn-pill">③ transactional insert via ORM sessions — commit or rollback</span></div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     LAYER 5 · DATA
+══════════════════════════════════════════════════════════════ -->
+<div class="layer lyr-data" style="border-top:3px solid var(--data);">
+  <div class="lyr-head">
+    <div class="lyr-head-dot" style="background:var(--data)"></div>
+    <div class="lyr-head-title" style="color:#0c4a6e;">Layer 5 — Data Layer: DB Access + Alembic Migrations + MariaDB</div>
+    <div class="lyr-head-path">DB/ · db_migrations/ · alembic.ini</div>
+  </div>
+
+  <div class="row" style="align-items:flex-start; gap:10px;">
+
+    <!-- DB Access -->
+    <div style="width:195px; flex-shrink:0;">
+      <div class="sub-head" style="color:#0c4a6e; border-color:#7dd3fc; border-bottom:2px solid; padding-bottom:4px; margin-bottom:8px; font-size:9px; font-weight:800; letter-spacing:1px; text-transform:uppercase;">DB Access Layer</div>
+      <div class="col">
+        <div class="box" style="border-top:2px solid var(--data);">
+          <div class="box-title"><span class="box-dot" style="background:var(--data)"></span>DB/sessions.py</div>
+          <div class="box-desc">SQLAlchemy engine factory + scoped session. Connection pool management. Proxy contract tested.</div>
+        </div>
+        <div class="box">
+          <div class="box-title"><span class="box-dot" style="background:var(--data)"></span>DB/models.py</div>
+          <div class="box-desc">All ORM table definitions. Declares relationships, unique constraints, cascade rules for purge-children.</div>
+        </div>
+        <div class="box" style="background:#e0f2fe; border-color:#7dd3fc; border-top:2px solid #0ea5e9;">
+          <div class="box-title"><span class="box-dot" style="background:#0ea5e9"></span>DB/inserter.py</div>
+          <div class="box-desc">Transactional insert with:<br>• overwrite-purge-children logic<br>• same-day snapshot guard<br>• 6h window guard<br>• HC-ID overwrite matrix<br>• constraint retry on conflict</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Migrations -->
+    <div class="mig-box">
+      <div class="sub-head" style="color:#0c4a6e; border-color:#7dd3fc; border-bottom:2px solid; padding-bottom:4px; margin-bottom:8px; font-size:9px; font-weight:800; letter-spacing:1px; text-transform:uppercase;">Alembic Migrations — 13 Versions (chronological)</div>
+      <div class="mig-inner">
+        <table class="mig-table">
+          <thead><tr><th>Revision Hash</th><th>Migration Description</th></tr></thead>
+          <tbody>
+            <tr><td>22925ffe</td><td>baseline_schema — Network, NetworkElement, CaptureDump, Customer</td></tr>
+            <tr><td>99e812d1</td><td>add_customer_table — dedicated Customer entity</td></tr>
+            <tr><td>2936a356</td><td>add_lsp_entry_table — LSP records per CaptureDump</td></tr>
+            <tr><td>65bab2a4</td><td>add_3r_group_tables — redundancy group membership</td></tr>
+            <tr><td>7ffc05d2</td><td>add_nea_bucket_count — NEA utilization counters</td></tr>
+            <tr class="key-mig"><td>8f225311</td><td>add_plugin_ledger_and_archive_sha256 <span class="key-badge">KEY</span> — enables idempotency engine</td></tr>
+            <tr><td>10e362f0</td><td>add_ingestion_ledger — per-dump ingestion state tracking</td></tr>
+            <tr><td>b59052c9</td><td>add_alarm_state_entry — alarm snapshot table</td></tr>
+            <tr><td>d31a690c</td><td>add_ma_notif_bucket_count — MA notification counters</td></tr>
+            <tr><td>440dd4ff</td><td>update_three_r_group_and_r_group_schema — schema refinement</td></tr>
+            <tr><td>fd71ca0a</td><td>add_router_id_and_ne_link — extend NE with router_id + link ref</td></tr>
+            <tr class="key-mig"><td>d8ae72a0</td><td>fix_lsp_unique_key_and_enforce_router_id <span class="key-badge">KEY</span> — data integrity enforcement</td></tr>
+            <tr><td>d76e01de</td><td>drop_old_ingestion_ledger — clean up deprecated table</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DB Cylinders -->
+    <div class="grow">
+      <div class="sub-head" style="color:#0c4a6e; border-color:#7dd3fc; border-bottom:2px solid; padding-bottom:4px; margin-bottom:10px; font-size:9px; font-weight:800; letter-spacing:1px; text-transform:uppercase;">MariaDB Schema — Logical Table Groups</div>
+      <div class="db-row">
+
+        <div class="cyl-wrap">
+          <div class="cyl">
+            <div class="cyl-top"></div>
+            <div class="cyl-body">Network<br>Customer<br>NetworkElement<br>CaptureDump</div>
+            <div class="cyl-bot"></div>
+          </div>
+          <div class="cyl-lbl">Core Entities</div>
+        </div>
+
+        <div class="cyl-wrap">
+          <div class="cyl">
+            <div class="cyl-top"></div>
+            <div class="cyl-body">lsp_entry<br>unique: dump × NE<br>× from × to<br>× label</div>
+            <div class="cyl-bot"></div>
+          </div>
+          <div class="cyl-lbl">LSP Table</div>
+        </div>
+
+        <div class="cyl-wrap">
+          <div class="cyl">
+            <div class="cyl-top"></div>
+            <div class="cyl-body">nea_bucket_count<br>ma_notif_<br>bucket_count<br>alarm_state_entry</div>
+            <div class="cyl-bot"></div>
+          </div>
+          <div class="cyl-lbl">Counter + State</div>
+        </div>
+
+        <div class="cyl-wrap">
+          <div class="cyl">
+            <div class="cyl-top"></div>
+            <div class="cyl-body">three_r_group<br>three_r_link<br>dpr_router_map<br>nea_trace</div>
+            <div class="cyl-bot"></div>
+          </div>
+          <div class="cyl-lbl">DPR / 3R Tables</div>
+        </div>
+
+        <div class="cyl-wrap">
+          <div class="cyl ledger">
+            <div class="cyl-top"></div>
+            <div class="cyl-body">plugin_ledger<br>ingestion_ledger<br>archive_sha256<br>state machine<br>PENDING→DONE</div>
+            <div class="cyl-bot"></div>
+          </div>
+          <div class="cyl-lbl" style="color:#9a3412;">Dedup / Ledger</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     TEST HARNESS
+══════════════════════════════════════════════════════════════ -->
+<div class="layer lyr-test" style="margin-top:8px;">
+  <div class="lyr-head">
+    <div class="lyr-head-dot" style="background:var(--test)"></div>
+    <div class="lyr-head-title" style="color:#0f766e;">Test Harness — Full Coverage (55+ test files · htmlcov tracked)</div>
+    <div class="lhr-head-path" style="margin-left:8px;"><div class="lyr-head-path">tests/</div></div>
+    <div class="lyr-head-right">
+      <span style="font-size:9px; font-family:var(--mono); color:#0f766e; background:#ccfbf1; border-radius:4px; padding:2px 7px; border:1px solid #5eead4;">pytest.ini · conftest.py · htmlcov/</span>
+    </div>
+  </div>
+
+  <div class="test-cols">
+
+    <!-- Unit -->
+    <div class="box" style="border-top:2px solid #7c3aed;">
+      <div class="box-title" style="color:#4c1d95; margin-bottom:6px;"><span class="box-dot" style="background:#7c3aed"></span>tests/unit/ — 29 files</div>
+      <div class="iwrap">
+        <span class="chip chip-unit">test_reader_iter_streams</span>
+        <span class="chip chip-unit">test_reader_corrupt_inner_member</span>
+        <span class="chip chip-unit">test_reader_early_exit</span>
+        <span class="chip chip-unit">test_reader_respects_max_depth</span>
+        <span class="chip chip-unit">test_reader_windows_backslash_paths</span>
+        <span class="chip chip-unit">test_reader_case_insensitive</span>
+        <span class="chip chip-unit">test_reader_missing_target</span>
+        <span class="chip chip-unit">test_reader_multiple_targets_one_pass</span>
+        <span class="chip chip-unit">test_reader_lines_generator_lifetime</span>
+        <span class="chip chip-unit">test_registry_contract</span>
+        <span class="chip chip-unit">test_registry_match_order</span>
+        <span class="chip chip-unit">test_registry_multi_match</span>
+        <span class="chip chip-unit">test_registry_single_match</span>
+        <span class="chip chip-unit">test_plugin_meta_and_overlap_contract</span>
+        <span class="chip chip-unit">test_ts_from_name</span>
+        <span class="chip chip-unit">test_ts_hint_priority</span>
+        <span class="chip chip-unit">test_sha256_file</span>
+        <span class="chip chip-unit">test_dpr_links_parse</span>
+        <span class="chip chip-unit">test_dpr_router_map_parse</span>
+        <span class="chip chip-unit">test_ma_notif_bucket_counts_parse</span>
+        <span class="chip chip-unit">test_cli_modes_mode1_mode2</span>
+        <span class="chip chip-unit">test_env_loader</span>
+        <span class="chip chip-unit">test_backfill_or_ingest_by_tree_deep</span>
+        <span class="chip chip-unit">test_backfill_run_calls_pipeline</span>
+        <span class="chip chip-unit">test_backfill_plugins</span>
+        <span class="chip chip-unit">test_ingest_ticket_folders_batch</span>
+        <span class="chip chip-unit">test_sessions_proxy_contract</span>
+        <span class="chip chip-unit">test_customers_sheet_read</span>
+        <span class="chip chip-unit">test_zero_cov_modules_import_smoke</span>
+      </div>
+    </div>
+
+    <!-- Integration -->
+    <div class="box" style="border-top:2px solid var(--orch);">
+      <div class="box-title" style="color:#1e3a8a; margin-bottom:6px;"><span class="box-dot" style="background:var(--orch)"></span>tests/integration/ — 15 files</div>
+      <div class="iwrap">
+        <span class="chip chip-int">test_pipeline_smoke</span>
+        <span class="chip chip-int">test_pipeline_db</span>
+        <span class="chip chip-int">test_pipeline_uses_chain</span>
+        <span class="chip chip-int">test_lsp_ingestion</span>
+        <span class="chip chip-int">test_duplicate_sha_policy_integration</span>
+        <span class="chip chip-int">test_sha_duplicate_behaviour</span>
+        <span class="chip chip-int">test_sha_different_creates_new_dump</span>
+        <span class="chip chip-int">test_hc_id_overwrite_policy</span>
+        <span class="chip chip-int">test_same_day_new_snapshot</span>
+        <span class="chip chip-int">test_same_day_different_origin_snapshot</span>
+        <span class="chip chip-int">test_snapshot_6h_guard</span>
+        <span class="chip chip-int">test_network_identity_idempotent</span>
+        <span class="chip chip-int">test_network_identity_uniqueness</span>
+        <span class="chip chip-int">test_backfill_plugins_integration</span>
+        <span class="chip chip-int">test_customers_db_upsert</span>
+      </div>
+    </div>
+
+    <!-- DB constraint tests -->
+    <div class="box" style="border-top:2px solid var(--domain);">
+      <div class="box-title" style="color:#14532d; margin-bottom:6px;"><span class="box-dot" style="background:var(--domain)"></span>tests/db/ — 11 files</div>
+      <div class="iwrap">
+        <span class="chip chip-db">test_constraints</span>
+        <span class="chip chip-db">test_constraints_links_and_3r</span>
+        <span class="chip chip-db">test_guardrails</span>
+        <span class="chip chip-db">test_plugin_ledger_state_machine</span>
+        <span class="chip chip-db">test_plugin_db_write_guards</span>
+        <span class="chip chip-db">test_overwrite_purge_children</span>
+        <span class="chip chip-db">test_sha_duplicate_policy</span>
+        <span class="chip chip-db">test_prepare_context_duplicate_policy_matrix</span>
+        <span class="chip chip-db">test_multi_plugin_same_file_order_required</span>
+        <span class="chip chip-db">test_schema_contract</span>
+        <span class="chip chip-db">test_db_bootstrap</span>
+      </div>
+    </div>
+
+    <!-- Fixtures -->
+    <div class="box" style="border-top:2px solid #7c3aed;">
+      <div class="box-title" style="margin-bottom:6px;"><span class="box-dot" style="background:#7c3aed"></span>tests/fixtures/archives/ — 24 .tgz</div>
+      <div class="iwrap">
+        <span class="chip chip-fix">example_small.tgz</span>
+        <span class="chip chip-fix">example_small_v2.tgz</span>
+        <span class="chip chip-fix">example_small_v2_with_lsp.tgz</span>
+        <span class="chip chip-fix">example_nested_chain.tgz</span>
+        <span class="chip chip-fix">example_nested_chain_act_240118.tgz</span>
+        <span class="chip chip-fix">example_deep_nested_depth8.tgz</span>
+        <span class="chip chip-fix">example_corrupt_inner.tgz</span>
+        <span class="chip chip-fix">example_active_only_fallback.tgz</span>
+        <span class="chip chip-fix">example_act_vs_stdby.tgz</span>
+        <span class="chip chip-fix">example_stdby_only.tgz</span>
+        <span class="chip chip-fix">example_ecs81_preferred.tgz</span>
+        <span class="chip chip-fix">example_case.tgz</span>
+        <span class="chip chip-fix">origin_a.tgz / origin_b.tgz</span>
+      </div>
+      <div class="divider"></div>
+      <div class="bf bf-grn">📄 tests/golden/golden_case_bharti_2025-01-18.json</div>
+      <div class="bf bf-acc" style="margin-top:2px;">📁 make_*.py — fixture generators (8 scripts)</div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /LEFT COLUMN -->
+
+<!-- ════════════════════
+     SIDE PANEL
+════════════════════ -->
+<div class="side">
+
+  <!-- LEGEND -->
+  <div class="card">
+    <div class="card-title">Legend</div>
+    <div class="leg-row"><div class="leg-line leg-solid"></div>data / record flow</div>
+    <div class="leg-row"><div class="leg-line leg-dash"></div>config / control</div>
+    <div class="leg-row"><div class="leg-line leg-green"></div>domain records</div>
+    <div class="leg-row"><div class="leg-line leg-orange"></div>plugin invocation</div>
+    <div class="leg-row"><div class="leg-cyl"></div>MariaDB table group</div>
+    <div class="sep"></div>
+    <div style="font-size:9px; font-family:var(--mono); color:#6b7280; line-height:1.6;">
+      Top → bottom = data flow.<br>
+      ①②③ = pipeline stages.
+    </div>
+  </div>
+
+  <!-- FLOW STEPS -->
+  <div class="card">
+    <div class="card-title">⚡ 11-Step Data Flow</div>
+    <div class="flow-step"><span class="flow-n">1</span>User / script invokes CLI</div>
+    <div class="flow-arr">↓</div>
+    <div class="flow-step"><span class="flow-n">2</span>cli/main.py · scripts/*</div>
+    <div class="flow-arr">↓</div>
+    <div class="flow-step"><span class="flow-n">3</span>run_pipeline_v2.py</div>
+    <div class="flow-arr">↓</div>
+    <div class="flow-step"><span class="flow-n">4</span>fingerprint.py → sha256 check</div>
+    <div class="flow-arr">↓</div>
+    <div class="flow-step"><span class="flow-n">5</span>plan.py → ArchivePlan</div>
+    <div class="flow-arr">↓</div>
+    <div class="flow-step"><span class="flow-n">6</span>timestamp.py → capture_ts</div>
+    <div class="flow-arr">↓</div>
+    <div class="flow-step"><span class="flow-n">7</span>reader.py → stream members</div>
+    <div class="flow-arr">↓</div>
+    <div class="flow-step"><span class="flow-n">8</span>registry → engine → plugins</div>
+    <div class="flow-arr">↓</div>
+    <div class="flow-step"><span class="flow-n">9</span>router → domain records</div>
+    <div class="flow-arr">↓</div>
+    <div class="flow-step"><span class="flow-n">10</span>inserter → MariaDB commit</div>
+    <div class="flow-arr">↓</div>
+    <div class="flow-step"><span class="flow-n">11</span>logs + RunResult + exit code</div>
+  </div>
+
+  <!-- IDEMPOTENCY -->
+  <div class="concern c-dedup">
+    <div class="concern-title">⟳ Idempotency &amp; Dedup</div>
+    <div class="concern-body">
+      sha256 archive fingerprint<br>
+      archive_sha256 DB table<br>
+      plugin_ledger state machine<br>
+      ingestion_ledger per-dump<br>
+      unique DB constraints<br>
+      <b>re-runs always safe</b>
+    </div>
+  </div>
+
+  <div class="concern c-guard">
+    <div class="concern-title">🛡️ Guardrail System</div>
+    <div class="concern-body">
+      overwrite_purge_children<br>
+      same-day snapshot guard<br>
+      6-hour window policy<br>
+      HC-ID overwrite matrix<br>
+      duplicate policy matrix<br>
+      schema contract checks
+    </div>
+  </div>
+
+  <div class="concern c-err">
+    <div class="concern-title">⚠ Error Handling</div>
+    <div class="concern-body">
+      corrupt inner archive recovery<br>
+      missing target → skip + log<br>
+      parse errors → partial result<br>
+      DB constraint → rollback<br>
+      multi-plugin ordering enforced<br>
+      windows path encoding fix
+    </div>
+  </div>
+
+  <!-- PRODUCTION HIGHLIGHTS -->
+  <div class="card" style="background:#0d1117; border-color:#1e3a8a;">
+    <div class="card-title" style="color:#60a5fa;">🏭 Production Highlights</div>
+    <div style="font-family:var(--mono); font-size:9px; color:#9ca3af; line-height:1.8;">
+      <span style="color:#34d399;">✓</span> Stream-read, no disk extract<br>
+      <span style="color:#34d399;">✓</span> SHA-256 dedup engine<br>
+      <span style="color:#34d399;">✓</span> Plugin ledger state machine<br>
+      <span style="color:#34d399;">✓</span> Partial backfill support<br>
+      <span style="color:#34d399;">✓</span> 13 tracked migrations<br>
+      <span style="color:#34d399;">✓</span> 55+ test files<br>
+      <span style="color:#34d399;">✓</span> htmlcov coverage report<br>
+      <span style="color:#34d399;">✓</span> Python 3.9 &amp; 3.12 dual compat<br>
+      <span style="color:#34d399;">✓</span> Dry-run mode (zero DB risk)<br>
+      <span style="color:#34d399;">✓</span> Atomic overwrite-purge-children<br>
+      <span style="color:#34d399;">✓</span> ECS81 / ACT preference logic<br>
+      <span style="color:#34d399;">✓</span> Depth-limited nested .tgz walk
+    </div>
+  </div>
+
+</div><!-- /SIDE PANEL -->
+
+</div><!-- /main-grid -->
+
+<div style="text-align:center; margin-top:18px; font-family:var(--mono); font-size:9px; color:#9ca3af;">
+  GMRE_logparser · Production Architecture V2 · 490 files · 42 dirs · Python 3.9/3.12 · SQLAlchemy + Alembic + MariaDB · Designed by Priyanshu
+</div>
+
+</body>
+</html>
