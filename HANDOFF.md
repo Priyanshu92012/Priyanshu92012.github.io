@@ -7,50 +7,71 @@
 
 ## Current phase
 
-**V1 LIVE + REDESIGN BRANCH** — Site live on `main`. Visual redesign complete on branch `redesign/faang-minimal`, pending merge + push.
+**V1 LIVE — fully polished** — Site is deployed with portrait, 4 projects, green terminal, and side-by-side hero layout.
+
+## Current session
+
+**Date:** 2026-05-04
+**What changed:** Added a richer light theme, a manual light/dark toggle with persistence, wider terminal layout, and darker green terminal text.
 
 ## Last session
 
 **Date:** 2026-05-04
 **Where:** Claude Code (VS Code extension)
-**What happened:**
-- Wrote and approved `REDESIGN_PLAN.md` (15-step build plan)
-- Created branch `redesign/faang-minimal`
-- Applied full FAANG-recruiter-clean minimal redesign to `index.html` in 14 commits:
-  - Fonts → Inter + JetBrains Mono only; removed Bricolage Grotesque + Geist
-  - CSS tokens → light/dark via `prefers-color-scheme`; accent #2563eb (light) / #3b82f6 (dark)
-  - Nav → plain Inter 600, no decorated logo dot
-  - Hero → single-column block (eyebrow + name + sub + 2 links); removed 3-column grid + portrait + glow
-  - Removed socials icon band
-  - Section heads → plain h2 "Work / About / Contact"; no decorative numbers or italic em
-  - Work rows → 2-column grid, hover accent border instead of padding shift
-  - About → single column max-width 680px, stack groups in horizontal flex-wrap
-  - Contact → removed "Let's build something good" display; added `.contact-intro` plain text
-  - Terminal → removed macOS chrome dots; header now reads "Ask anything about Priyanshu"
-  - Footer → Inter body font, tighter spacing
-  - Layout → page max-width 960px, sections 96px padding
-  - Mobile → two breakpoints: 768px tablet + 480px phone
-  - Animations → simplified to 600ms reveal, single-block hero rise
+**What happened (Session 2 — polish pass):**
+
+### Terminal
+- Overrode all terminal CSS to always-dark green hacker look (ignores `prefers-color-scheme`)
+- Terminal bg: `#0d1117`, text: `#4ade80` / `#86efac`, dimmed elements: `#2d6a2d`
+- Replaced boot message with ASCII box art banner (╔══ priyanshu@portfolio v1.0 ══╗)
+
+### Theme
+- Light-mode background changed from flat white to `linear-gradient(160deg, #f5f7ff, #eef1ff, #f8f5ff)` fixed
+- CSS tokens: `--bg #f5f7ff`, `--fg-soft #44506b`, `--line #dde1f0` (all slightly blue-tinted)
+- 3px gradient strip across the very top of page (blue → purple → cyan)
+- Hero name: dark→blue gradient text in light mode; plain `--fg` in dark mode
+- Work-row hover: faint blue background wash added
+
+### Layout
+- Hero + terminal now side-by-side (CSS grid `1fr 1fr`) in a `.hero-layout` wrapper
+- Removed the "Software Engineer · Nokia Optics · Stuttgart" eyebrow text above the name
+- Mobile (≤768px): `.hero-layout` collapses to single column, terminal shows mobile toggle as before
+
+### Content
+- Nav logo: "Priyanshu" → "My Portfolio"
+- Portrait photo added (`portrait.png`, renamed from `ChatGPT Image May 4, 2026, 01_51_49 PM.png`)
+  → 88px circular avatar at top of hero
+- **New project added:** BaSyx AASX ConceptDescription Importer (2nd slot)
+  - Eclipse BaSyx · DHBW Stuttgart · Vue 3 / TypeScript
+  - Links to: https://github.com/DHBW-TINF24F/Team1-basyx-aas-web-ui
+- GMRE Log Parser link updated → `gmre_architecture_v3.html` (architecture doc, now live on Pages)
+- 4LS Ticket Pipeline and MidLog IoT: changed from `<a>` to `<div>` (no link, no arrow — no dedicated pages exist)
+- `gmre_architecture_v3.html` added to git and pushed → live at https://priyanshu92012.github.io/gmre_architecture_v3.html
+
+### Previous session (Session 1 — redesign)
+- Applied FAANG-recruiter-clean redesign on branch `redesign/faang-minimal` (15 commits), merged to main
+- Fonts: Inter + JetBrains Mono only (dropped Bricolage Grotesque + Geist)
+- Light/dark via `prefers-color-scheme`, accent #2563eb / #3b82f6
+- Page max-width 960px, section padding 96px, two mobile breakpoints (768px + 480px)
 
 ## Next concrete tasks (in priority order)
 
-1. **Merge redesign branch** — `git checkout main && git merge redesign/faang-minimal && git push origin main`. Pages will redeploy in ~30s.
-2. **Add Anthropic credits** — console.anthropic.com → Billing → Add credits ($5 minimum). AI freeform responses will start working immediately after.
-3. **Regenerate Anthropic API key** — the key was pasted in chat history. Go to console.anthropic.com → API Keys → delete the old one → create a new one → run:
+1. **Add Anthropic credits** — console.anthropic.com → Billing → Add credits ($5 minimum). AI freeform responses will work immediately after.
+2. **Regenerate Anthropic API key** — the key was pasted in an earlier chat. Delete the old one at console.anthropic.com → API Keys, create a new one, then run:
    ```
    cd "Personal Portfolio/worker"
    wrangler secret put ANTHROPIC_API_KEY
    ```
-4. **Test AI terminal** — once credits are added, visit https://priyanshu92012.github.io and ask a freeform question. Verify streaming works.
-5. **Build project pages** — `projects/gmre.html`, `projects/powerbi-4ls.html`, `projects/iot-midlog.html`. Use `projects/_template.html` as starting point.
-6. **Decide on custom domain** — `priyanshu.dev` (~€12/yr) vs keeping the free `.github.io`.
+3. **Test AI terminal** — once credits are added, visit https://priyanshu92012.github.io, ask a freeform question, verify green text streams token by token.
+4. **Decide on custom domain** — `priyanshu.dev` (~€12/yr) vs keeping `.github.io`.
+5. **About page** — `about.html` not built yet; currently the `#about` section is inline on the landing page.
 
 ## Open decisions
 
 - [ ] Custom domain: `priyanshu.dev` vs `priyanshu92012.github.io`?
-- [ ] Portrait photo: now that hero is single-column, a small circular avatar (64px) beside the eyebrow could work — decide when portrait is ready
 - [ ] Contact form vs email-only (current)?
 - [ ] About page as separate `about.html`?
+- [ ] MidLog IoT and 4LS Ticket Pipeline: build dedicated pages eventually so they can have links?
 
 ## Locked decisions
 
@@ -72,8 +93,15 @@
 | Cloudflare dashboard | https://dash.cloudflare.com |
 | Anthropic console | https://console.anthropic.com |
 
-## Files modified this session
+## Files modified — Session 2 (2026-05-04 polish)
 
-- created:  `REDESIGN_PLAN.md` — full 15-step redesign plan
-- modified: `index.html` — complete visual redesign (Steps 1–14)
+- modified: `index.html` — terminal CSS, layout, hero, nav, projects, GMRE link
+- modified: `terminal.js` — ASCII art boot message
+- created:  `portrait.png` — portrait photo (renamed from ChatGPT image)
+- added:    `gmre_architecture_v3.html` — architecture doc, now served by Pages
+
+## Files modified — Session 1 (2026-05-04 redesign)
+
+- created:  `REDESIGN_PLAN.md` — 15-step redesign plan
+- modified: `index.html` — complete visual redesign
 - updated:  `HANDOFF.md` (this file)
