@@ -66,10 +66,18 @@
         nav.top .links a { transition: color 200ms; }
         nav.top .links a:hover { color: var(--fg); }
 
+        /* HERO LAYOUT — two-column: hero text left, terminal right */
+        .hero-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: start;
+            padding: 72px 0 64px;
+        }
+
         /* HERO */
         .hero {
-            padding: 80px 0 64px;
-            max-width: 680px;
+            max-width: none;
         }
         .hero-avatar {
             width: 88px;
@@ -80,14 +88,6 @@
             margin-bottom: 28px;
             border: 2px solid var(--line);
             display: block;
-        }
-
-        .hero-eyebrow {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-            color: var(--fg-mute);
-            margin-bottom: 24px;
-            letter-spacing: 0.01em;
         }
 
         .hero-name {
@@ -199,6 +199,8 @@
             margin-top: 4px;
         }
         .work-row:hover .arr { color: var(--accent); transform: translate(3px, -3px); }
+        .work-row--static { cursor: default; }
+        .work-row--static:hover { border-top-color: var(--line); background: none; }
 
         /* ABOUT */
         .about-grid { max-width: 680px; }
@@ -281,7 +283,7 @@
         }
 
         /* ─── TERMINAL ─────────────────────────────────────────────────── */
-        .term-wrapper { padding: 48px 0 0; }
+        .term-wrapper { padding: 0; }
 
         .term-mobile-btn {
             display: none;
@@ -417,7 +419,11 @@
 
         /* ─── MOBILE ────────────────────────────────────────────────────── */
         @media (max-width: 768px) {
-            .hero { padding: 48px 0 40px; }
+            .hero-layout {
+                grid-template-columns: 1fr;
+                gap: 32px;
+                padding: 48px 0 40px;
+            }
             .hero-name { font-size: clamp(44px, 14vw, 72px); }
             .hero-links { gap: 16px; font-size: 14px; }
             section.block { padding: 64px 0; }
@@ -473,37 +479,39 @@
         </div>
     </nav>
 
-    <!-- HERO -->
-    <section class="hero">
-        <img src="portrait.png" class="hero-avatar" alt="Priyanshu">
-        <p class="hero-eyebrow">Software Engineer · Nokia Optics · Stuttgart</p>
-        <h1 class="hero-name">Priyanshu</h1>
-        <p class="hero-sub">Building intelligent systems on top of telecom data.</p>
-        <div class="hero-links">
-            <a href="#work" class="link-work">See work ↓</a>
-            <a href="mailto:priyanshu240105@gmail.com" class="link-email">Email ↗</a>
-        </div>
-    </section>
+    <!-- HERO + TERMINAL side-by-side -->
+    <div class="hero-layout">
 
-    <!-- TERMINAL -->
-    <div class="term-wrapper reveal">
-        <button class="term-mobile-btn" id="termMobileBtn" aria-label="Open terminal">
-            <span>Ask AI ↗</span>
-        </button>
-        <div class="term-window" id="termWindow">
-            <div class="term-bar">
-                <span class="term-header-text">Ask anything about Priyanshu</span>
-                <button class="term-close-btn" id="termCloseBtn">&#x2715; close</button>
+        <section class="hero">
+            <img src="portrait.png" class="hero-avatar" alt="Priyanshu">
+            <h1 class="hero-name">Priyanshu</h1>
+            <p class="hero-sub">Building intelligent systems on top of telecom data.</p>
+            <div class="hero-links">
+                <a href="#work" class="link-work">See work ↓</a>
+                <a href="mailto:priyanshu240105@gmail.com" class="link-email">Email ↗</a>
             </div>
-            <div class="term-output" id="termOutput"></div>
-            <div class="term-input-row">
-                <span class="term-prompt">~ %</span>
-                <input type="text" id="termInput" class="term-input"
-                    autocomplete="off" autocorrect="off" autocapitalize="off"
-                    spellcheck="false"
-                    placeholder="type a command or ask me anything…">
+        </section>
+
+        <div class="term-wrapper">
+            <button class="term-mobile-btn" id="termMobileBtn" aria-label="Open terminal">
+                <span>Ask AI ↗</span>
+            </button>
+            <div class="term-window" id="termWindow">
+                <div class="term-bar">
+                    <span class="term-header-text">Ask anything about Priyanshu</span>
+                    <button class="term-close-btn" id="termCloseBtn">&#x2715; close</button>
+                </div>
+                <div class="term-output" id="termOutput"></div>
+                <div class="term-input-row">
+                    <span class="term-prompt">~ %</span>
+                    <input type="text" id="termInput" class="term-input"
+                        autocomplete="off" autocorrect="off" autocapitalize="off"
+                        spellcheck="false"
+                        placeholder="type a command or ask me anything…">
+                </div>
             </div>
         </div>
+
     </div>
 
     <!-- WORK -->
@@ -527,7 +535,20 @@
                 <span class="arr">↗</span>
             </a>
 
-            <a href="projects/powerbi-4ls.html" class="work-row">
+            <a href="https://github.com/DHBW-TINF24F/Team1-basyx-aas-web-ui" target="_blank" rel="noopener" class="work-row">
+                <div>
+                    <h3>BaSyx AASX ConceptDescription Importer</h3>
+                    <p class="desc">AASX import wizard for Eclipse BaSyx's web UI — extracts ConceptDescriptions and Common Data Dictionaries from .aasx archives, maps them against the target repository, and lets users selectively import or overwrite entries. Also handled Embedded Data Specifications attached to Submodel properties. As Test Manager, derived and executed 17 system test cases (all passed).</p>
+                </div>
+                <span class="stack">
+                    <span>Open Source</span>
+                    <span>Vue 3 · TypeScript</span>
+                    <span>Eclipse BaSyx</span>
+                </span>
+                <span class="arr">↗</span>
+            </a>
+
+            <div class="work-row work-row--static">
                 <div>
                     <h3>4LS Ticket Pipeline</h3>
                     <p class="desc">Automated Power BI refresh pipeline pulling from Excel, sheets, and source systems. Replaced manual weekly upkeep with zero-touch reporting and consistent KPIs across the team.</p>
@@ -537,10 +558,9 @@
                     <span>Power BI · DAX</span>
                     <span>Excel · Automation</span>
                 </span>
-                <span class="arr">↗</span>
-            </a>
+            </div>
 
-            <a href="projects/iot-midlog.html" class="work-row">
+            <div class="work-row work-row--static">
                 <div>
                     <h3>MidLog IoT Architecture</h3>
                     <p class="desc">End-to-end IoT design for a 12 000 m² cold-chain food distribution centre — sensor selection, LoRaWAN gateway placement, edge/fog/cloud topology, energy budget under real constraints.</p>
@@ -550,8 +570,7 @@
                     <span>LoRaWAN · MQTT</span>
                     <span>Edge / Fog / Cloud</span>
                 </span>
-                <span class="arr">↗</span>
-            </a>
+            </div>
 
         </div>
     </section>
