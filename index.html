@@ -140,45 +140,41 @@
         .work-list { display: flex; flex-direction: column; }
         .work-row {
             display: grid;
-            grid-template-columns: 60px 1fr auto 40px;
-            gap: 32px; align-items: center;
-            padding: 32px 0;
+            grid-template-columns: 1fr auto;
+            gap: 24px; align-items: center;
+            padding: 28px 0;
             border-top: 1px solid var(--line);
-            transition: padding 300ms ease, background 300ms ease;
-            position: relative;
+            transition: border-top-color 200ms ease;
             cursor: pointer;
         }
         .work-row:last-child { border-bottom: 1px solid var(--line); }
-        .work-row:hover { padding-left: 16px; padding-right: 16px; }
-        .work-row .num {
-            font-family: 'JetBrains Mono', monospace; font-size: 13px;
-            color: var(--fg-mute); letter-spacing: 0.04em;
-        }
-        .work-row:hover .num { color: var(--accent); }
+        .work-row:hover { border-top-color: var(--accent); }
         .work-row h3 {
-            font-family: 'Bricolage Grotesque', sans-serif;
-            font-size: clamp(24px, 3vw, 36px); font-weight: 600;
-            letter-spacing: -0.02em; line-height: 1.05;
-            margin-bottom: 8px;
+            font-size: 20px; font-weight: 600;
+            letter-spacing: -0.01em; line-height: 1.2;
+            color: var(--fg);
+            margin-bottom: 6px;
         }
         .work-row .desc {
-            color: var(--fg-soft); font-size: 14px; max-width: 580px; line-height: 1.5;
+            color: var(--fg-soft); font-size: 14px; max-width: 560px; line-height: 1.6;
         }
         .work-row .stack {
             font-family: 'JetBrains Mono', monospace; font-size: 11px;
-            color: var(--fg-mute); letter-spacing: 0.04em;
+            color: var(--fg-mute); letter-spacing: 0.03em;
             text-align: right;
             white-space: nowrap;
         }
         .work-row .stack span { display: block; line-height: 1.7; }
-        .work-row .stack span:first-child { color: var(--accent); }
+        .work-row .stack span:first-child { color: var(--fg-soft); }
         .work-row .arr {
-            font-family: 'JetBrains Mono', monospace; font-size: 18px;
+            font-size: 18px;
             color: var(--fg-mute);
-            transition: all 300ms ease;
+            transition: color 200ms ease, transform 200ms ease;
             justify-self: end;
+            align-self: start;
+            margin-top: 4px;
         }
-        .work-row:hover .arr { color: var(--accent); transform: translate(4px, -4px); }
+        .work-row:hover .arr { color: var(--accent); transform: translate(3px, -3px); }
 
         /* ABOUT */
         .about-grid {
@@ -493,7 +489,6 @@
         <div class="work-list">
 
             <a href="projects/gmre.html" class="work-row">
-                <span class="num">A</span>
                 <div>
                     <h3>GMRE Log Parser</h3>
                     <p class="desc">Plugin-based ingestion engine for nested customer log archives. 8-level deep extraction, SHA256 dedup, 14+ Alembic migrations, 77+ tests. Feeds Power BI dashboards across the Nokia 4LS team.</p>
@@ -507,7 +502,6 @@
             </a>
 
             <a href="projects/powerbi-4ls.html" class="work-row">
-                <span class="num">B</span>
                 <div>
                     <h3>4LS Ticket Pipeline</h3>
                     <p class="desc">Automated Power BI refresh pipeline pulling from Excel, sheets, and source systems. Replaced manual weekly upkeep with zero-touch reporting and consistent KPIs across the team.</p>
@@ -521,7 +515,6 @@
             </a>
 
             <a href="projects/iot-midlog.html" class="work-row">
-                <span class="num">C</span>
                 <div>
                     <h3>MidLog IoT Architecture</h3>
                     <p class="desc">End-to-end IoT design for a 12 000 m² cold-chain food distribution centre — sensor selection, LoRaWAN gateway placement, edge/fog/cloud topology, energy budget under real constraints.</p>
