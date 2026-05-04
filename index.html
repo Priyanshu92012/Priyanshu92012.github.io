@@ -12,22 +12,22 @@
 
     <style>
         :root {
-            --bg:          #f7f4ff;
-            --bg-2:        #eef5ff;
-            --bg-3:        #fff7fb;
-            --bg-elev:     rgba(255, 255, 255, 0.72);
+            --bg:          #f8fafc;
+            --bg-2:        #eef4ff;
+            --bg-3:        #fff7f2;
+            --bg-elev:     rgba(255, 255, 255, 0.78);
             --fg:          #111827;
-            --fg-soft:     #4b5569;
-            --fg-mute:     #75819a;
-            --line:        #d8def0;
+            --fg-soft:     #475569;
+            --fg-mute:     #728197;
+            --line:        #dbe3f2;
             --shadow:      rgba(15, 23, 42, 0.08);
             --accent:      #2563eb;
             --accent-2:    #7c3aed;
             --accent-3:    #0891b2;
             --accent-4:    #10b981;
-            --accent-5:    #f97316;
-            --hover-wash:  rgba(124, 58, 237, 0.07);
-            --hero-gradient: linear-gradient(135deg, #0f172a 0%, #2563eb 28%, #7c3aed 64%, #0891b2 100%);
+            --accent-5:    #f59e0b;
+            --hover-wash:  rgba(37, 99, 235, 0.06);
+            --hero-gradient: linear-gradient(135deg, #0f172a 0%, #1d4ed8 30%, #7c3aed 66%, #0f766e 100%);
         }
         html[data-theme="dark"] {
             --bg:          #0b1020;
@@ -52,9 +52,9 @@
         html { scroll-behavior: smooth; font-size: 16px; }
         body {
             background:
-                radial-gradient(circle at 14% 14%, rgba(124, 58, 237, 0.12), transparent 24%),
-                radial-gradient(circle at 84% 10%, rgba(8, 145, 178, 0.10), transparent 22%),
-                radial-gradient(circle at 78% 82%, rgba(16, 185, 129, 0.09), transparent 20%),
+                radial-gradient(circle at 14% 14%, rgba(124, 58, 237, 0.10), transparent 24%),
+                radial-gradient(circle at 84% 10%, rgba(8, 145, 178, 0.08), transparent 22%),
+                radial-gradient(circle at 78% 82%, rgba(16, 185, 129, 0.07), transparent 20%),
                 linear-gradient(160deg, var(--bg) 0%, var(--bg-2) 48%, var(--bg-3) 100%);
             background-attachment: fixed;
             color: var(--fg);
@@ -114,8 +114,8 @@
         /* HERO LAYOUT — two-column: hero text left, terminal right */
         .hero-layout {
             display: grid;
-            grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-            gap: 60px;
+            grid-template-columns: minmax(0, 0.84fr) minmax(0, 1.16fr);
+            gap: 72px;
             align-items: start;
             padding: 72px 0 64px;
         }
@@ -321,7 +321,7 @@
         }
 
         /* ─── TERMINAL ─────────────────────────────────────────────────── */
-        .term-wrapper { padding: 0; width: 100%; max-width: 680px; justify-self: end; }
+        .term-wrapper { padding: 0; width: 100%; max-width: 720px; justify-self: end; margin-left: auto; }
 
         .term-mobile-btn {
             display: none;
@@ -349,6 +349,7 @@
             width: 100%;
             min-width: 0;
             box-shadow: 0 18px 40px var(--shadow);
+            margin-left: auto;
         }
 
         .term-bar {
@@ -477,6 +478,7 @@
 
             .term-window     { display: none; }
             .term-mobile-btn { display: flex; }
+            .term-wrapper { max-width: none; margin-left: 0; }
         }
 
         @media (max-width: 480px) {
