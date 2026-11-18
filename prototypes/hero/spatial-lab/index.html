@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Priyanshu · Spatial Lab (prototype B)</title>
+<meta name="description" content="Phase 1 hero prototype B: an isometric engineering workbench where each project is a physical module sized by its evidence.">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  body {
+    background:
+      linear-gradient(180deg, rgba(122, 140, 255, 0.06), transparent 40%),
+      var(--bg);
+    min-height: 100vh;
+  }
+  .hero {
+    max-width: var(--max); margin: 0 auto;
+    padding: clamp(8px, 3vh, 32px) var(--gutter) 64px;
+    display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
+    gap: clamp(16px, 3vw, 40px); align-items: center;
+    min-height: calc(100vh - 80px);
+  }
+  .copy { max-width: 520px; }
+  .eyebrow { font: 500 12px/1.4 var(--font-mono); color: var(--fg-mute); letter-spacing: 0.08em; margin: 0 0 18px; }
+  .eyebrow span { color: var(--violet); }
+  h1 { font: 700 clamp(52px, 7.5vw, 96px)/0.95 var(--font-display); letter-spacing: -0.04em; margin: 0 0 20px; }
+  .headline { font: 500 clamp(19px, 2.1vw, 24px)/1.3 var(--font-display); margin: 0 0 14px; max-width: 30ch; }
+  .summary { color: var(--fg-soft); font-size: 16px; margin: 0 0 26px; max-width: 50ch; }
+  .ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* ── Lab ─────────────────────────────────────────────── */
+  .lab { position: relative; display: grid; grid-template-rows: auto auto; justify-items: center; }
+  .viewport {
+    --rx: 58deg; --rz: 45deg; --scale: 1; --ty: 30px;
+    position: relative; width: 100%; height: clamp(420px, 62vh, 600px);
+    perspective: 1600px; perspective-origin: 50% 30%;
+    display: grid; place-items: center; overflow: visible;
+  }
+  .bench {
+    position: relative; width: 440px; height: 440px;
+    transform-style: preserve-3d;
+    transform: scale(var(--scale)) translateY(var(--ty)) rotateX(var(--rx)) rotateZ(var(--rz));
+    transition: transform 500ms var(--ease);
+  }
+  .floor {
+    position: absolute; inset: 0; border-radius: 6px;
+    border: 1px solid var(--line);
+    background:
+      repeating-linear-gradient(0deg, transparent 0 21px, rgba(140, 151, 170, 0.10) 21px 22px),
+      repeating-linear-gradient(90deg, transparent 0 21px, rgba(140, 151, 170, 0.10) 21px 22px),
+      radial-gradient(circle at 25% 25%, rgba(122, 140, 255, 0.16), transparent 45%),
+      radial-gradient(circle at 75% 25%, rgba(139, 255, 176, 0.12), transparent 45%),
+      radial-gradient(circle at 75% 75%, rgba(255, 136, 94, 0.12), transparent 45%),
+      radial-gradient(circle at 25% 75%, rgba(233, 238, 246, 0.08), transparent 45%),
+      #0D121C;
+    box-shadow: 0 0 0 10px rgba(21, 28, 41, 0.6), 0 40px 80px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+  }
+  .floor::after { /* scanner sweep */
+    content: ''; position: absolute; inset: -20% 0; height: 40px;
+    background: linear-gradient(180deg, transparent, rgba(139, 255, 176, 0.10), transparent);
+    animation: sweep 6s linear infinite;
+  }
+  @keyframes sweep { from { transform: translateY(-40px); } to { transform: translateY(560px); } }
+  .zone {
+    position: absolute; font: 500 10px/1 var(--font-mono); letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--c); opacity: 0.8;
+  }
+  .traces { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .traces path { fill: none; stroke: var(--line); stroke-width: 2; transition: stroke 250ms, opacity 250ms; }
+  .traces path.on { stroke: var(--c); stroke-dasharray: 6 6; animation: flow 1.2s linear infinite; }
+  .traces circle { fill: var(--line); }
+  @keyframes flow { to { stroke-dashoffset: -24; } }
+
+  /* module = footprint button; faces are 3D children */
+  .module {
+    --h: 60px; --fp: 72px;
+    position: absolute; width: var(--fp); height: var(--fp);
+    transform-style: preserve-3d; padding: 0; border: 0; background: none; cursor: pointer;
+  }
+  .module .face { position: absolute; pointer-events: none; border: 1px solid color-mix(in srgb, var(--c) 70%, transparent); }
+  .module .top {
+    inset: 0; transform: translateZ(var(--hh, var(--h)));
+    background: color-mix(in srgb, var(--c) 22%, #151C29);
+    transition: transform 700ms var(--ease), background 250ms, box-shadow 250ms;
+    display: grid; place-items: center;
+  }
+  .module .top::after { content: ''; width: 34%; height: 34%; border: 1px solid color-mix(in srgb, var(--c) 60%, transparent); border-radius: 50%; }
+  .module .front {
+    left: 0; top: 100%; width: var(--fp); height: var(--hh, var(--h));
+    transform-origin: top; transform: rotateX(90deg);
+    background: color-mix(in srgb, var(--c) 12%, #0F1520);
+    transition: height 700ms var(--ease);
+  }
+  .module .side {
+    left: 100%; top: 0; width: var(--hh, var(--h)); height: var(--fp);
+    transform-origin: left; transform: rotateY(-90deg);
+    background: color-mix(in srgb, var(--c) 8%, #0B1018);
+    transition: width 700ms var(--ease);
+  }
+  .module .top, .module .front, .module .side, .module .tag { transition-delay: var(--d, 0ms); }
+  .bench.ready .module { --d: 0ms !important; }
+
+  .module[data-status="in-progress"] .top { background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--c) 26%, #151C29) 0 6px, #151C29 6px 12px); }
+  .module[data-status="pending"] .face { background: transparent; border-style: dashed; }
+  .module[data-status="pending"] .top::after { display: none; }
+
+  .module:hover .top, .module:focus-visible .top { box-shadow: 0 0 24px color-mix(in srgb, var(--c) 55%, transparent); }
+  .module[aria-pressed="true"] { --hh: calc(var(--h) + 26px); }
+  .module[aria-pressed="true"] .top { background: color-mix(in srgb, var(--c) 45%, #151C29); box-shadow: 0 0 36px color-mix(in srgb, var(--c) 70%, transparent); }
+  .module:focus-visible { outline: none; }
+  .module:focus-visible .top { outline: 2px solid var(--bio); outline-offset: 4px; }
+
+  .tag {
+    position: absolute; left: 50%; top: 50%; pointer-events: none;
+    transform: translateZ(calc(var(--hh, var(--h)) + 40px)) rotateZ(calc(-1 * var(--rz))) rotateX(calc(-1 * var(--rx))) translate(-50%, -50%);
+    transition: transform 700ms var(--ease);
+    font: 500 10.5px/1.15 var(--font-mono); letter-spacing: 0.04em; white-space: nowrap;
+    color: var(--fg); background: rgba(9, 12, 18, 0.82); border: 1px solid var(--line);
+    padding: 5px 7px; border-radius: 6px;
+  }
+  .lab.labels-off .tag { opacity: 0; }
+
+  /* intro: modules rise from the floor */
+  .bench.booting .module { --hh: 0px; }
+
+  .c-systems { --c: var(--violet); } .c-ai { --c: var(--bio); }
+  .c-security { --c: var(--orange); } .c-research { --c: #C9D3E3; }
+
+  /* inspector */
+  .inspector {
+    width: min(520px, 100%); margin-top: -8px;
+    background: rgba(21, 28, 41, 0.86); border: 1px solid var(--line); border-radius: 14px;
+    padding: 16px 18px; min-height: 132px;
+  }
+  .inspector .k { display: flex; justify-content: space-between; gap: 12px; font: 500 11px/1 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg-mute); margin-bottom: 10px; }
+  .inspector h2 { margin: 0 0 6px; font: 600 19px/1.2 var(--font-display); }
+  .inspector p { margin: 0 0 10px; color: var(--fg-soft); font-size: 14px; }
+  .inspector .tech { display: flex; flex-wrap: wrap; gap: 6px; }
+  .inspector .tech span { font: 11px/1 var(--font-mono); padding: 5px 8px; border-radius: 6px; background: var(--elevated-2); color: var(--fg-soft); }
+  .legend { display: grid; grid-template-columns: repeat(3, auto); gap: 8px 16px; font: 12px/1.3 var(--font-mono); color: var(--fg-soft); }
+  .legend i { display: inline-block; width: 12px; vertical-align: -2px; margin-right: 6px; border: 1px solid var(--fg-mute); }
+  .legend .t i { height: 14px; background: var(--fg-mute); }
+  .legend .m i { height: 9px; background: repeating-linear-gradient(45deg, var(--fg-mute) 0 2px, transparent 2px 4px); }
+  .legend .s i { height: 4px; border-style: dashed; }
+  .open-link { color: var(--fg); font-weight: 500; font-size: 14px; }
+
+  @media (max-width: 960px) {
+    .hero { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+    .lab { min-width: 0; }
+    .viewport { --scale: 0.8; --ty: -10px; height: 420px; overflow: hidden; }
+    .inspector { margin-top: 8px; }
+  }
+  @media (max-width: 520px) {
+    .viewport { --scale: 0.6; --ty: -70px; height: 300px; }
+    .legend { grid-template-columns: 1fr; }
+    .lab { margin-top: -48px; }
+  }
+  :root[data-motion="reduce"] .floor::after { display: none; }
+  @media (prefers-reduced-motion: reduce) { .floor::after { display: none; } }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <a class="brand" href="/">PRIYANSHU<span>.EXE</span></a>
+  <nav class="site-nav" aria-label="Primary">
+    <a class="nav-link" href="/#work">Work</a>
+    <a class="nav-link" href="/#about">About</a>
+    <a class="nav-link" href="../">Lab</a>
+    <button class="chip-btn" type="button" data-recruiter-toggle aria-pressed="false">Recruiter<span class="hide-sm"> Mode</span></button>
+    <button class="chip-btn ask" type="button" data-ask-ai>Ask AI</button>
+  </nav>
+</header>
+
+<section id="recruiter" class="recruiter" tabindex="-1" aria-label="Recruiter summary"></section>
+
+<main id="main" class="hero immersive" tabindex="-1">
+  <div class="copy">
+    <p class="eyebrow"><span>■</span> Workbench / Stuttgart</p>
+    <h1>Priyanshu</h1>
+    <p class="headline">Software engineer building reliable systems and evidence-first AI.</p>
+    <p class="summary">Software engineer at Nokia Optics and dual CS student at DHBW. Every module on this bench is a real project, and its height shows how much public evidence stands behind it.</p>
+    <div class="ctas">
+      <a class="btn primary" href="/#work">See work</a>
+      <a class="btn" href="mailto:priyanshu240105@gmail.com">Email</a>
+    </div>
+  </div>
+
+  <div class="lab" id="lab">
+    <div class="viewport" id="viewport">
+      <div class="bench booting" id="bench" role="group" aria-label="Project workbench. Each button opens a project in the inspector below.">
+        <div class="floor" aria-hidden="true">
+          <span class="zone c-systems" style="left:14px;top:14px">Systems</span>
+          <span class="zone c-ai" style="right:14px;top:14px">AI</span>
+          <span class="zone c-security" style="right:14px;bottom:14px">Security</span>
+          <span class="zone c-research" style="left:14px;bottom:14px">Research</span>
+          <svg class="traces" id="traces" viewBox="0 0 440 440"></svg>
+        </div>
+      </div>
+    </div>
+    <section class="inspector" id="inspector" aria-live="polite"></section>
+  </div>
+</main>
+
+<p class="proto-badge">Prototype B · Spatial Lab · <a href="../">compare</a></p>
+
+<script src="../shared/projects.js"></script>
+<script src="../shared/proto.js"></script>
+<script>
+(function () {
+  const P = window.PORTFOLIO, PROTO = window.PROTO, esc = PROTO.esc;
+  const bench = document.getElementById('bench');
+  const traces = document.getElementById('traces');
+  const inspector = document.getElementById('inspector');
+  const viewport = document.getElementById('viewport');
+  const reduced = PROTO.reducedMotion();
+
+  // Grid placement on a 4×4 floor (110px cells); quadrant = primary domain.
+  const layout = {
+    'gmre':             [0.55, 0.55],
+    'ticket-pipeline':  [1.55, 0.35],
+    'basyx':            [0.45, 1.6],
+    'incident-copilot': [2.45, 0.55],
+    'finbert-xai':      [3.3, 1.5],
+    'securemed':        [2.75, 2.75],
+    'midlog':           [0.85, 2.85],
+  };
+  // Traces = real relationships, not decoration.
+  const links = [
+    ['gmre', 'ticket-pipeline', 'systems'],     // same team data flow
+    ['gmre', 'incident-copilot', 'ai'],        // log ingestion → AI triage
+    ['basyx', 'midlog', 'research'],           // industrial / IoT
+    ['incident-copilot', 'finbert-xai', 'ai'], // applied ML + explainability
+    ['finbert-xai', 'midlog', 'research'],     // academic research
+    ['incident-copilot', 'securemed', 'security'],
+  ];
+  const heights = { 'verified': 66, 'research': 44, 'in-progress': 40, 'pending': 18 };
+  const CELL = 110, FP = 72;
+  const centre = (slug) => { const [x, y] = layout[slug]; return [x * CELL + FP / 2, y * CELL + FP / 2]; };
+
+  const mods = {};
+  P.projects.forEach((p, i) => {
+    const [gx, gy] = layout[p.slug];
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = `module c-${p.domains[0]}`;
+    b.dataset.slug = p.slug; b.dataset.status = p.status;
+    b.setAttribute('aria-pressed', 'false');
+    b.setAttribute('aria-label', `${p.title}, ${p.statusLabel}`);
+    b.style.left = `${gx * CELL}px`; b.style.top = `${gy * CELL}px`;
+    b.style.setProperty('--h', `${heights[p.status]}px`);
+    b.style.setProperty('--d', reduced ? '0ms' : `${i * 70}ms`);
+    b.innerHTML = `<span class="face top"></span><span class="face front"></span><span class="face side"></span>
+      <span class="tag" aria-hidden="true">${esc(p.title)}</span>`;
+    b.addEventListener('click', () => select(p.slug));
+    bench.appendChild(b);
+    mods[p.slug] = b;
+  });
+
+  // orthogonal PCB-style routes
+  traces.innerHTML = links.map(([a, b, d]) => {
+    const [x1, y1] = centre(a), [x2, y2] = centre(b);
+    const mx = (x1 + x2) / 2;
+    return `<path class="c-${d}" data-a="${a}" data-b="${b}" d="M${x1} ${y1} H${mx} V${y2} H${x2}"/>`;
+  }).join('') + Object.keys(layout).map((s) => { const [x, y] = centre(s); return `<circle cx="${x}" cy="${y}" r="3"/>`; }).join('');
+
+  let current = null;
+  function renderInspector() {
+    if (!current) {
+      inspector.innerHTML = `
+        <div class="k"><span>Inspector</span><span>${P.projects.length} modules</span></div>
+        <p>Select a module to inspect it. Height encodes evidence:</p>
+        <div class="legend">
+          <span class="t"><i></i>verified / live</span>
+          <span class="m"><i></i>in progress</span>
+          <span class="s"><i></i>case study pending</span>
+        </div>`;
+      return;
+    }
+    const p = P.projects.find((x) => x.slug === current);
+    const d = P.domains.filter((x) => p.domains.includes(x.id)).map((x) => x.label).join(' · ');
+    inspector.innerHTML = `
+      <div class="k"><span>${esc(d)}</span><span class="status" data-status="${esc(p.status)}">${esc(p.statusLabel)}</span></div>
+      <h2>${esc(p.title)}</h2>
+      <p>${esc(p.summary)}</p>
+      <div class="tech">${p.tech.map((t) => `<span>${esc(t)}</span>`).join('')}</div>
+      ${p.url ? `<p style="margin:12px 0 0"><a class="open-link" href="${esc(p.url)}"${p.url.startsWith('http') ? ' target="_blank" rel="noopener"' : ''}>Open ${p.url.startsWith('http') ? 'repository' : 'case study'} →</a></p>` : ''}`;
+  }
+  function select(slug) {
+    current = current === slug ? null : slug;
+    Object.entries(mods).forEach(([s, b]) => b.setAttribute('aria-pressed', String(s === current)));
+    traces.querySelectorAll('path').forEach((pth) => pth.classList.toggle('on', !!current && (pth.dataset.a === current || pth.dataset.b === current)));
+    renderInspector();
+  }
+  renderInspector();
+
+  // intro rise
+  requestAnimationFrame(() => requestAnimationFrame(() => bench.classList.remove('booting')));
+  setTimeout(() => bench.classList.add('ready'), reduced ? 0 : 1400);
+
+  // pointer tilt (skipped for reduced motion)
+  if (!reduced) {
+    let raf = 0, tx = 0, ty = 0;
+    viewport.addEventListener('pointermove', (e) => {
+      const r = viewport.getBoundingClientRect();
+      tx = (e.clientX - r.left) / r.width - 0.5; ty = (e.clientY - r.top) / r.height - 0.5;
+      if (!raf) raf = requestAnimationFrame(() => {
+        raf = 0;
+        viewport.style.setProperty('--rz', `${45 + tx * 10}deg`);
+        viewport.style.setProperty('--rx', `${58 - ty * 8}deg`);
+      });
+    });
+    viewport.addEventListener('pointerleave', () => {
+      viewport.style.setProperty('--rz', '45deg'); viewport.style.setProperty('--rx', '58deg');
+    });
+  }
+})();
+</script>
+</body>
+</html>
