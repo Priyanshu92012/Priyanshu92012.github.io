@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hero Prototypes · Phase 1</title>
+<meta name="description" content="PRIYANSHU.EXE V2, Phase 1: three isolated hero prototypes compared on readability, distinctiveness, performance, cost, accessibility and fit.">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="shared/tokens.css">
+<style>
+  .wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter) 96px; }
+  .intro { padding: 24px 0 40px; border-bottom: 1px solid var(--line); margin-bottom: 40px; }
+  .kicker { font: 500 12px/1 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg-mute); margin: 0 0 16px; }
+  h1 { font: 700 clamp(36px, 6vw, 64px)/1 var(--font-display); letter-spacing: -0.035em; margin: 0 0 16px; }
+  .intro p { color: var(--fg-soft); max-width: 70ch; margin: 0; }
+  .cards { display: grid; gap: 28px; }
+  .card { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 2fr) minmax(0, 4fr); gap: 20px; align-items: start; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+  .card figure { margin: 0; }
+  .card img { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+  .card figcaption { font: 11px var(--font-mono); color: var(--fg-mute); margin-top: 6px; }
+  .card h2 { font: 600 24px/1.15 var(--font-display); margin: 0 0 6px; }
+  .card .tag { font: 500 11px/1 var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--c); }
+  .card p { color: var(--fg-soft); font-size: 14.5px; margin: 10px 0; }
+  .card ul { margin: 0 0 14px; padding-left: 18px; color: var(--fg-soft); font-size: 14px; }
+  .card ul li { margin-bottom: 4px; }
+  .card .links { display: flex; flex-wrap: wrap; gap: 8px; }
+  .card .links a { font: 12px var(--font-mono); color: var(--fg-soft); }
+  .a { --c: var(--violet); } .b { --c: var(--bio); } .c { --c: var(--orange); }
+
+  h3.sec { font: 600 28px/1.1 var(--font-display); letter-spacing: -0.02em; margin: 56px 0 16px; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+  table { width: 100%; border-collapse: collapse; min-width: 560px; }
+  th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line); font-size: 14px; }
+  th { font: 500 11px/1.2 var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg-mute); }
+  td.n { text-align: center; font: 500 15px var(--font-mono); }
+  td.best { color: var(--bio); }
+  tr.total td { font-weight: 600; border-bottom: 0; }
+  .rec { margin-top: 24px; padding: 20px 22px; border: 1px solid var(--bio); border-radius: 12px; background: color-mix(in srgb, var(--bio) 6%, transparent); }
+  .rec h4 { margin: 0 0 10px; font: 600 18px var(--font-display); }
+  .rec ol { margin: 0; padding-left: 20px; color: var(--fg-soft); }
+  .rec ol li { margin-bottom: 8px; }
+  .rec strong { color: var(--fg); }
+  .rec .note { font-size: 13.5px; color: var(--fg-mute); margin: 12px 0 0; }
+  .states { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 16px; }
+  .states figure { margin: 0; }
+  .states img { width: 100%; border: 1px solid var(--line); border-radius: 8px; display: block; }
+  .states figcaption { font: 11px var(--font-mono); color: var(--fg-mute); margin-top: 6px; }
+  @media (max-width: 960px) {
+    .card { grid-template-columns: minmax(0, 3fr) minmax(0, 1fr); }
+    .card .meta { grid-column: 1 / -1; }
+  }
+  @media (max-width: 560px) {
+    .card { grid-template-columns: 1fr; }
+    .card .mob { display: none; }
+  }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="/">PRIYANSHU<span>.EXE</span></a>
+  <nav class="site-nav" aria-label="Prototypes">
+    <a href="neural-core/">A</a><a href="spatial-lab/">B</a><a href="editorial-machine/">C</a>
+  </nav>
+</header>
+<main class="wrap">
+  <section class="intro">
+    <p class="kicker">V2 · Phase 1 · Hero direction review</p>
+    <h1>Three hero prototypes</h1>
+    <p>Three isolated, responsive directions built on the same content model, tokens and header. Each one has a reduced-motion path, a no-WebGL or no-dependency fallback and a Recruiter Mode. The copy is always real HTML. Nothing here is deployed or linked from the live site.</p>
+  </section>
+
+  <div class="cards">
+    <article class="card a">
+      <figure><img src="screenshots/neural-core-desktop.png" alt="Neural Core desktop: name and headline on the left, a 3D point-cloud neural system with four labelled clusters on the right." loading="lazy"><figcaption>desktop 1440 × 900</figcaption></figure>
+      <figure class="mob"><img src="screenshots/neural-core-mobile.png" alt="Neural Core on a 390px phone." loading="lazy"><figcaption>mobile 390</figcaption></figure>
+      <div class="meta">
+        <span class="tag">Prototype A</span>
+        <h2>Neural Core</h2>
+        <p>A living 3D neural system. Four point-cloud clusters are the domains. Selecting one rotates it forward and lists its projects.</p>
+        <ul><li>Most cinematic and memorable</li><li>166 KB gzip of Three.js plus continuous GPU work</li><li>The visual doesn't encode evidence. A pending project looks as alive as production work.</li></ul>
+        <div class="links"><a href="neural-core/">open →</a><a href="neural-core/?fallback=1">no-WebGL →</a><a href="neural-core/?motion=reduce">reduced →</a></div>
+      </div>
+    </article>
+
+    <article class="card b">
+      <figure><img src="screenshots/spatial-lab-desktop.png" alt="Spatial Lab desktop: an isometric workbench with project modules of different heights, labelled, and an inspector panel below." loading="lazy"><figcaption>desktop 1440 × 900</figcaption></figure>
+      <figure class="mob"><img src="screenshots/spatial-lab-mobile.png" alt="Spatial Lab on a 390px phone." loading="lazy"><figcaption>mobile 390</figcaption></figure>
+      <div class="meta">
+        <span class="tag">Prototype B</span>
+        <h2>Spatial Lab</h2>
+        <p>An isometric engineering workbench. Each project is a module, and <strong>height encodes evidence</strong>: tall = verified, striped = in progress, dashed = case study pending.</p>
+        <ul><li>The spectacle is the proof</li><li>CSS 3D + SVG, about 6 KB of JS, no WebGL</li><li>Needs a real Safari check, and the layout scales by hand</li></ul>
+        <div class="links"><a href="spatial-lab/">open →</a><a href="spatial-lab/?motion=reduce">reduced →</a><a href="spatial-lab/?mode=recruiter">recruiter →</a></div>
+      </div>
+    </article>
+
+    <article class="card c">
+      <figure><img src="screenshots/editorial-machine-desktop.png" alt="Editorial Machine desktop: huge name typography, a masthead, and a four-channel signal monitor with spikes per project." loading="lazy"><figcaption>desktop 1440 × 900</figcaption></figure>
+      <figure class="mob"><img src="screenshots/editorial-machine-mobile.png" alt="Editorial Machine on a 390px phone." loading="lazy"><figcaption>mobile 390</figcaption></figure>
+      <div class="meta">
+        <span class="tag">Prototype C</span>
+        <h2>Editorial Machine</h2>
+        <p>A technical magazine cover with a 4-channel signal monitor. Every spike is a project and spike height is evidence. A real index table sits directly below.</p>
+        <ul><li>Most readable and cheapest to build</li><li>Canvas 2D, about 6 KB of JS, plus a paper/print mode</li><li>Least "extraordinary": editorial type is a known genre</li></ul>
+        <div class="links"><a href="editorial-machine/">open →</a><a href="editorial-machine/?theme=paper">paper →</a><a href="editorial-machine/?motion=reduce">reduced →</a></div>
+      </div>
+    </article>
+  </div>
+
+  <h3 class="sec">Scorecard</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Criterion (1–5)</th><th>A · Neural Core</th><th>B · Spatial Lab</th><th>C · Editorial</th></tr></thead>
+      <tbody>
+        <tr><td>Readability</td><td class="n">4</td><td class="n">4</td><td class="n best">5</td></tr>
+        <tr><td>Distinctiveness</td><td class="n best">5</td><td class="n">4</td><td class="n">3</td></tr>
+        <tr><td>Mobile performance</td><td class="n">2</td><td class="n">4</td><td class="n best">5</td></tr>
+        <tr><td>Implementation cost (5 = cheapest)</td><td class="n">2</td><td class="n">3</td><td class="n best">5</td></tr>
+        <tr><td>Accessibility</td><td class="n">4</td><td class="n">4</td><td class="n best">5</td></tr>
+        <tr><td>Fit with actual projects</td><td class="n">3</td><td class="n best">5</td><td class="n">4</td></tr>
+        <tr class="total"><td>Total / 30</td><td class="n">20</td><td class="n">24</td><td class="n best">27</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="rec">
+    <h4>Recommendation (proposed, your call)</h4>
+    <ol>
+      <li><strong>Hero = B, Spatial Lab.</strong> It's the only direction where the visual itself carries evidence status. It's distinctive without WebGL, so Three.js leaves the launch critical path.</li>
+      <li><strong>Page system = C, Editorial Machine.</strong> Lock its typography, mono telemetry labels and index table for everything below the hero, <code>/work/</code>, and paper Recruiter Mode.</li>
+      <li><strong>Neural Core → Phase 5</strong> as the Skills Constellation, where its cluster-to-project model fits and it no longer costs the landing page.</li>
+    </ol>
+    <p class="note">This changes plan §5, which lists Neural Core as the MVP hero. It needs explicit approval before Phase 2 starts. Full trade-offs, performance budget and contrast table are in <code>prototypes/hero/README.md</code>.</p>
+  </div>
+
+  <h3 class="sec">States and fallbacks</h3>
+  <div class="states">
+    <figure><img src="screenshots/neural-core-selected.png" alt="Neural Core with the Applied AI cluster selected and its projects listed." loading="lazy"><figcaption>A · domain selected</figcaption></figure>
+    <figure><img src="screenshots/neural-core-nowebgl.png" alt="Neural Core static SVG fallback without WebGL." loading="lazy"><figcaption>A · no-WebGL fallback (SVG)</figcaption></figure>
+    <figure><img src="screenshots/spatial-lab-selected.png" alt="Spatial Lab with GMRE Log Parser raised and shown in the inspector." loading="lazy"><figcaption>B · module selected</figcaption></figure>
+    <figure><img src="screenshots/editorial-machine-selected.png" alt="Editorial Machine with the AI channel highlighted and the index filtered." loading="lazy"><figcaption>C · channel filter</figcaption></figure>
+    <figure><img src="screenshots/editorial-machine-paper.png" alt="Editorial Machine in light paper presentation." loading="lazy"><figcaption>C · paper / print mode</figcaption></figure>
+    <figure><img src="screenshots/recruiter-mode.png" alt="Recruiter Mode: a clean single-page summary with contact buttons and a project list." loading="lazy"><figcaption>Shared · Recruiter Mode</figcaption></figure>
+    <figure><img src="screenshots/spatial-lab-reduced.png" alt="Spatial Lab rendered with reduced motion." loading="lazy"><figcaption>B · reduced motion</figcaption></figure>
+    <figure><img src="screenshots/neural-core-tablet.png" alt="Neural Core at tablet width." loading="lazy"><figcaption>A · tablet 820</figcaption></figure>
+  </div>
+</main>
+</body>
+</html>

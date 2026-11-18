@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Priyanshu · Neural Core (prototype A)</title>
+<meta name="description" content="Phase 1 hero prototype A: a living 3D neural system whose clusters map to real project domains.">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  body {
+    background:
+      radial-gradient(60vw 60vw at 78% 38%, rgba(122, 140, 255, 0.10), transparent 60%),
+      radial-gradient(40vw 40vw at 92% 80%, rgba(139, 255, 176, 0.06), transparent 60%),
+      var(--bg);
+    min-height: 100vh;
+  }
+  .hero {
+    max-width: var(--max); margin: 0 auto;
+    padding: clamp(16px, 4vh, 48px) var(--gutter) 64px;
+    display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: clamp(24px, 4vw, 56px); align-items: center;
+    min-height: calc(100vh - 80px);
+  }
+  .copy { position: relative; z-index: 2; max-width: 560px; }
+  .eyebrow { font: 500 12px/1.4 var(--font-mono); color: var(--fg-mute); letter-spacing: 0.08em; margin: 0 0 20px; }
+  .eyebrow b { color: var(--bio); font-weight: 500; }
+  h1 {
+    font: 700 clamp(56px, 9vw, 112px)/0.92 var(--font-display);
+    letter-spacing: -0.045em; margin: 0 0 22px;
+  }
+  .headline { font: 500 clamp(20px, 2.3vw, 26px)/1.3 var(--font-display); letter-spacing: -0.01em; margin: 0 0 16px; max-width: 30ch; }
+  .summary { color: var(--fg-soft); font-size: 16px; max-width: 52ch; margin: 0 0 28px; }
+  .ctas { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 36px; }
+
+  .domains-label { font: 500 11px/1 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg-mute); margin: 0 0 12px; }
+  .domain-chips { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+  .domain-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 14px; border-radius: 999px; border: 1px solid var(--line);
+    background: rgba(21, 28, 41, 0.6); cursor: pointer;
+    font: 500 13px/1 var(--font-body); color: var(--fg-soft);
+    transition: border-color 160ms, color 160ms, background 160ms;
+  }
+  .domain-chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c); }
+  .domain-chip:hover { color: var(--fg); border-color: var(--c); }
+  .domain-chip[aria-pressed="true"] { color: var(--fg); border-color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); }
+  .domain-chip .n { font: 11px var(--font-mono); color: var(--fg-mute); }
+
+  /* scene column */
+  .stage-wrap { position: relative; }
+  .stage { position: relative; height: min(78vh, 720px); min-height: 460px; }
+  .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; }
+  .stage canvas.pointing { cursor: pointer; }
+  .stage .fallback { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .stage.webgl .fallback { display: none; }
+  .labels { position: absolute; inset: 0; pointer-events: none; }
+  .labels button {
+    position: absolute; left: 0; top: 0; pointer-events: auto;
+    transform: translate(-50%, -50%); will-change: transform;
+    font: 500 11px/1 var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--fg); background: rgba(9, 12, 18, 0.72); border: 1px solid color-mix(in srgb, var(--c) 55%, transparent);
+    padding: 7px 10px; border-radius: 999px; cursor: pointer; white-space: nowrap;
+    transition: opacity 200ms, border-color 200ms;
+  }
+  .labels button.dim { opacity: 0.35; }
+  .labels button.on { border-color: var(--c); box-shadow: 0 0 18px color-mix(in srgb, var(--c) 40%, transparent); }
+
+  .readout {
+    position: absolute; right: 0; bottom: 0; z-index: 3;
+    width: min(360px, 100%);
+    background: rgba(13, 18, 28, 0.86); backdrop-filter: blur(8px);
+    border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px;
+  }
+  .readout .k { font: 500 11px/1 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg-mute); display: flex; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+  .readout h2 { font: 600 18px/1.2 var(--font-display); margin: 0 0 10px; }
+  .readout ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .readout li a, .readout li span.t { font-weight: 600; font-size: 14px; color: var(--fg); }
+  .readout li p { margin: 4px 0 0; color: var(--fg-soft); font-size: 13px; line-height: 1.45; }
+  .readout .hint { color: var(--fg-soft); font-size: 13.5px; margin: 0; }
+  .telemetry { position: absolute; left: 0; top: 0; font: 11px/1.6 var(--font-mono); color: var(--fg-mute); pointer-events: none; }
+
+  /* fallback svg colour hooks */
+  .fallback .d { color: var(--c); transition: opacity 200ms; }
+  .fallback.has-focus .d:not(.on) { opacity: 0.25; }
+  .fallback .core { color: var(--paper); }
+
+  .c-systems { --c: var(--violet); } .c-ai { --c: var(--bio); }
+  .c-security { --c: var(--orange); } .c-research { --c: var(--paper); }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: minmax(0, 1fr); min-height: 0; padding-top: 12px; }
+    .stage { overflow: hidden; }
+    .stage { height: 420px; min-height: 0; }
+    .readout { position: relative; width: 100%; margin-top: 12px; }
+    .stage-wrap { display: flex; flex-direction: column; }
+  }
+  @media (max-width: 420px) { .stage { height: 340px; } }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <a class="brand" href="/">PRIYANSHU<span>.EXE</span></a>
+  <nav class="site-nav" aria-label="Primary">
+    <a class="nav-link" href="/#work">Work</a>
+    <a class="nav-link" href="/#about">About</a>
+    <a class="nav-link" href="../">Lab</a>
+    <button class="chip-btn" type="button" data-recruiter-toggle aria-pressed="false">Recruiter<span class="hide-sm"> Mode</span></button>
+    <button class="chip-btn ask" type="button" data-ask-ai>Ask AI</button>
+  </nav>
+</header>
+
+<section id="recruiter" class="recruiter" tabindex="-1" aria-label="Recruiter summary"></section>
+
+<main id="main" class="hero immersive" tabindex="-1">
+  <div class="copy">
+    <p class="eyebrow"><b>●</b> Software engineer · Stuttgart</p>
+    <h1>Priyanshu</h1>
+    <p class="headline">Software engineer building reliable systems and evidence-first AI.</p>
+    <p class="summary">Software engineer at Nokia Optics and dual CS student at DHBW. I build data pipelines, AI tooling and systems that turn messy operational data into something engineers can trust.</p>
+    <div class="ctas">
+      <a class="btn primary" href="/#work">See work</a>
+      <a class="btn" href="mailto:priyanshu240105@gmail.com">Email</a>
+    </div>
+    <p class="domains-label" id="domains-label">Trace a domain</p>
+    <ul class="domain-chips" id="domain-chips" aria-labelledby="domains-label"></ul>
+  </div>
+
+  <div class="stage-wrap">
+    <div class="stage" id="stage">
+      <!-- Static fallback (no WebGL / module failed). Shown until the 3D scene boots. -->
+      <svg class="fallback" id="fallback" viewBox="0 0 600 600" role="img" aria-label="Diagram: a central core linked to four clusters labelled Software Systems, Applied AI, Security and Research.">
+        <defs>
+          <radialGradient id="glow"><stop offset="0" stop-color="currentColor" stop-opacity=".55"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/></radialGradient>
+        </defs>
+        <g class="core" fill="none" stroke="currentColor" stroke-opacity=".25">
+          <circle cx="300" cy="300" r="70"/><circle cx="300" cy="300" r="46" stroke-dasharray="3 6"/>
+          <circle cx="300" cy="300" r="120" fill="url(#glow)" stroke="none" opacity=".25"/>
+        </g>
+        <g class="d c-systems" data-domain="systems">
+          <line x1="300" y1="300" x2="150" y2="170" stroke="currentColor" stroke-opacity=".35"/>
+          <circle cx="150" cy="170" r="80" fill="url(#glow)"/>
+          <g fill="currentColor"><circle cx="150" cy="170" r="5"/><circle cx="122" cy="150" r="3"/><circle cx="176" cy="146" r="2.5"/><circle cx="168" cy="196" r="3"/><circle cx="126" cy="192" r="2"/><circle cx="104" cy="172" r="2"/><circle cx="190" cy="172" r="2"/></g>
+          <text x="150" y="104" text-anchor="middle" fill="currentColor" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="1.5">SYSTEMS</text>
+        </g>
+        <g class="d c-ai" data-domain="ai">
+          <line x1="300" y1="300" x2="460" y2="160" stroke="currentColor" stroke-opacity=".35"/>
+          <circle cx="460" cy="160" r="80" fill="url(#glow)"/>
+          <g fill="currentColor"><circle cx="460" cy="160" r="5"/><circle cx="432" cy="140" r="2.5"/><circle cx="488" cy="136" r="3"/><circle cx="480" cy="188" r="2"/><circle cx="436" cy="184" r="3"/><circle cx="506" cy="164" r="2"/><circle cx="414" cy="162" r="2"/></g>
+          <text x="460" y="94" text-anchor="middle" fill="currentColor" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="1.5">AI</text>
+        </g>
+        <g class="d c-security" data-domain="security">
+          <line x1="300" y1="300" x2="470" y2="440" stroke="currentColor" stroke-opacity=".35"/>
+          <circle cx="470" cy="440" r="80" fill="url(#glow)"/>
+          <g fill="currentColor"><circle cx="470" cy="440" r="5"/><circle cx="444" cy="420" r="2.5"/><circle cx="496" cy="418" r="2"/><circle cx="492" cy="466" r="3"/><circle cx="446" cy="462" r="2"/><circle cx="516" cy="444" r="2"/></g>
+          <text x="470" y="540" text-anchor="middle" fill="currentColor" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="1.5">SECURITY</text>
+        </g>
+        <g class="d c-research" data-domain="research">
+          <line x1="300" y1="300" x2="160" y2="450" stroke="currentColor" stroke-opacity=".35"/>
+          <circle cx="160" cy="450" r="80" fill="url(#glow)"/>
+          <g fill="currentColor"><circle cx="160" cy="450" r="5"/><circle cx="134" cy="430" r="2"/><circle cx="186" cy="428" r="3"/><circle cx="182" cy="476" r="2.5"/><circle cx="136" cy="472" r="3"/><circle cx="112" cy="452" r="2"/></g>
+          <text x="160" y="550" text-anchor="middle" fill="currentColor" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="1.5">RESEARCH</text>
+        </g>
+      </svg>
+      <div class="labels" id="labels" aria-hidden="true"></div>
+      <div class="telemetry" id="telemetry" aria-hidden="true"></div>
+    </div>
+    <aside class="readout" id="readout" aria-live="polite"></aside>
+  </div>
+</main>
+
+<p class="proto-badge">Prototype A · Neural Core · <a href="../">compare</a></p>
+
+<script src="../shared/projects.js"></script>
+<script src="../shared/proto.js"></script>
+<script>
+// Domain selection: plain DOM, works with or without the 3D scene.
+(function () {
+  const P = window.PORTFOLIO, esc = window.PROTO.esc;
+  const chips = document.getElementById('domain-chips');
+  const readout = document.getElementById('readout');
+  const fallback = document.getElementById('fallback');
+  let current = null;
+
+  chips.innerHTML = P.domains.map((d) => `
+    <li><button type="button" class="domain-chip c-${d.id}" data-domain="${d.id}" aria-pressed="false" aria-controls="readout">
+      <i aria-hidden="true"></i>${esc(d.label)} <span class="n">${P.projectsIn(d.id).length}</span>
+    </button></li>`).join('');
+
+  function renderReadout() {
+    if (!current) {
+      readout.innerHTML = `
+        <div class="k"><span>Neural core</span><span>${P.projects.length} projects · ${P.domains.length} domains</span></div>
+        <p class="hint">Each cluster is a domain of real work. Select one to trace the projects behind it.</p>`;
+      return;
+    }
+    const d = P.domains.find((x) => x.id === current);
+    const items = P.projectsIn(current);
+    readout.innerHTML = `
+      <div class="k"><span>Domain</span><span>${items.length} project${items.length === 1 ? '' : 's'}</span></div>
+      <h2>${esc(d.label)}</h2>
+      <ul>${items.map((p) => `
+        <li>
+          ${p.url ? `<a href="${esc(p.url)}"${p.url.startsWith('http') ? ' target="_blank" rel="noopener"' : ''}>${esc(p.title)}</a>` : `<span class="t">${esc(p.title)}</span>`}
+          <span class="status" data-status="${esc(p.status)}" style="margin-left:8px">${esc(p.statusLabel)}</span>
+          <p>${esc(p.summary)}</p>
+        </li>`).join('')}</ul>`;
+  }
+
+  function select(id) {
+    current = current === id ? null : id;
+    chips.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.domain === current)));
+    fallback.classList.toggle('has-focus', !!current);
+    fallback.querySelectorAll('.d').forEach((g) => g.classList.toggle('on', g.dataset.domain === current));
+    renderReadout();
+    window.dispatchEvent(new CustomEvent('domain:select', { detail: { id: current } }));
+  }
+
+  chips.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-domain]');
+    if (b) select(b.dataset.domain);
+  });
+  fallback.addEventListener('click', (e) => {
+    const g = e.target.closest('[data-domain]');
+    if (g) select(g.dataset.domain);
+  });
+  window.selectDomain = select;
+  renderReadout();
+})();
+</script>
+<script type="module" src="./scene.js"></script>
+</body>
+</html>
