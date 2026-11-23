@@ -1,0 +1,98 @@
+{
+  "measuredAt": "2026-11-19 20:27 UTC",
+  "environment": "Lighthouse 12 mobile emulation (simulated slow 4G, median of 3) and local Chrome at 1440 px, served by astro preview on this Mac",
+  "pages": {
+    "monolith": {
+      "transferKB": 560.5234375,
+      "requests": 33,
+      "external": 0,
+      "consoleErrors": 0,
+      "jsInitialKB": 158.7900390625,
+      "phoneKB": 284.4482421875,
+      "axe": {
+        "serious": 0,
+        "critical": 0,
+        "moderate": 0
+      },
+      "lighthouse": {
+        "performance": 90,
+        "accessibility": 100,
+        "bestPractices": 100,
+        "seo": 69,
+        "lcp": 3.3153397999999994,
+        "cls": 0,
+        "tbt": 0,
+        "runs": 3
+      }
+    },
+    "orbit": {
+      "transferKB": 533.44140625,
+      "requests": 31,
+      "external": 0,
+      "consoleErrors": 0,
+      "jsInitialKB": 115.0927734375,
+      "phoneKB": 264.0703125,
+      "axe": {
+        "serious": 0,
+        "critical": 0,
+        "moderate": 0
+      },
+      "lighthouse": {
+        "performance": 92,
+        "accessibility": 100,
+        "bestPractices": 100,
+        "seo": 69,
+        "lcp": 3.1674491999999996,
+        "cls": 0,
+        "tbt": 0,
+        "runs": 3
+      }
+    },
+    "signal": {
+      "transferKB": 340.892578125,
+      "requests": 27,
+      "external": 0,
+      "consoleErrors": 0,
+      "jsInitialKB": 154.783203125,
+      "phoneKB": 321.39453125,
+      "axe": {
+        "serious": 0,
+        "critical": 0,
+        "moderate": 0
+      },
+      "lighthouse": {
+        "performance": 90,
+        "accessibility": 100,
+        "bestPractices": 100,
+        "seo": 69,
+        "lcp": 3.3364883999999995,
+        "cls": 0.000105654701071185,
+        "tbt": 0,
+        "runs": 3
+      }
+    },
+    "v2": {
+      "transferKB": 539.54296875,
+      "requests": 32,
+      "external": 0,
+      "consoleErrors": 0,
+      "jsInitialKB": 153.6015625,
+      "phoneKB": 290.265625,
+      "axe": {
+        "serious": 0,
+        "critical": 0,
+        "moderate": 0
+      },
+      "lighthouse": {
+        "performance": 91,
+        "accessibility": 100,
+        "bestPractices": 100,
+        "seo": 100,
+        "lcp": 3.1711449000000003,
+        "cls": 0,
+        "tbt": 5.5,
+        "runs": 3
+      }
+    }
+  }
+}

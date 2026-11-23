@@ -1,0 +1,33 @@
+import { dict } from '../dict';
+export const HOME = dict({
+  en: {
+    description: '{name}: software engineer in Stuttgart. {positioning}. {count} case studies, a cybersecurity lab, an AI systems lab and a scripted portfolio guide.',
+    ctaWork: 'Explore the work', ctaLabs: 'Open the labs', ctaRecruiter: 'Recruiter mode',
+    introNum: '01 / INTRODUCTION', focus: 'Focus', education: 'Education',
+    workNum: '02 / SELECTED WORK', workH1: 'Three systems,', workH2: 'each with a lab.',
+    workLede: 'Professional and academic work, labelled honestly: <strong>status</strong> says what it is, <strong>evidence</strong> says how much of it you can check. The labs run on synthetic data.',
+    caseStudy: 'Case study', openLab: 'Open the lab', alsoIndex: 'ALSO IN THE INDEX', lab: 'Lab',
+    exploreNum: '03 / EXPLORE', exploreH1: 'All {count} projects,', exploreH2: 'on one floor.',
+    exploreLede: 'Every module is a real project: colour is its domain, height is how much public evidence backs it, and traces connect work that shares skills. Select one to inspect it.',
+    filterDomain: 'Filter the lab by domain', allProjects: 'Explore all projects', nLabs: '{n} interactive labs',
+    skillsNum: '04 / SKILLS & LANGUAGES', skillsH1: 'Skills, each tied', skillsH2: 'to the work behind it.',
+    skillsLede: 'Only technologies with evidence on this site are listed. Each one links to the projects behind it; the letters say what kind of work that was.',
+    kinds: 'Kinds of evidence', lgWork: 'Nokia', lgStudy: 'DHBW', lgOwn: 'own project', lgTool: 'tool', lgExploring: 'exploring',
+    mapH: 'A skill is a claim. The constellation shows the proof.', mapCta: 'Explore the constellation', languages: 'Languages',
+  },
+  de: {
+    description: '{name}: Software Engineer in Stuttgart. {positioning}. {count} Fallstudien, ein Cybersecurity-Labor, ein AI Systems Lab und ein geskripteter Portfolio-Guide.',
+    ctaWork: 'Projekte ansehen', ctaLabs: 'Labore öffnen', ctaRecruiter: 'Recruiter-Modus',
+    introNum: '01 / VORSTELLUNG', focus: 'Fokus', education: 'Studium',
+    workNum: '02 / AUSGEWÄHLTE PROJEKTE', workH1: 'Drei Systeme,', workH2: 'jedes mit Labor.',
+    workLede: 'Berufliche und akademische Arbeit, ehrlich gekennzeichnet: <strong>Status</strong> sagt, was es ist, <strong>Nachweis</strong> sagt, wie viel davon du prüfen kannst. Die Labore laufen auf synthetischen Daten.',
+    caseStudy: 'Fallstudie', openLab: 'Labor öffnen', alsoIndex: 'WEITERE PROJEKTE', lab: 'Labor',
+    exploreNum: '03 / ENTDECKEN', exploreH1: 'Alle {count} Projekte,', exploreH2: 'auf einer Fläche.',
+    exploreLede: 'Jedes Modul ist ein echtes Projekt: Die Farbe zeigt den Bereich, die Höhe, wie viel öffentlicher Nachweis dahintersteht, und Linien verbinden Arbeiten mit gemeinsamen Skills. Wähle eines aus, um es dir anzusehen.',
+    filterDomain: 'Labor nach Bereich filtern', allProjects: 'Alle Projekte ansehen', nLabs: '{n} interaktive Labore',
+    skillsNum: '04 / SKILLS & SPRACHEN', skillsH1: 'Jeder Skill', skillsH2: 'mit der Arbeit dahinter.',
+    skillsLede: 'Aufgeführt sind nur Technologien mit Nachweis auf dieser Website. Jede verlinkt die Projekte dahinter; die Buchstaben zeigen, welche Art von Arbeit das war.',
+    kinds: 'Arten von Nachweisen', lgWork: 'Nokia', lgStudy: 'DHBW', lgOwn: 'eigenes Projekt', lgTool: 'Tool', lgExploring: 'Erkundung',
+    mapH: 'Ein Skill ist eine Behauptung. Die Konstellation zeigt den Nachweis.', mapCta: 'Konstellation erkunden', languages: 'Sprachen',
+  },
+});

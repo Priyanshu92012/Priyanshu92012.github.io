@@ -1,0 +1,216 @@
+---
+// Extra sections for the PRIYANSHU.EXE case study (/work/priyanshu-exe/): architecture, component
+// explorer, contracts, the honest state of the AI features, challenges, technologies, evidence, roadmap.
+import ComponentExplorer from '../islands/demos/ComponentExplorer';
+import { SITE_EVIDENCE, ROADMAP } from '../data/site-architecture';
+import { profile, projects, evidencedSkills } from '../data/index';
+import pkg from '../../package.json';
+
+const deps = { ...pkg.dependencies, ...pkg.devDependencies } as Record<string, string>;
+const v = (name: string) => (deps[name] ?? '').replace(/^[\^~]/, '');
+const STACK = [
+  ['Astro', v('astro'), 'static pages, islands'], ['React', v('react'), 'interactive islands'], ['TypeScript', v('typescript'), 'everything'],
+  ['Three.js', v('three'), 'Spatial Lab, constellation orbit'], ['React Three Fiber', v('@react-three/fiber'), '3D in React'], ['GSAP', v('gsap'), 'scroll choreography'],
+  ['Zod', v('zod'), 'build-time validation'], ['Vitest', v('vitest'), 'unit tests'], ['Playwright', v('@playwright/test'), 'browser tests'], ['axe-core', v('@axe-core/playwright'), 'accessibility checks'],
+];
+const CHALLENGES = [
+  { c: '3D labels crashed when the window crossed a breakpoint', s: 'Each label was its own React root and was unmounted mid-commit. Replaced with one projected DOM overlay and greedy decluttering; a resize stress test now guards it.' },
+  { c: 'A lab hydrated differently on the server and in the browser', s: 'A sort-based shuffle in the LIME sampler was biased and engine-dependent. A seeded Fisher–Yates shuffle made it deterministic everywhere.' },
+  { c: 'The content schema library shipped to every page', s: 'Records are typed at compile time and validated with Zod only at build time, removing a 92 KB chunk from each page.' },
+  { c: 'A free, honest guide without paid inference', s: 'A scripted engine answers from the approved records; the build fails if an AI endpoint reaches the output, and every browser test fails on a request to another host.' },
+  { c: 'Confidential internal names must never reach a public repository', s: 'A gate checks every source, document and built file against a list of hashed terms, so the names it blocks are never written down.' },
+  { c: 'A fast first screen on slow mobile networks', s: 'CSS inlined per page, the first fonts preloaded, a headline animation that never hides text, 3D opt-in on phones, and islands that hydrate only after the first contentful paint, so their JavaScript never competes with the portrait. Largest Contentful Paint now meets the target in Lighthouse (see evidence).' },
+];
+---
+<section class="section site" aria-labelledby="site-arch-h">
+  <div class="shell">
+    <div class="section-head">
+      <div><p class="num">ARCHITECTURE</p><h2 id="site-arch-h" class="h2">Static first,<br />interactive where it pays.</h2></div>
+      <p>Frontend engineering, AI systems and creative technology in one product. Everything below is in this repository; nothing here describes a feature that is not built.</p>
+    </div>
+
+    <figure class="site-diagram">
+      <div class="sd-scroll" tabindex="0" aria-label="Architecture diagram (scrolls sideways on small screens)"><svg viewBox="0 0 960 420" role="img" aria-labelledby="sd-t sd-d">
+        <title id="sd-t">How PRIYANSHU.EXE is built and served</title>
+        <desc id="sd-d">At build time, the typed content model is validated and rendered by Astro, then checked by the content and output gates. In the browser, static HTML loads first; React islands hydrate on idle or when visible and talk through a typed event bus; the guide engine answers from the same content through an allowlist. An LLM agent Worker exists in the repository but is not deployed.</desc>
+        <text class="sd-k" x="20" y="28">BUILD TIME</text>
+        <g class="sd-b"><rect x="20" y="40" width="200" height="74" rx="10" /><text x="36" y="70">Typed content model</text><text class="sd-s" x="36" y="92">src/data · 7 projects · Zod</text></g>
+        <g class="sd-b"><rect x="270" y="40" width="190" height="74" rx="10" /><text x="286" y="70">Astro build</text><text class="sd-s" x="286" y="92">pages · CSS inlined</text></g>
+        <g class="sd-b gate"><rect x="510" y="40" width="200" height="74" rx="10" /><text x="526" y="70">Content + output gates</text><text class="sd-s" x="526" y="92">secrets · AI endpoints · names</text></g>
+        <g class="sd-b"><rect x="760" y="40" width="180" height="74" rx="10" /><text x="776" y="70">Static site</text><text class="sd-s" x="776" y="92">GitHub Pages</text></g>
+        <path class="sd-a" d="M220 77h50M460 77h50M710 77h50" />
+        <text class="sd-k" x="20" y="168">IN THE BROWSER</text>
+        <g class="sd-b"><rect x="20" y="180" width="200" height="74" rx="10" /><text x="36" y="210">Static HTML first</text><text class="sd-s" x="36" y="232">works without JavaScript</text></g>
+        <g class="sd-b hot"><rect x="270" y="180" width="440" height="74" rx="10" /><text x="286" y="210">React islands</text><text class="sd-s" x="286" y="232">pet bot chat · labs · Spatial Lab · constellation · X-Ray</text></g>
+        <g class="sd-b"><rect x="760" y="180" width="180" height="74" rx="10" /><text x="776" y="210">Typed event bus</text><text class="sd-s" x="776" y="232">queued open events</text></g>
+        <path class="sd-a" d="M220 217h50M710 217h50" />
+        <g class="sd-b hot"><rect x="270" y="300" width="440" height="74" rx="10" /><text x="286" y="330">Guide engine + allowlist (lazy)</text><text class="sd-s" x="286" y="352">intents · synonyms · BM25 · job matcher · guards</text></g>
+        <path class="sd-a" d="M490 254v46" />
+        <path class="sd-a sd-dash" d="M120 114v66" />
+        <g class="sd-b off"><rect x="760" y="300" width="180" height="74" rx="10" /><text x="776" y="330">LLM agent Worker</text><text class="sd-s" x="776" y="352">built · tested · not deployed</text></g>
+        <text class="sd-s" x="760" y="398">no page calls it</text>
+      </svg></div>
+      <figcaption class="mono muted">Solid boxes run for every visitor; the dashed box exists only in the repository.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="section site" aria-labelledby="site-cx-h">
+  <div class="shell">
+    <div class="section-head">
+      <div><p class="num">COMPONENTS</p><h2 id="site-cx-h" class="h2">Pick a part,<br />see how it ships.</h2></div>
+      <p>What each part does, how it reaches the browser, where it lives and what tests it.</p>
+    </div>
+    <ComponentExplorer client:visible />
+  </div>
+</section>
+
+<section class="section site" aria-labelledby="site-ct-h">
+  <div class="shell grid-12">
+    <div class="site-ct-copy">
+      <p class="num mono muted">CONTRACTS</p>
+      <h2 id="site-ct-h" class="h2">Data in, safe actions out.</h2>
+      <p class="soft">The same typed records feed every page and the guide. An answer can only point at destinations that exist: the allowlist accepts known pages, published projects (and their lab anchor), skill and domain anchors, and the owner’s own profiles. Everything else is dropped, in the engine and again at render time.</p>
+    </div>
+    <div class="site-code">
+      <pre><code>{`type Project = {
+  slug: string; title: string; summary: string;
+  status: Status;          // what the work is
+  evidence: EvidenceLevel; // how much is public
+  outcomes: { claim: string;
+    basis: 'verified' | 'linked' | 'self-reported' }[];
+  skills: string[]; demo?: { kind; title; disclosure };
+  publishApproved: boolean;
+};`}</code></pre>
+      <pre><code>{`type GuideAnswer = {
+  intent: string;   // e.g. 'ai', 'project:opticlab'
+  route: 'curated' | 'project' | 'skill' | 'job'
+       | 'brief' | 'search' | 'guard' | 'unknown';
+  text: string;     // from the records, never generated
+  links: { label: string; href: string }[];  // allowlisted
+  sources: { title: string; url: string }[];
+};`}</code></pre>
+    </div>
+  </div>
+</section>
+
+<section class="section site" aria-labelledby="site-ai-h">
+  <div class="shell">
+    <div class="section-head">
+      <div><p class="num">AI, HONESTLY</p><h2 id="site-ai-h" class="h2">What is live, what is off,<br />what is only planned.</h2></div>
+      <p>The tiger is a scripted guide, not an autonomous agent. These three are kept apart on purpose.</p>
+    </div>
+    <div class="ai-tiers">
+      <article class="ai-tier live">
+        <p class="mono">Implemented and public</p>
+        <ul>
+          <li>Deterministic intent matching with synonyms and keyword scoring</li>
+          <li>Retrieval over the approved records (BM25), quoted, never paraphrased</li>
+          <li>A job-description matcher that maps requirements to evidence, gaps included</li>
+          <li>Allowlisted, contextual navigation; guards for prompt injection and private questions</li>
+        </ul>
+      </article>
+      <article class="ai-tier off">
+        <p class="mono">Built, disabled</p>
+        <ul>
+          <li>An LLM agent Worker on the Anthropic SDK with a streaming tool loop over seven read-only tools</li>
+          <li>Origin allowlist, request caps, rate limits and a daily spend guard</li>
+          <li>Tested with a mocked provider; a default-off kill switch; not deployed, no page calls it</li>
+        </ul>
+      </article>
+      <article class="ai-tier future">
+        <p class="mono">Possible next, not built</p>
+        <ul>{ROADMAP.slice(0, 2).map((r) => <li>{r.title}</li>)}</ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section site" aria-labelledby="site-ch-h">
+  <div class="shell">
+    <div class="section-head">
+      <div><p class="num">CHALLENGES</p><h2 id="site-ch-h" class="h2">What broke,<br />and what fixed it.</h2></div>
+    </div>
+    <ol class="site-ch">
+      {CHALLENGES.map((x, i) => <li><span class="mono">{String(i + 1).padStart(2, '0')}</span><b>{x.c}</b><span class="soft">{x.s}</span></li>)}
+    </ol>
+  </div>
+</section>
+
+<section class="section site" aria-labelledby="site-ev-h">
+  <div class="shell grid-12">
+    <div class="site-stack">
+      <p class="num mono muted">STACK</p>
+      <h2 id="site-ev-h" class="h2">Evidence, with dates.</h2>
+      <ul class="stack-list">{STACK.map(([n, ver, use]) => <li><b>{n}</b> <span class="mono">{ver}</span><span class="muted">{use}</span></li>)}</ul>
+      <p class="soft">{projects.length} projects · {evidencedSkills().length} evidenced skills · source on <a href={profile.links.repo}>GitHub ↗</a></p>
+    </div>
+    <dl class="site-ev">
+      {SITE_EVIDENCE.map((e) => <div><dt>{e.label}</dt><dd><b>{e.value}</b><span class="muted">{e.context}</span></dd></div>)}
+    </dl>
+  </div>
+</section>
+
+<section class="section site" aria-labelledby="site-rm-h">
+  <div class="shell">
+    <div class="section-head"><div><p class="num">ROADMAP</p><h2 id="site-rm-h" class="h2">Next, not yet built.</h2></div></div>
+    <ul class="site-rm">{ROADMAP.map((r) => <li><b>{r.title}</b><span class="soft">{r.note}</span></li>)}</ul>
+  </div>
+</section>
+
+<style>
+  .site + .site { border-top: 1px solid var(--line); }
+  .site-diagram { margin: 0; display: grid; gap: 10px; }
+  .site-diagram svg { width: 100%; height: auto; min-width: 720px; }
+  .sd-scroll { overflow-x: auto; border-radius: var(--radius-lg); }
+  .sd-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .sd-k { font: 500 11px var(--font-mono); letter-spacing: 0.16em; fill: var(--fg-mute); }
+  .sd-b rect { fill: var(--surface); stroke: var(--line-strong); }
+  .sd-b text { font: 600 15px var(--font-display); fill: var(--fg); }
+  .sd-b .sd-s, .sd-s { font: 500 11px var(--font-mono); fill: var(--fg-mute); }
+  .sd-b.hot rect { stroke: var(--accent); fill: color-mix(in srgb, var(--accent) 6%, var(--surface)); }
+  .sd-b.gate rect { stroke: var(--orange); }
+  .sd-b.off rect { stroke-dasharray: 6 5; fill: none; }
+  .sd-b.off text { fill: var(--fg-mute); }
+  .sd-a { fill: none; stroke: var(--line-strong); stroke-width: 1.5; marker-end: none; }
+  .sd-dash { stroke-dasharray: 4 4; }
+  .site-diagram figcaption { font-size: 0.75rem; }
+
+  .site-ct-copy { grid-column: 1 / span 5; display: grid; gap: 16px; align-content: start; }
+  .site-code { grid-column: 7 / span 6; display: grid; gap: 12px; min-width: 0; }
+  .site-code pre { margin: 0; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--bg-deep); overflow-x: auto; font-size: 0.8125rem; line-height: 1.55; color: var(--fg-soft); }
+
+  .ai-tiers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .ai-tier { padding: 18px; border-radius: var(--radius-lg); border: 1px solid var(--line); background: var(--surface); }
+  .ai-tier p { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
+  .ai-tier.live { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
+  .ai-tier.live p { color: var(--accent); }
+  .ai-tier.off { border-style: dashed; }
+  .ai-tier.off p { color: var(--orange); }
+  .ai-tier.future p { color: var(--fg-mute); }
+  .ai-tier ul { margin: 0; padding-left: 1.1em; display: grid; gap: 8px; color: var(--fg-soft); font-size: 0.9375rem; }
+
+  .site-ch { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; }
+  .site-ch li { display: grid; grid-template-columns: 2.4em 1fr; gap: 4px 10px; padding: 18px 0; border-top: 1px solid var(--line); }
+  .site-ch .mono { grid-row: span 2; font-size: 0.75rem; color: var(--accent); padding-top: 3px; }
+  .site-ch b { font: 600 1.05rem/1.25 var(--font-display); }
+
+  .site-stack { grid-column: 1 / span 5; display: grid; gap: 16px; align-content: start; }
+  .stack-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .stack-list li { display: grid; grid-template-columns: 9.5em 5em 1fr; gap: 8px; font-size: 0.875rem; }
+  .stack-list .mono { font-size: 0.75rem; color: var(--fg-soft); }
+  .site-ev { grid-column: 7 / span 6; margin: 0; display: grid; gap: 0; }
+  .site-ev div { display: grid; gap: 4px; padding: 14px 0; border-top: 1px solid var(--line); }
+  .site-ev dt { font: 500 var(--fs-micro)/1.3 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-mute); }
+  .site-ev dd { margin: 0; display: grid; gap: 2px; }
+  .site-ev dd .muted { font-size: 0.8125rem; }
+
+  .site-rm { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .site-rm li { display: grid; gap: 6px; padding: 16px; border: 1px dashed var(--line-strong); border-radius: var(--radius-lg); }
+
+  @media (max-width: 900px) {
+    .site-ct-copy, .site-code, .site-stack, .site-ev { grid-column: 1 / -1; }
+    .ai-tiers, .site-ch, .site-rm { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 480px) { .stack-list li { grid-template-columns: 1fr auto; } .stack-list li .muted { grid-column: 1 / -1; } }
+</style>

@@ -1,0 +1,71 @@
+---
+// Layout for the V3 design-lab concepts. Same head contract as BaseLayout (modes before first paint,
+// SEO tags, self-hosted fonts) but always noindex, no V2 header/footer, and the portfolio guide is the
+// Pet Bot instead of the V2 drawer. These routes are injected only by astro.lab.config.mjs.
+import '../styles/fonts.css';
+import '../styles/global.css';
+import Seo from '../components/Seo.astro';
+import GlobalUI from '../islands/GlobalUI';
+import PetBot from '../islands/petbot/PetBot';
+import { validateContent } from '../data/validate';
+import type { ConceptId } from './content';
+
+validateContent();
+
+interface Props { title: string; description: string; concept: ConceptId | 'gallery'; preload?: string[]; themeColor?: string }
+const { title, description, concept, preload = [], themeColor = '#0b0b0c' } = Astro.props;
+const letter = { monolith: 'A', orbit: 'B', signal: 'C', gallery: '' }[concept];
+---
+<!doctype html>
+<html lang="en" class="no-js" data-concept={concept}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content={themeColor} />
+    <meta name="color-scheme" content={concept === 'signal' ? 'light' : 'dark'} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {preload.map((href) => <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />)}
+    <Seo title={title} description={description} noindex />
+    <script is:inline>
+      (function () {
+        var r = document.documentElement, s = {};
+        r.classList.remove('no-js'); r.classList.add('js');
+        try { s = JSON.parse(localStorage.getItem('pexe:prefs') || '{}'); } catch (e) {}
+        var q = new URLSearchParams(location.search);
+        var osReduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+        r.dataset.theme = 'dark';
+        r.dataset.motion = q.get('motion') === 'reduce' || s.motion === 'reduce' || (s.motion !== 'full' && osReduce) ? 'reduce' : 'full';
+        r.dataset.mode = s.mode === 'recruiter' ? 'recruiter' : 'immersive';
+      })();
+    </script>
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <slot name="nav" />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <slot name="footer" />
+    {concept !== 'gallery' && (
+      <a class="lab-pill" href="/design-lab/">
+        <span aria-hidden="true">←</span> Design lab · {letter}<span class="sr-only"> (back to the comparison gallery)</span>
+      </a>
+    )}
+    <GlobalUI client:idle guide={concept === 'gallery' ? 'drawer' : 'external'} />
+    {concept !== 'gallery' && <PetBot client:idle variant={concept} />}
+  </body>
+</html>
+
+<style is:global>
+  .lab-pill {
+    position: fixed; left: max(12px, env(safe-area-inset-left)); bottom: max(12px, env(safe-area-inset-bottom)); z-index: 94;
+    display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 12px; border-radius: 999px;
+    font: 500 11px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none;
+    color: var(--fg-soft); background: color-mix(in srgb, var(--bg) 92%, transparent); border: 1px solid var(--line-strong);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: color 200ms, border-color 200ms;
+  }
+  .lab-pill:hover, .lab-pill:focus-visible { color: var(--fg); border-color: var(--fg-mute); }
+  @media (max-width: 560px) { .lab-pill { left: max(8px, env(safe-area-inset-left)); bottom: max(10px, env(safe-area-inset-bottom)); min-height: 26px; padding: 0 9px; font-size: 10px; } }
+  @media print { .lab-pill { display: none; } }
+</style>

@@ -1,0 +1,145 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import portrait from '../assets/portrait.png';
+import { profile, getProject, projectUrl } from '../data/index';
+import { localeFromPath, localizePath } from '../i18n/index';
+import { pick } from '../i18n/dict';
+import { ABOUT } from '../i18n/pages/about';
+import { profileText, statusLabel } from '../i18n/content';
+const lang = localeFromPath(Astro.url.pathname);
+const a = pick(ABOUT, lang);
+const P = profileText(lang);
+const L = (x: string) => localizePath(x, lang);
+
+// Only facts from src/data/profile.ts (owner-stated or already public on v1).
+const timeline = [
+  { kind: a('work'), org: P.exp.org, sub: P.exp.unit, title: P.exp.title, body: P.exp.summary, projects: profile.experience[0].projects },
+  { kind: a('study'), org: P.edu.org, sub: a('dual'), title: P.edu.program, body: P.edu.summary, projects: profile.education[0].projects },
+];
+---
+<BaseLayout title={a('title')} description={a('description', { name: profile.name })}>
+  <PageHead num="05" kicker={a('kicker')} title={a('h')} accent={a('accent')} meta={P.location}>
+    <p class="lede">{P.lede}</p>
+    <div class="about-ctas">
+      <a class="btn btn-primary" href="#contact">{a('touch')} <span class="arrow">→</span></a>
+      <button class="btn" type="button" data-ask={a('askQ')} data-send="1">{a('askGuide')}</button>
+    </div>
+  </PageHead>
+
+  <section class="section" aria-labelledby="who-h">
+    <div class="shell grid-12">
+      <figure class="portrait">
+        <Image src={portrait} alt={a('portrait', { name: profile.name })} width={480} height={480} loading="eager" fetchpriority="high" />
+        <figcaption class="mono muted"><span>{profile.name}</span><span>{P.location}</span></figcaption>
+      </figure>
+      <div class="who prose">
+        <h2 id="who-h" class="h2">{a('who')}</h2>
+        <p set:html={a('p1', { name: profile.name })} />
+        <p set:html={a('p2')} />
+        <p set:html={a('p3')} />
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="tl-h">
+    <div class="shell">
+      <div class="section-head">
+        <div><p class="num">{a('tlNum')}</p><h2 id="tl-h" class="h2">{a('tlH')}</h2></div>
+        <p>{a('tlLede')}</p>
+      </div>
+      <ol class="timeline">
+        {timeline.map((t) => (
+          <li class="tl-item" data-reveal>
+            <p class="eyebrow"><b>{t.kind}</b> · {t.sub}</p>
+            <h3 class="h3">{t.org}</h3>
+            <p class="tl-title">{t.title}</p>
+            <p class="soft">{t.body}</p>
+            <ul class="tl-projects">
+              {t.projects.map((s) => getProject(s)).filter(Boolean).map((p) => (
+                <li><a href={L(projectUrl(p!))}>{p!.title}</a><span class="status" data-status={p!.status}>{statusLabel(p!.status, lang)}</span></li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="principles" aria-labelledby="pr-h">
+    <div class="shell">
+      <div class="section-head">
+        <div><p class="num">{a('prNum')}</p><h2 id="pr-h" class="h2">{a('prH')}</h2></div>
+      </div>
+      <ol class="principles">
+        {P.principles.map((p, i) => (
+          <li data-reveal>
+            <span class="mono pr-num">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class="h3">{p.title}</h3>
+            <p class="soft">{p.body}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section contact" id="contact" aria-labelledby="ct-h">
+    <div class="shell grid-12">
+      <div class="ct-copy">
+        <p class="num mono muted">{a('ctNum')}</p>
+        <h2 id="ct-h" class="h2">{a('ctH')}</h2>
+        <p class="lede">{a('ctLede')}</p>
+      </div>
+      <ul class="ct-list">
+        <li><span class="mono muted">{a('email')}</span><a href={profile.links.email}>{profile.links.emailLabel}</a><button class="btn btn-sm" type="button" data-copy={profile.links.emailLabel} data-copied={a('copied')} data-select={a('selectCopy')} data-label={a('copy')}>{a('copy')}</button></li>
+        <li><span class="mono muted">LinkedIn</span><a href={profile.links.linkedin} rel="noopener noreferrer">{profile.links.linkedinLabel}</a></li>
+        <li><span class="mono muted">GitHub</span><a href={profile.links.github} rel="noopener noreferrer">{profile.links.githubLabel}</a></li>
+        <li><span class="mono muted">{a('location')}</span><span>{P.location}</span></li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .about-ctas { display: flex; flex-wrap: wrap; gap: 10px; }
+  .portrait { grid-column: 1 / span 4; margin: 0; align-self: start; position: sticky; top: 96px; }
+  .portrait img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-lg); border: 1px solid var(--line); filter: grayscale(0.25) contrast(1.05); }
+  .portrait figcaption { display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.6875rem; letter-spacing: 0.12em; text-transform: uppercase; }
+  .who { grid-column: 6 / span 7; }
+  .who h2 { margin-top: 0; }
+  .timeline { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(16px, 3vw, 40px); }
+  .tl-item { display: grid; gap: 10px; align-content: start; padding-top: 18px; border-top: 1px solid var(--fg); }
+  .tl-title { font-weight: 600; }
+  .tl-projects { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
+  .tl-projects li { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding-top: 8px; border-top: 1px solid var(--line); }
+  .tl-projects a { text-decoration: none; }
+  .tl-projects a:hover { color: var(--accent); }
+  .principles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 3vw, 40px); }
+  .principles li { display: grid; gap: 12px; align-content: start; padding-top: 18px; border-top: 1px solid var(--line); }
+  .pr-num { font-size: 0.75rem; color: var(--accent); letter-spacing: 0.12em; }
+  .ct-copy { grid-column: 1 / span 5; display: grid; gap: 18px; align-content: start; }
+  .ct-list { grid-column: 7 / span 6; list-style: none; margin: 0; padding: 0; }
+  .ct-list li { display: grid; grid-template-columns: 7em minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 16px 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+  .ct-list li:last-child { border-bottom: 1px solid var(--line); }
+  .ct-list .mono { font-size: 0.6875rem; letter-spacing: 0.14em; text-transform: uppercase; }
+  .ct-list a { font: 500 1.0625rem var(--font-display); text-decoration: none; }
+  .ct-list a:hover { color: var(--accent); }
+  @media (max-width: 900px) {
+    .portrait { grid-column: 1 / -1; position: static; max-width: 360px; }
+    .who, .ct-copy, .ct-list { grid-column: 1 / -1; }
+    .timeline, .principles { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) { .ct-list li { grid-template-columns: 1fr auto; } .ct-list li > .mono { grid-column: 1 / -1; } }
+</style>
+
+<script>
+  import { emit } from '../lib/bus';
+  document.querySelectorAll<HTMLElement>('[data-ask]').forEach((b) =>
+    b.addEventListener('click', () => emit('pexe:agent-open', { prompt: b.dataset.ask || undefined, send: b.dataset.send === '1' })));
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((b) =>
+    b.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(b.dataset.copy!); b.textContent = b.dataset.copied ?? 'Copied'; } catch { b.textContent = b.dataset.select ?? 'Select & copy'; }
+      setTimeout(() => (b.textContent = b.dataset.label ?? 'Copy'), 1800);
+    }));
+</script>

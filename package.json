@@ -1,0 +1,62 @@
+{
+  "name": "priyanshu-exe",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "PRIYANSHU.EXE V2: portfolio site (Astro) + PRIYANSHU.AI agent (Cloudflare Worker).",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "npm run check:content && astro build && node scripts/csp.mjs && node scripts/check-dist.mjs",
+    "preview": "astro preview --port 4321",
+    "check": "astro check",
+    "check:content": "node scripts/check-content.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "worker:bundle": "node scripts/bundle-worker.mjs",
+    "ci": "npm run check && npm test && npm run build && npm run worker:bundle && npm run test:e2e",
+    "worker:dev": "cd worker && wrangler dev --local --port 8787",
+    "staging:build": "npm run check:content && PUBLIC_STAGING=1 astro build --outDir .staging/site && node scripts/check-dist.mjs .staging/site",
+    "staging": "npm run staging:build && node scripts/staging-server.mjs .staging/site",
+    "lab:build": "npm run check:content && astro build --config astro.lab.config.mjs && node scripts/csp.mjs .lab/site && node scripts/check-dist.mjs .lab/site",
+    "lab": "npm run lab:build && astro preview --config astro.lab.config.mjs --ignore-lock",
+    "lab:dev": "astro dev --config astro.lab.config.mjs",
+    "lab:shots": "node scripts/design-lab/shots.mjs",
+    "test:lab": "playwright test --config playwright.lab.config.ts",
+    "lab:measure": "node scripts/design-lab/measure.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^8.1.6",
+    "@astrojs/react": "^7.1.9",
+    "@astrojs/sitemap": "^3.7.6",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@fontsource-variable/space-grotesk": "^5.3.0",
+    "@fontsource/instrument-serif": "^5.3.0",
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.2",
+    "astro": "^7.4.13",
+    "gsap": "^3.15.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "three": "^0.187.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^1.10.0",
+    "@astrojs/check": "^0.9.12",
+    "@axe-core/playwright": "^4.14.0",
+    "@cloudflare/workers-types": "^5.20261118.1",
+    "@playwright/test": "^1.65.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.187.0",
+    "esbuild": "^0.28.2",
+    "typescript": "^6.0.3",
+    "vitest": "^5.1.1",
+    "wrangler": "^4.164.0"
+  }
+}

@@ -1,0 +1,46 @@
+# Build and test every push and pull request. Never deploys.
+name: CI
+on:
+  push:
+    branches-ignore: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Type check
+        run: npm run check
+      - name: Unit, agent and worker tests
+        run: npm test
+      - name: Build (includes the content-safety gate and schema validation)
+        run: npm run build
+      - name: Worker bundle (size, credential and private-host gate)
+        run: npm run worker:bundle
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: End-to-end, accessibility and reflow tests
+        run: npm run test:e2e
+        env:
+          PW_CHANNEL: bundled
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: test-results/
+          retention-days: 7

@@ -1,0 +1,72 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import WorkIndex from '../components/WorkIndex.astro';
+import { projects, EVIDENCE_RANK, type Status, type EvidenceLevel } from '../data/index';
+import { localeFromPath } from '../i18n/index';
+import { pick } from '../i18n/dict';
+import { WORK } from '../i18n/pages/work';
+import { statusLabel, evidenceLabel } from '../i18n/content';
+const lang = localeFromPath(Astro.url.pathname);
+const w = pick(WORK, lang);
+
+const statuses = [...new Set(projects.map((p) => p.status))] as Status[];
+const levels: EvidenceLevel[] = ['public', 'documented', 'reported', 'pending'];
+const LEVEL_NOTE: Record<EvidenceLevel, string> = { public: w('evPublic'), documented: w('evDocumented'), reported: w('evReported'), pending: w('evPending') };
+const demos = projects.filter((p) => p.demo && p.demo.kind !== 'xray').length;
+---
+<BaseLayout title={w('title')} description={w('description', { n: projects.length })}>
+  <PageHead num="01" kicker={w('kicker')} title={w('h')} accent={w('accent')} meta={w('meta', { n: projects.length, d: demos })}
+    lede={w('lede')}>
+  </PageHead>
+
+  <section class="section work-list" aria-labelledby="list-h">
+    <div class="shell">
+      <h2 id="list-h" class="sr-only">{w('all')}</h2>
+      <WorkIndex filters />
+    </div>
+  </section>
+
+  <section class="section legend" aria-labelledby="legend-h">
+    <div class="shell grid-12">
+      <div class="legend-copy">
+        <p class="num mono muted">{w('howNum')}</p>
+        <h2 id="legend-h" class="h2">{w('howH1')} <br />{w('howH2')}</h2>
+        <p class="lede">{w('howLede')}</p>
+      </div>
+      <div class="legend-tables">
+        <section class="panel">
+          <div class="panel-head"><span>{w('status')}</span><span>{w('statusSub')}</span></div>
+          <ul class="panel-body lg-list">
+            {statuses.map((s) => (
+              <li><span class="status" data-status={s}>{statusLabel(s, lang)}</span><span class="mono muted">{projects.filter((p) => p.status === s).length}</span></li>
+            ))}
+          </ul>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><span>{w('evidence')}</span><span>{w('evidenceSub')}</span></div>
+          <ul class="panel-body lg-list lg-ev">
+            {levels.map((l) => (
+              <li>
+                <span class="evidence"><span class="bars">{[1, 2, 3, 4].map((i) => <i class={i <= EVIDENCE_RANK[l] ? 'on' : ''} />)}</span>{evidenceLabel(l, lang)}</span>
+                <span class="soft">{LEVEL_NOTE[l]}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .work-list { padding-top: clamp(36px, 6vw, 64px); }
+  .legend-copy { grid-column: 1 / span 5; display: grid; gap: 20px; align-content: start; }
+  .legend-tables { grid-column: 7 / span 6; display: grid; gap: 16px; }
+  .lg-list { list-style: none; margin: 0; display: grid; gap: 12px; }
+  .lg-list li { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; }
+  .lg-ev li { display: grid; grid-template-columns: 13.5em 1fr; }
+  .lg-ev .soft { font-size: 0.875rem; }
+  @media (max-width: 900px) { .legend-copy, .legend-tables { grid-column: 1 / -1; } }
+  @media (max-width: 520px) { .lg-ev li { grid-template-columns: 1fr; gap: 4px; } }
+</style>

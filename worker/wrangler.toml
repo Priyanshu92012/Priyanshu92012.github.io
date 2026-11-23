@@ -1,0 +1,26 @@
+# EXPERIMENTAL, NOT DEPLOYED. The public site does not use this Worker. Never deploy it under the
+# v1 name: a future trial must use a separate service (see worker/README.md).
+name = "priyanshu-ai-v2-experimental"
+main = "src/index.ts"
+compatibility_date = "2026-11-01"
+# The Anthropic SDK lazily imports node:fs/path for file-based credentials (never used here: the key is passed explicitly).
+compatibility_flags = ["nodejs_compat"]
+
+# KV namespace for rate-limit and daily-spend counters (no conversation data is stored).
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "1af15787108945efa97b689186af1af7"
+
+# Non-secret configuration. Override per environment with `wrangler deploy --var KEY:VALUE`.
+[vars]
+AGENT_ENABLED = "false"           # kill switch: every chat request gets 503 unless this is "true"
+AGENT_MODEL = "claude-haiku-5-5"  # cheapest current model; no cross-model fallback
+AGENT_EFFORT = "medium"           # low | medium | high
+DAILY_BUDGET_USD = "3"            # hard daily spend cap; requests fail closed (429 → offline mode) above it
+RL_PER_MINUTE = "4"
+RL_PER_HOUR = "20"
+RL_PER_DAY = "400"
+# ALLOWED_ORIGINS = "https://priyanshu92012.github.io"   # defaults include localhost:4321 for development
+
+# Secrets (never in this file):
+#   wrangler secret put ANTHROPIC_API_KEY

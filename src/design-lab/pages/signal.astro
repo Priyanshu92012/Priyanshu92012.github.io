@@ -1,0 +1,166 @@
+---
+// CONCEPT C · SIGNAL: future editorial. An ivory magazine about a software engineer building
+// intelligent systems: monumental type, a monochrome cover portrait, features as spreads.
+import LabLayout from '../LabLayout.astro';
+import Portrait from '../../components/Portrait.astro';
+import FlagshipViz from '../visuals/FlagshipViz';
+import { flagships, intro, explore, capabilities, contact, nav, moreNav } from '../content';
+import { DOMAIN_LABEL } from '../labels';
+import { wavePath, barcodeBars } from '../scripts/signal-wave';
+import serifFont from '@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2?url';
+import serifItalic from '@fontsource/instrument-serif/files/instrument-serif-latin-400-italic.woff2?url';
+import bodyFont from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import '../styles/signal.css';
+
+const W = 1600, H = 120;
+const wave = wavePath(0.6, W, H);
+const bars = barcodeBars('PRIYANSHU.EXE');
+const barW = bars.at(-1)!.x + 3;
+const roman = ['I', 'II', 'III'];
+const words = (s: string) => s.split(' ');
+const year = new Date().getFullYear();
+---
+<LabLayout title="Signal · V3 concept C" description={`${intro.name}: ${intro.role}. ${intro.headline}`} concept="signal" preload={[serifFont, bodyFont]} themeColor="#f2efe8">
+  <Fragment slot="head"><style is:inline set:html={`
+    @font-face { font-family: 'Instrument Serif'; font-style: normal; font-weight: 400; font-display: swap; src: url(${serifFont}) format('woff2'); }
+    @font-face { font-family: 'Instrument Serif'; font-style: italic; font-weight: 400; font-display: swap; src: url(${serifItalic}) format('woff2'); }
+  `} /></Fragment>
+
+  <header slot="nav" class="s-mast">
+    <a class="s-mast-brand" href="/design-lab/signal/">PRIYANSHU<span>.EXE</span><span class="sr-only">, home</span></a>
+    <span class="s-mast-issue" aria-hidden="true">The intelligent-systems issue</span>
+    <nav aria-label="Primary" class="s-mast-nav">
+      {nav.map((l) => <a href={l.href}>{l.label}</a>)}
+      <a href="#contact">Contact</a>
+    </nav>
+    <button type="button" class="s-menu-btn" data-menu-btn aria-expanded="false" aria-controls="s-menu">Index</button>
+    <div class="s-menu" id="s-menu" data-menu hidden>
+      <nav aria-label="Mobile">{[...nav, ...moreNav].map((l, i) => <a href={l.href}><span>{String(i + 1).padStart(2, '0')}</span>{l.label}</a>)}<a href="#contact"><span>{String(nav.length + moreNav.length + 1).padStart(2, '0')}</span>Contact</a></nav>
+    </div>
+  </header>
+
+  <!-- 1 · COVER -->
+  <section class="s-cover" aria-labelledby="s-name">
+    <div class="s-cover-meta" aria-hidden="true"><span>Vol. {year}</span><span>Stuttgart, DE</span><span>48.78° N · 9.18° E</span></div>
+    <h1 id="s-name" class="s-name" data-name>{intro.name}</h1>
+    <div class="s-cover-portrait" data-allow-overflow><Portrait variant="cutout" eager class="s-portrait" sizes="(max-width: 760px) 86vw, 52vw" /></div>
+    <div class="s-cover-lines">
+      <p class="s-role">{intro.role} <span>—</span> {intro.affiliation}</p>
+      <p class="s-headline"><em>{intro.headlineParts[0]}</em><br />{intro.headlineParts[1]}</p>
+      <ol class="s-toc" aria-label="In this issue">
+        {flagships.map((f) => <li><a href={`#s-${f.slug}`}><span class="s-toc-n">{f.no}</span><span class="s-toc-t">{f.title}</span><span class="s-toc-d">{DOMAIN_LABEL[f.domain]}</span></a></li>)}
+      </ol>
+      <p class="s-ctas"><a href="#features">Read the features ↓</a><a href={explore.href}>All projects ↗</a></p>
+    </div>
+    <svg class="s-wave" data-wave data-w={W} data-h={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true"><path d={wave} /></svg>
+    <div class="s-cover-foot" aria-hidden="true">
+      <span>Fig. 0 — {intro.name}, {intro.role.toLowerCase()}, {intro.location}.</span>
+      <svg class="s-barcode" viewBox={`0 0 ${barW} 28`} preserveAspectRatio="none">{bars.map((b) => <rect x={b.x} y="0" width={b.w} height="28" />)}</svg>
+    </div>
+  </section>
+
+  <!-- 2 · INTRODUCTION -->
+  <section class="s-intro" aria-labelledby="s-intro-h">
+    <h2 id="s-intro-h" class="s-kick">Introduction</h2>
+    <p class="s-lede" data-words>
+      {intro.ledeParts.map((part) => words(part).map((w) => <span class="w">{w} </span>))}
+    </p>
+    <ol class="s-principles">
+      {intro.principles.map((p, i) => <li data-rv><span class="s-roman">{roman[i]}.</span><h3>{p.title}</h3><p>{p.body}</p></li>)}
+    </ol>
+  </section>
+
+  <!-- 3 · FEATURES -->
+  <section class="s-features" id="features" aria-labelledby="s-feat-h">
+    <h2 id="s-feat-h" class="s-section-t"><span class="s-kick">Selected work</span>Three features</h2>
+    {flagships.map((f, i) => (
+      <article class={`s-spread s-spread-${i + 1}`} id={`s-${f.slug}`} data-fs={f.slug} aria-labelledby={`s-t-${f.slug}`}>
+        <div class="s-sp-head">
+          <span class="s-sp-no" data-num aria-hidden="true">{f.no}</span>
+          <p class="s-kick">Feature {f.no} · {DOMAIN_LABEL[f.domain]} · {f.kicker}</p>
+          <h3 class="s-sp-t" id={`s-t-${f.slug}`}><a href={f.caseHref}>{f.title}</a></h3>
+          <p class="s-sp-deck">{f.line}</p>
+          <p class="s-sp-tech">{f.tech.join(' / ')}</p>
+        </div>
+        <figure class="s-fig" data-rv>
+          <FlagshipViz client:visible kind={f.visual} slug={f.slug} />
+          <figcaption><span>Fig. {i + 1}</span> {f.demoTitle}. {f.honesty}</figcaption>
+        </figure>
+        <div class="s-notes-wrap">
+          <button type="button" class="s-notes-btn" data-fs-toggle aria-expanded="false" aria-controls={`s-notes-${f.slug}`} data-open="Read the technical notes" data-close="Close the notes"><span data-fs-label>Read the technical notes</span><span class="s-plus" aria-hidden="true">+</span></button>
+          <div class="s-notes" id={`s-notes-${f.slug}`}>
+            <div class="s-notes-in">
+              {f.problem && <p class="s-dropcap">{f.problem}</p>}
+              {f.approach.length > 0 && <ul>{f.approach.map((a) => <li>{a}</li>)}</ul>}
+              {f.note && <p class="s-note">{f.note}</p>}
+              <p class="s-notes-links"><a href={f.caseHref}>Full case study →</a><a href={f.labHref}>Open the interactive lab →</a></p>
+            </div>
+          </div>
+        </div>
+      </article>
+    ))}
+  </section>
+
+  <!-- 4 · EXPLORE MORE -->
+  <section class="s-explore" aria-label="All projects">
+    <a href={explore.href} class="s-explore-link">
+      <span class="s-kick">The complete index · {explore.projects} projects · {explore.labs} labs</span>
+      <span class="s-explore-t">Explore All Projects <span class="s-arrow" aria-hidden="true">↗</span></span>
+    </a>
+  </section>
+
+  <!-- 5 · CAPABILITIES -->
+  <section class="s-contents" aria-labelledby="s-cap-h">
+    <h2 id="s-cap-h" class="s-section-t"><span class="s-kick">Capabilities</span>Contents</h2>
+    <ol class="s-cap">
+      {capabilities.map((c, i) => (
+        <li data-rv>
+          <a href={c.href}>
+            <span class="s-cap-i">{String(i + 1).padStart(2, '0')}</span>
+            <span class="s-cap-t">{c.label}</span>
+            <span class="s-cap-dots" aria-hidden="true"></span>
+            <span class="s-cap-n">{c.projects} projects</span>
+            <span class="s-cap-s">{c.skills.join(', ')}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <!-- 6 · CONTACT -->
+  <section class="s-corr" id="contact" aria-labelledby="s-corr-h">
+    <h2 id="s-corr-h" class="s-kick">Correspondence</h2>
+    <p class="s-corr-t">Write to <em>{intro.name}</em></p>
+    <a class="s-mail" href={contact.email}>{contact.emailLabel}</a>
+    <p class="s-corr-row">
+      <a href={contact.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+      <a href={contact.github} target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+      <a href="/recruiter/">Recruiter mode</a>
+      <button type="button" data-ask="">Ask the pet bot 🐯</button>
+    </p>
+  </section>
+  <footer slot="footer" class="s-colophon"><span>© {year} {intro.name} · {intro.location}</span><span>Set in Instrument Serif, Inter and JetBrains Mono · Concept C · Signal</span></footer>
+</LabLayout>
+
+<script>
+  import { bootShowcases, bootAsk, bootMenu, bootReveal, afterLoad, loadGsap, reducedMotion } from '../scripts/common';
+  import { bootWave } from '../scripts/signal-wave';
+  bootShowcases(); bootAsk(); bootMenu(); bootReveal();
+  bootWave(document.querySelector<SVGSVGElement>('[data-wave]'));
+  const mast = document.querySelector<HTMLElement>('.s-mast');
+  const onScroll = () => mast?.classList.toggle('is-scrolled', scrollY > innerHeight * 0.6);
+  onScroll(); addEventListener('scroll', onScroll, { passive: true });
+
+  if (!reducedMotion()) afterLoad(async () => {
+    const { gsap } = await loadGsap();
+    // cover: the name slides left and the portrait rises as the cover leaves
+    gsap.to('[data-name]', { xPercent: -8, ease: 'none', scrollTrigger: { trigger: '.s-cover', start: 'top top', end: 'bottom top', scrub: true } });
+    gsap.to('.s-portrait', { yPercent: -6, ease: 'none', scrollTrigger: { trigger: '.s-cover', start: 'top top', end: 'bottom top', scrub: true } });
+    // the introduction is typeset word by word as you read it
+    gsap.fromTo('.s-lede .w', { color: '#6b665d' }, { color: '#0d0d0d', stagger: 0.05, ease: 'none', scrollTrigger: { trigger: '.s-lede', start: 'top 80%', end: 'bottom 45%', scrub: true } });
+    // giant feature numerals drift against the scroll
+    gsap.utils.toArray<HTMLElement>('[data-num]').forEach((n) => gsap.fromTo(n, { yPercent: 18 }, { yPercent: -18, ease: 'none', scrollTrigger: { trigger: n.closest('.s-spread'), start: 'top bottom', end: 'bottom top', scrub: true } }));
+    // the explore line stretches as it crosses the page
+    gsap.fromTo('.s-explore-t', { letterSpacing: '0.02em' }, { letterSpacing: '-0.035em', ease: 'none', scrollTrigger: { trigger: '.s-explore', start: 'top bottom', end: 'bottom top', scrub: true } });
+  });
+</script>

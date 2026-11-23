@@ -1,0 +1,165 @@
+---
+// CONCEPT B · ORBIT: spatial intelligence. The portrait sits inside three project orbits;
+// information appears only when a visitor selects one.
+import { getImage } from 'astro:assets';
+import LabLayout from '../LabLayout.astro';
+import Portrait from '../../components/Portrait.astro';
+import OrbitHero from '../three/OrbitHero';
+import FlagshipViz from '../visuals/FlagshipViz';
+import cutout from '../../assets/portrait/portrait-cutout.webp';
+import { flagships, intro, explore, capabilities, contact, nav, moreNav } from '../content';
+import { DOMAIN_LABEL } from '../labels';
+import { COLORS } from '../three/orbit-geometry';
+import displayFont from '@fontsource-variable/space-grotesk/files/space-grotesk-latin-wght-normal.woff2?url';
+import bodyFont from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import '../styles/orbit.css';
+
+const occluder = await getImage({ src: cutout, width: 720, format: 'webp', quality: 60 });
+const items = flagships.map((f) => ({
+  slug: f.slug, no: f.no, shortTitle: f.shortTitle, title: f.title, domain: f.domain, domainLabel: DOMAIN_LABEL[f.domain],
+  line: f.line, tech: f.tech, honesty: f.honesty, caseHref: f.caseHref, labHref: f.labHref,
+}));
+const maxProjects = Math.max(...capabilities.map((c) => c.projects));
+---
+<LabLayout title="Orbit · V3 concept B" description={`${intro.name}: ${intro.role}. ${intro.headline}`} concept="orbit" preload={[displayFont, bodyFont]} themeColor="#05060a">
+  <header slot="nav" class="o-nav">
+    <a class="o-brand" href="/design-lab/orbit/" aria-label="Priyanshu, home"><span class="o-brand-mark" aria-hidden="true"></span>Priyanshu</a>
+    <nav aria-label="Primary" class="o-nav-links">
+      {nav.map((l) => <a href={l.href}>{l.label}</a>)}
+      <a href="#contact">Contact</a>
+    </nav>
+    <button type="button" class="o-menu-btn" data-menu-btn aria-expanded="false" aria-controls="o-menu">Menu</button>
+    <div class="o-menu" id="o-menu" data-menu hidden>
+      <nav aria-label="Mobile">{[...nav, ...moreNav].map((l) => <a href={l.href}>{l.label}</a>)}<a href="#contact">Contact</a></nav>
+    </div>
+  </header>
+
+  <!-- 1 · HERO -->
+  <section class="o-hero" aria-labelledby="o-name">
+    <OrbitHero client:idle items={items} portraitSrc={occluder.src}>
+      <Portrait slot="portrait" variant="cutout" eager class="o-portrait" sizes="(max-width: 760px) 80vw, 62vh" />
+      <div class="o-copy">
+        <p class="o-kicker">{intro.role} · {intro.affiliation}</p>
+        <h1 id="o-name" class="o-name">{intro.name}</h1>
+        <p class="o-headline">{intro.headline}</p>
+      </div>
+    </OrbitHero>
+  </section>
+
+  <!-- 2 · INTRODUCTION -->
+  <section class="o-intro" aria-labelledby="o-intro-h">
+    <h2 id="o-intro-h" class="o-label">Introduction</h2>
+    <p class="o-lede" data-rv>{intro.lede}</p>
+    <ol class="o-principles">
+      {intro.principles.map((p, i) => (
+        <li data-rv style={`--d:${i * 100}ms`}><span class="o-node" aria-hidden="true"></span><h3>{p.title}</h3><p>{p.body}</p></li>
+      ))}
+    </ol>
+  </section>
+
+  <!-- 3 · SELECTED WORK -->
+  <section class="o-work" id="work" aria-labelledby="o-work-h">
+    <div class="o-work-rail" aria-hidden="true">
+      <svg viewBox="-60 -60 120 120" class="o-mini">
+        {flagships.map((f, i) => (
+          <g class={`o-mini-ring`} data-mini={f.slug} style={`--c:${COLORS[f.domain]}`}>
+            <ellipse cx="0" cy="0" rx={26 + i * 10} ry={(26 + i * 10) * 0.34} transform={`rotate(${[-12, 20, -34][i]})`} />
+            <circle cx={(26 + i * 10)} cy="0" r="2.6" transform={`rotate(${[-12, 20, -34][i]})`} />
+          </g>
+        ))}
+        <circle cx="0" cy="0" r="9" class="o-mini-core" />
+      </svg>
+      <ol class="o-rail-list">
+        {flagships.map((f) => <li data-rail={f.slug} style={`--c:${COLORS[f.domain]}`}><span>{f.no}</span>{f.shortTitle}</li>)}
+      </ol>
+    </div>
+    <div class="o-work-main">
+      <header class="o-work-head">
+        <h2 id="o-work-h" class="o-label">Selected work</h2>
+        <p class="o-h2">Three orbits. Three working labs.</p>
+      </header>
+      {flagships.map((f) => (
+        <article class="o-chapter" id={`o-${f.slug}`} data-fs={f.slug} data-chapter={f.slug} style={`--c:${COLORS[f.domain]}`} aria-labelledby={`o-t-${f.slug}`}>
+          <p class="o-ch-k"><span class="o-dot" aria-hidden="true"></span>{f.no} · {DOMAIN_LABEL[f.domain]} · {f.kicker}</p>
+          <h3 class="o-ch-t" id={`o-t-${f.slug}`}><a href={f.caseHref}>{f.title}</a></h3>
+          <p class="o-ch-line">{f.line}</p>
+          <ul class="o-chips" aria-label="Technologies">{f.tech.map((t) => <li>{t}</li>)}</ul>
+          <div class="o-viz" data-rv>
+            <FlagshipViz client:visible kind={f.visual} slug={f.slug} />
+          </div>
+          <p class="o-ch-honesty">{f.honesty}</p>
+          <button type="button" class="o-ch-toggle" data-fs-toggle aria-expanded="false" aria-controls={`o-more-${f.slug}`} data-open="Mission notes" data-close="Hide notes"><span data-fs-label>Mission notes</span><span aria-hidden="true" class="o-chev">↓</span></button>
+          <div class="o-ch-more" id={`o-more-${f.slug}`}>
+            <div class="o-ch-more-in">
+              {f.problem && <p><b>Problem.</b> {f.problem}</p>}
+              {f.approach.length > 0 && <ul>{f.approach.map((a) => <li>{a}</li>)}</ul>}
+              {f.note && <p class="o-ch-note">{f.note}</p>}
+              <p class="o-ch-links"><a href={f.caseHref}>Full case study →</a><a href={f.labHref}>Open the interactive lab →</a></p>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- 4 · EXPLORE MORE -->
+  <section class="o-explore" aria-label="All projects">
+    <a class="o-explore-link" href={explore.href}>
+      <svg class="o-explore-orbit" viewBox="-100 -100 200 200" aria-hidden="true">
+        <ellipse cx="0" cy="0" rx="92" ry="34" transform="rotate(-14)" />
+        <ellipse cx="0" cy="0" rx="78" ry="78" class="faint" />
+        <circle cx="92" cy="0" r="3" transform="rotate(-14)" class="sat" />
+      </svg>
+      <span class="o-explore-k">{explore.projects} projects · {explore.labs} labs</span>
+      <span class="o-explore-t">Explore All Projects <span aria-hidden="true">↗</span></span>
+    </a>
+  </section>
+
+  <!-- 5 · CAPABILITIES -->
+  <section class="o-cap" aria-labelledby="o-cap-h">
+    <h2 id="o-cap-h" class="o-label">Capabilities</h2>
+    <ul class="o-cap-list">
+      {capabilities.map((c) => (
+        <li data-rv>
+          <a href={c.href}>
+            <span class="o-planet" style={`--sz:${16 + (c.projects / maxProjects) * 30}px`} aria-hidden="true"></span>
+            <span class="o-cap-t">{c.label}</span>
+            <span class="o-cap-n">{c.projects} projects</span>
+            <span class="o-cap-s">{c.skills.join(' · ')}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- 6 · CONTACT -->
+  <section class="o-contact" id="contact" aria-labelledby="o-contact-h">
+    <h2 id="o-contact-h" class="o-contact-t">Start a conversation.</h2>
+    <a class="o-mail" href={contact.email}>{contact.emailLabel}</a>
+    <p class="o-contact-row">
+      <a href={contact.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+      <a href={contact.github} target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+      <a href="/recruiter/">Recruiter mode</a>
+      <button type="button" data-ask="">Ask the pet bot 🐯</button>
+    </p>
+    <p class="o-loc">{contact.location}</p>
+  </section>
+  <footer slot="footer" class="o-foot"><span>© {new Date().getFullYear()} {intro.name}</span><span>Concept B · Orbit · Three.js gyroscope, React islands</span></footer>
+</LabLayout>
+
+<script>
+  import { bootShowcases, bootAsk, bootMenu, bootReveal } from '../scripts/common';
+  bootShowcases(); bootAsk(); bootMenu(); bootReveal();
+  const nav = document.querySelector<HTMLElement>('.o-nav');
+  const onScroll = () => nav?.classList.toggle('is-scrolled', scrollY > 24);
+  onScroll(); addEventListener('scroll', onScroll, { passive: true });
+
+  // the sticky orbit rail follows the chapter in view
+  const rail = document.querySelector<HTMLElement>('.o-work-rail');
+  const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+    if (!e.isIntersecting || !rail) return;
+    const slug = (e.target as HTMLElement).dataset.chapter;
+    rail.querySelectorAll<HTMLElement>('[data-mini],[data-rail]').forEach((el) => el.classList.toggle('on', (el.dataset.mini ?? el.dataset.rail) === slug));
+  }), { rootMargin: '-45% 0px -45% 0px' });
+  document.querySelectorAll('[data-chapter]').forEach((c) => io.observe(c));
+</script>

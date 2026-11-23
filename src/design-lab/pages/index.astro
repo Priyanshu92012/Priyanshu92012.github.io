@@ -1,0 +1,207 @@
+---
+// /design-lab/ · local-only comparison gallery for the V3 homepage concepts and the V2 baseline.
+// Screenshots come from `npm run lab:shots` and numbers from `npm run lab:measure` (both against the
+// built lab). Nothing here is invented: missing files show as "not captured yet".
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import LabLayout from '../LabLayout.astro';
+import { CONCEPTS } from '../content';
+import notes from '../notes';
+import bodyFont from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+
+const shotFiles = import.meta.glob<{ default: ImageMetadata }>('../shots/*.{webp,jpg,png}', { eager: true });
+const shot = (id: string, kind: string) => Object.entries(shotFiles).find(([k]) => k.endsWith(`/${id}-${kind}.webp`) || k.endsWith(`/${id}-${kind}.jpg`))?.[1].default;
+const metricFiles = import.meta.glob<{ default: Metrics }>('../metrics.json', { eager: true });
+type PageMetrics = { lighthouse?: { performance: number; accessibility: number; bestPractices: number; seo: number; lcp: number; cls: number; tbt: number; runs: number }; jsInitialKB?: number; phoneKB?: number; transferKB?: number; requests?: number; external?: number; axe?: { serious: number; critical: number; moderate: number }; consoleErrors?: number };
+type Metrics = { measuredAt: string; environment: string; pages: Record<string, PageMetrics> };
+const metrics: Metrics | undefined = Object.values(metricFiles)[0]?.default;
+const fmt = (n: number | undefined, d = 0, unit = '') => (n === undefined ? '—' : `${n.toFixed(d)}${unit}`);
+---
+<LabLayout title="Design lab · V3 concepts" description="Local comparison gallery for the PRIYANSHU.EXE V3 homepage concepts." concept="gallery" preload={[bodyFont]} themeColor="#0b0c10">
+  <style is:global>
+    :root[data-concept='gallery'] { --bg: #0b0c10; --surface: #12141a; --surface-2: #181b23; --fg: #eceef2; --fg-soft: #b6bcc8; --fg-mute: #8d94a3; --line: #222631; --line-strong: #343a48; --accent: #c8ff3d; --on-accent: #10140a; --grain-opacity: 0; }
+    .g { max-width: 1440px; margin: 0 auto; padding: 40px clamp(16px, 4vw, 56px) 120px; display: grid; gap: 72px; }
+    .g-head { display: grid; gap: 18px; padding-top: 24px; }
+    .g-kick { font: 500 0.6875rem/1.3 var(--font-mono); letter-spacing: 0.2em; text-transform: uppercase; color: var(--fg-mute); }
+    .g-title { font: 600 clamp(2.4rem, 5vw, 4.4rem)/0.95 var(--font-display); letter-spacing: -0.045em; }
+    .g-lede { max-width: 72ch; color: var(--fg-soft); font-size: 1.0625rem; }
+    .g-rules { display: flex; flex-wrap: wrap; gap: 8px; }
+    .g-rules span { padding: 6px 10px; border: 1px solid var(--line-strong); border-radius: 999px; font: 500 0.75rem var(--font-mono); color: var(--fg-soft); }
+    .g-h2 { font: 600 clamp(1.6rem, 2.6vw, 2.2rem)/1.05 var(--font-display); letter-spacing: -0.03em; margin-bottom: 8px; }
+    .g-sub { color: var(--fg-soft); max-width: 70ch; margin-bottom: 24px; }
+    .g-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+    .g-card { display: grid; gap: 14px; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+    .g-card.is-rec { border-color: color-mix(in srgb, var(--accent) 60%, var(--line)); }
+    .g-card-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+    .g-letter { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 8px; background: var(--fg); color: var(--bg); font: 700 1rem var(--font-display); }
+    .g-card-t { font: 600 1.5rem/1 var(--font-display); letter-spacing: -0.03em; }
+    .g-card-tag { color: var(--fg-mute); font-size: 0.9375rem; }
+    .g-badge { margin-left: auto; padding: 4px 9px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font: 600 0.6875rem var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; }
+    .g-shots { display: grid; grid-template-columns: minmax(0, 3.3fr) minmax(0, 1fr); gap: 10px; align-items: start; }
+    .g-shots figure { margin: 0; display: grid; gap: 6px; }
+    .g-shots img { width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--line); background: #000; }
+    .g-shots figcaption { font: 500 0.6875rem var(--font-mono); color: var(--fg-mute); }
+    .g-missing { display: grid; place-items: center; aspect-ratio: 16/10; border: 1px dashed var(--line-strong); border-radius: 8px; color: var(--fg-mute); font: 500 0.75rem var(--font-mono); }
+    .g-card p { color: var(--fg-soft); font-size: 0.9375rem; }
+    .g-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .g-actions a { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--fg); font: 500 0.8125rem var(--font-body); text-decoration: none; }
+    .g-actions a:first-child { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+    .g-actions a:hover { border-color: var(--accent); }
+    .g-live-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
+    .g-live-bar button { min-height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-strong); background: none; color: var(--fg); font: 500 0.8125rem var(--font-body); cursor: pointer; }
+    .g-live-bar button[aria-pressed='true'] { background: var(--fg); color: var(--bg); }
+    .g-live { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .g-live figure { margin: 0; display: grid; gap: 6px; }
+    .g-frame { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: #000; aspect-ratio: var(--ar, 1440 / 900); }
+    .g-frame iframe { position: absolute; left: 0; top: 0; border: 0; transform-origin: 0 0; }
+    .g-frame .g-placeholder { position: absolute; inset: 0; display: grid; place-items: center; color: var(--fg-mute); font: 500 0.75rem var(--font-mono); }
+    .g-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+    .g-table { width: 100%; border-collapse: collapse; min-width: 900px; font-size: 0.875rem; }
+    .g-table th, .g-table td { padding: 12px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .g-table thead th { font: 600 0.75rem var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-mute); background: var(--surface); position: sticky; top: 0; }
+    .g-table tbody th { font-weight: 600; color: var(--fg); width: 16%; }
+    .g-table td { color: var(--fg-soft); }
+    .g-num { font-family: var(--font-mono); color: var(--fg) !important; white-space: nowrap; }
+    .g-good { color: var(--accent) !important; }
+    .g-warn { color: #ffb08a !important; }
+    .g-rec { display: grid; gap: 16px; padding: clamp(20px, 3vw, 36px); border-radius: 16px; border: 1px solid color-mix(in srgb, var(--accent) 50%, var(--line)); background: linear-gradient(160deg, rgba(200, 255, 61, 0.05), transparent 60%); }
+    .g-rec h2 { font: 600 clamp(1.6rem, 2.6vw, 2.2rem)/1.05 var(--font-display); letter-spacing: -0.03em; }
+    .g-rec p, .g-rec li { color: var(--fg-soft); max-width: 80ch; }
+    .g-rec ul, .g-list { margin: 0; padding-left: 1.2em; display: grid; gap: 8px; color: var(--fg-soft); }
+    .g-rec b, .g-list b { color: var(--fg); }
+    .g-foot { color: var(--fg-mute); font: 500 0.75rem var(--font-mono); }
+    @media (max-width: 1000px) { .g-cards { grid-template-columns: minmax(0, 1fr); } .g-live { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 560px) { .g-live { grid-template-columns: minmax(0, 1fr); } .g-shots { grid-template-columns: minmax(0, 1fr); } }
+  </style>
+
+  <div class="g">
+    <header class="g-head">
+      <p class="g-kick">PRIYANSHU.EXE · V3 design lab · local only, never deployed</p>
+      <h1 class="g-title">Three directions.<br />One baseline.</h1>
+      <p class="g-lede">{notes.intro}</p>
+      <div class="g-rules">{notes.rules.map((r) => <span>{r}</span>)}</div>
+    </header>
+
+    <section aria-labelledby="g-concepts">
+      <h2 id="g-concepts" class="g-h2">The concepts</h2>
+      <p class="g-sub">Real screenshots of the built pages (1440 × 900 and 390 × 844). Open any concept full screen to use it: navigation, project interactions, labs and the pet bot all work.</p>
+      <div class="g-cards">
+        {CONCEPTS.map((c) => {
+          const d = shot(c.id, 'desktop'), m = shot(c.id, 'mobile'), full = shot(c.id, 'full'), bot = shot(c.id, 'bot');
+          return (
+            <article class={`g-card${notes.recommended === c.id ? ' is-rec' : ''}`} aria-labelledby={`g-c-${c.id}`}>
+              <div class="g-card-head">
+                <span class="g-letter" aria-hidden="true">{c.letter}</span>
+                <h3 class="g-card-t" id={`g-c-${c.id}`}>{c.name}</h3>
+                <span class="g-card-tag">{c.tagline}</span>
+                {notes.recommended === c.id && <span class="g-badge">Recommended</span>}
+              </div>
+              <div class="g-shots">
+                <figure>{d ? <Image src={d} alt={`${c.name}: desktop homepage, first screen`} widths={[720, 1080]} sizes="(max-width: 1000px) 90vw, 34vw" format="webp" quality={80} /> : <div class="g-missing">desktop screenshot not captured yet</div>}<figcaption>Desktop · 1440</figcaption></figure>
+                <figure>{m ? <Image src={m} alt={`${c.name}: phone homepage, first screen`} widths={[240, 390]} sizes="(max-width: 560px) 90vw, 11vw" format="webp" quality={80} /> : <div class="g-missing">phone</div>}<figcaption>Phone · 390</figcaption></figure>
+              </div>
+              <p>{notes.summaries[c.id]}</p>
+              <div class="g-actions">
+                <a href={c.href} target="_blank" rel="noopener">Open full screen ↗</a>
+                {full && <a href={full.src} target="_blank" rel="noopener">Full-page screenshot</a>}
+                {bot && <a href={bot.src} target="_blank" rel="noopener">Pet bot screenshot</a>}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+
+    <section aria-labelledby="g-live-h">
+      <h2 id="g-live-h" class="g-h2">Live side by side</h2>
+      <p class="g-sub">The actual pages in frames, scaled down. They load on demand (four live pages with 3D at once are heavy). Phone width shows the static, touch-first versions.</p>
+      <div class="g-live-bar" role="group" aria-label="Preview width">
+        <button type="button" data-w="1440" aria-pressed="true">Desktop 1440</button>
+        <button type="button" data-w="820" aria-pressed="false">Tablet 820</button>
+        <button type="button" data-w="390" aria-pressed="false">Phone 390</button>
+        <button type="button" data-load>Load live previews</button>
+      </div>
+      <div class="g-live" data-live>
+        {CONCEPTS.map((c) => (
+          <figure>
+            <div class="g-frame" data-src={c.href}><span class="g-placeholder">{c.letter} · {c.name}</span></div>
+            <figcaption class="g-foot">{c.letter} · {c.name} · <a href={c.href} target="_blank" rel="noopener">open ↗</a></figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
+
+    <section aria-labelledby="g-cmp">
+      <h2 id="g-cmp" class="g-h2">Visual and technical comparison</h2>
+      <p class="g-sub">{metrics ? `Measured ${metrics.measuredAt} · ${metrics.environment}` : 'No measurements yet: run npm run lab:measure.'}</p>
+      <div class="g-table-wrap">
+        <table class="g-table">
+          <thead><tr><th scope="col">Aspect</th>{CONCEPTS.map((c) => <th scope="col">{c.letter} · {c.name}</th>)}</tr></thead>
+          <tbody>
+            {notes.compare.map((row) => (
+              <tr><th scope="row">{row.label}</th>{CONCEPTS.map((c) => <td>{row.values[c.id]}</td>)}</tr>
+            ))}
+            <tr><th scope="row">Lighthouse performance (mobile, median)</th>{CONCEPTS.map((c) => { const l = metrics?.pages[c.id]?.lighthouse; return <td class={`g-num ${l ? (l.performance >= 90 ? 'g-good' : 'g-warn') : ''}`}>{l ? `${l.performance} (${l.runs} runs)` : '—'}</td>; })}</tr>
+            <tr><th scope="row">LCP (simulated slow 4G)</th>{CONCEPTS.map((c) => { const l = metrics?.pages[c.id]?.lighthouse; return <td class={`g-num ${l ? (l.lcp <= 2.5 ? 'g-good' : 'g-warn') : ''}`}>{fmt(l?.lcp, 2, ' s')}</td>; })}</tr>
+            <tr><th scope="row">CLS · TBT</th>{CONCEPTS.map((c) => { const l = metrics?.pages[c.id]?.lighthouse; return <td class="g-num">{l ? `${l.cls.toFixed(3)} · ${Math.round(l.tbt)} ms` : '—'}</td>; })}</tr>
+            <tr><th scope="row">Accessibility · Best practices · SEO</th>{CONCEPTS.map((c) => { const l = metrics?.pages[c.id]?.lighthouse; return <td class="g-num">{l ? `${l.accessibility} · ${l.bestPractices} · ${l.seo}` : '—'}</td>; })}</tr>
+            <tr><th scope="row">JavaScript a phone downloads (no interaction)</th>{CONCEPTS.map((c) => <td class="g-num">{fmt(metrics?.pages[c.id]?.jsInitialKB, 0, ' KB')}</td>)}</tr>
+            <tr><th scope="row">Everything a phone downloads (no interaction)</th>{CONCEPTS.map((c) => <td class="g-num">{fmt(metrics?.pages[c.id]?.phoneKB, 0, ' KB')}</td>)}</tr>
+            <tr><th scope="row">Desktop total once the 3D has started</th>{CONCEPTS.map((c) => <td class="g-num">{fmt(metrics?.pages[c.id]?.transferKB, 0, ' KB')}</td>)}</tr>
+            <tr><th scope="row">Console errors</th>{CONCEPTS.map((c) => <td class="g-num">{metrics?.pages[c.id]?.consoleErrors ?? '—'}</td>)}</tr>
+            <tr><th scope="row">axe WCAG 2.2 AA (serious + critical)</th>{CONCEPTS.map((c) => { const a = metrics?.pages[c.id]?.axe; return <td class={`g-num ${a ? (a.serious + a.critical === 0 ? 'g-good' : 'g-warn') : ''}`}>{a ? `${a.serious + a.critical} (moderate ${a.moderate})` : '—'}</td>; })}</tr>
+            <tr><th scope="row">Requests to other hosts</th>{CONCEPTS.map((c) => <td class="g-num">{metrics?.pages[c.id]?.external ?? '—'}</td>)}</tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="g-rec" aria-labelledby="g-rec-h">
+      <p class="g-kick">Recommendation · your decision</p>
+      <h2 id="g-rec-h">{notes.recommendation.title}</h2>
+      {notes.recommendation.body.map((p) => <p set:html={p} />)}
+      <ul>{notes.recommendation.points.map((p) => <li set:html={p} />)}</ul>
+      <p class="g-foot">Nothing has been selected, merged, pushed or deployed. V2 at / is unchanged.</p>
+    </section>
+
+    <section aria-labelledby="g-notes">
+      <h2 id="g-notes" class="g-h2">Performance, accessibility and open items</h2>
+      <ul class="g-list">{notes.findings.map((f) => <li set:html={f} />)}</ul>
+    </section>
+  </div>
+</LabLayout>
+
+<script>
+  const frames = [...document.querySelectorAll<HTMLElement>('[data-live] .g-frame')];
+  let width = 1440, loaded = false;
+  const heights: Record<number, number> = { 1440: 900, 820: 1180, 390: 844 };
+  function layout() {
+    frames.forEach((f) => {
+      f.style.setProperty('--ar', `${width} / ${heights[width]}`);
+      const ifr = f.querySelector('iframe');
+      if (!ifr) return;
+      const scale = f.clientWidth / width;
+      ifr.style.width = `${width}px`; ifr.style.height = `${heights[width]}px`; ifr.style.transform = `scale(${scale})`;
+    });
+  }
+  function load() {
+    loaded = true;
+    frames.forEach((f) => {
+      if (f.querySelector('iframe')) return;
+      const ifr = document.createElement('iframe');
+      ifr.src = f.dataset.src!; ifr.title = `Live preview: ${f.dataset.src}`; ifr.loading = 'lazy';
+      f.querySelector('.g-placeholder')?.remove();
+      f.appendChild(ifr);
+    });
+    layout();
+  }
+  document.querySelector('[data-load]')?.addEventListener('click', load);
+  document.querySelectorAll<HTMLButtonElement>('[data-w]').forEach((b) => b.addEventListener('click', () => {
+    width = Number(b.dataset.w);
+    document.querySelectorAll('[data-w]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    if (loaded) frames.forEach((f) => { const i = f.querySelector('iframe'); if (i) i.src = i.src; });
+    layout();
+  }));
+  addEventListener('resize', layout);
+  layout();
+</script>

@@ -1,0 +1,66 @@
+/* Flagship visuals. Each concept sets the --viz-* tokens on an ancestor. */
+.viz {
+  --_fg: var(--viz-fg, var(--fg)); --_soft: var(--viz-soft, var(--fg-soft)); --_mute: var(--viz-mute, var(--fg-mute));
+  --_line: var(--viz-line, var(--line)); --_a: var(--viz-a, var(--accent)); --_warn: var(--viz-warn, #ff885e);
+  --_pos: var(--viz-pos, var(--_a)); --_neg: var(--viz-neg, #ff7a8a); --_r: var(--viz-radius, 6px);
+  display: grid; gap: 14px; color: var(--_soft); font-size: 0.875rem; min-width: 0;
+}
+.viz-svg { width: 100%; height: auto; overflow: visible; }
+.viz-rule { stroke: var(--_line); stroke-width: 1; }
+.viz-lane { fill: var(--_mute); font: 500 9px var(--font-mono); letter-spacing: 0.06em; }
+.viz-res { fill: var(--_a); transition: width 600ms var(--ease, ease); }
+.viz-res.s-reserved { fill: transparent; stroke: var(--_a); stroke-width: 1.2; stroke-dasharray: 3 2; }
+.viz-res.s-releasing { opacity: 0.55; }
+.viz-res.s-expired, .viz-res.s-failed { fill: var(--_warn); }
+.viz-off { fill: color-mix(in srgb, var(--_mute) 22%, transparent); }
+.viz-head { stroke: var(--_a); stroke-width: 1.5; opacity: 0.8; }
+.viz-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.viz-stats div { display: grid; gap: 2px; padding-top: 8px; border-top: 1px solid var(--_line); }
+.viz-stats dt { font: 500 10px/1.2 var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--_mute); }
+.viz-stats dd { margin: 0; font: 500 1.25rem/1.1 var(--font-mono); color: var(--_fg); font-variant-numeric: tabular-nums; }
+.viz-controls { display: flex; flex-wrap: wrap; gap: 6px; }
+.viz-controls button, .viz-tabs button {
+  min-height: 34px; padding: 0 12px; border-radius: var(--viz-btn-radius, 999px); border: 1px solid var(--_line); background: transparent;
+  color: var(--_fg); font: 500 0.8125rem/1 var(--font-body); cursor: pointer; transition: border-color 160ms, background 160ms, color 160ms;
+}
+.viz-controls button:hover, .viz-tabs button:hover { border-color: var(--_a); }
+.viz-controls button[aria-pressed='true'], .viz-tabs button[aria-pressed='true'] { background: var(--_a); border-color: var(--_a); color: var(--viz-on-a, #0b0b0c); }
+.viz-note { min-height: 2.9em; color: var(--_soft); line-height: 1.45; }
+.viz-cap { font: 500 10.5px/1.5 var(--font-mono); letter-spacing: 0.04em; color: var(--_mute); }
+.viz-cap strong { color: var(--_fg); font-weight: 600; }
+.viz-legend { display: inline-block; width: 14px; height: 8px; margin: 0 4px 0 8px; border-radius: 2px; vertical-align: 0; background: var(--_a); }
+.viz-legend:first-child { margin-left: 0; }
+.viz-legend.s-reserved { background: none; border: 1px dashed var(--_a); }
+.viz-legend.viz-off { background: color-mix(in srgb, var(--_mute) 35%, transparent); }
+
+/* SecureMed */
+.viz-sec-mfa { display: flex; align-items: center; gap: 16px; }
+.viz-ring { width: 64px; height: 64px; flex: none; }
+.viz-ring-bg { fill: none; stroke: var(--_line); stroke-width: 3; }
+.viz-ring-fg { fill: none; stroke: var(--_a); stroke-width: 3; stroke-linecap: round; transition: stroke-dashoffset 900ms linear; }
+.viz-otp { display: grid; gap: 4px; }
+.viz-k { font: 500 10px/1.2 var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--_mute); }
+.viz-code { font: 500 clamp(1.8rem, 3.4vw, 2.6rem)/1 var(--font-mono); letter-spacing: 0.08em; color: var(--_fg); font-variant-numeric: tabular-nums; }
+.viz-flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.viz-flow span { padding: 5px 10px; border-radius: var(--viz-btn-radius, 999px); border: 1px solid var(--_line); font: 500 0.75rem var(--font-mono); color: var(--_mute); }
+.viz-flow span.ok { border-color: var(--_a); color: var(--_fg); }
+.viz-flow span.bad { border-color: var(--_warn); color: var(--_warn); }
+.viz-flow i { width: 18px; height: 1px; background: var(--_line); }
+.viz-gates { display: flex; flex-wrap: wrap; gap: 4px; padding-top: 12px; border-top: 1px solid var(--_line); }
+.viz-gates span { padding: 5px 8px; border-radius: 3px; font: 500 0.6875rem var(--font-mono); border: 1px solid var(--_line); color: var(--_soft); }
+.viz-gates .g-pass { border-color: color-mix(in srgb, var(--_a) 60%, var(--_line)); color: var(--_fg); }
+.viz-gates .g-fail { border-color: var(--_warn); background: color-mix(in srgb, var(--_warn) 18%, transparent); color: var(--_fg); }
+.viz-gates .g-skipped { opacity: 0.4; text-decoration: line-through; }
+
+/* XAI */
+.viz-tabs { display: flex; gap: 6px; }
+.viz-sentence { display: flex; flex-wrap: wrap; gap: 6px 4px; font: var(--viz-sentence-font, 500 clamp(1.15rem, 2vw, 1.5rem)/1.3 var(--font-display)); color: var(--_fg); }
+.tok { padding: 2px 6px; border-radius: 4px; transition: background 400ms var(--ease, ease); }
+.tok.pos { background: color-mix(in srgb, var(--_pos) calc(var(--w) * 55%), transparent); }
+.tok.neg { background: color-mix(in srgb, var(--_neg) calc(var(--w) * 55%), transparent); }
+.viz-meter { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.viz-bar { height: 4px; border-radius: 2px; background: var(--_line); overflow: hidden; }
+.viz-bar i { display: block; height: 100%; background: var(--_a); transition: width 500ms var(--ease, ease); }
+.viz-num { font: 500 0.875rem var(--font-mono); color: var(--_fg); font-variant-numeric: tabular-nums; }
+
+@media (max-width: 420px) { .viz-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

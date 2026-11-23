@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /v1/
+Disallow: /og-card/
+
+Sitemap: https://priyanshu92012.github.io/sitemap-index.xml

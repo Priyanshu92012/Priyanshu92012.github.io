@@ -1,0 +1,55 @@
+---
+// BREACH MODE: consent-based cybersecurity lab. The island renders a permission screen first;
+// nothing runs until the visitor grants permission and presses a module's button.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import BreachLab from '../islands/breach/BreachLab';
+import { localeFromPath, localizePath, t } from '../i18n/index';
+import { pick } from '../i18n/dict';
+import { SEC } from '../i18n/pages/labs2';
+
+const lang = localeFromPath(Astro.url.pathname);
+const x = pick(SEC, lang);
+const L = (p: string) => localizePath(p, lang);
+const HONESTY: [string, string, string][] = ([1, 2, 3, 4, 5, 6, 7] as const).map((n) => [x(`m${n}`), x(`k${n}`), x(`d${n}`)]);
+---
+<BaseLayout title={x('title')} description={x('description')}>
+  <PageHead num="05" kicker={x('kicker')} title={x('h')} accent={x('accent')} meta={x('meta')} lede={x('lede')} />
+
+  <section class="section br-section" aria-labelledby="br-h">
+    <div class="shell">
+      <h2 id="br-h" class="sr-only">{x('expH')}</h2>
+      <p class="br-tiger"><span aria-hidden="true">🐯</span> {x('tiger')}</p>
+      <BreachLab client:afterpaint lang={lang} />
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="hon-h">
+    <div class="shell">
+      <div class="section-head">
+        <div><p class="num">{x('honNum')}</p><h2 id="hon-h" class="h2">{x('honH')}</h2></div>
+        <p>{x('honLede')}</p>
+      </div>
+      <table class="index-table br-honesty">
+        <thead><tr><th scope="col">{x('colModule')}</th><th scope="col">{x('colKind')}</th><th scope="col">{x('colMeans')}</th></tr></thead>
+        <tbody>{HONESTY.map(([m, k, d]) => <tr><th scope="row">{m}</th><td class="mono">{k}</td><td>{d}</td></tr>)}</tbody>
+      </table>
+      <p class="soft br-more">{x('more')} <a href={L('/work/securemed/#demo')}>{x('moreSm')}</a> {x('moreSmD')} {x('and')} <a href={L('/work/opticlab/#demo')}>{x('moreOl')}</a> {x('moreOlD')}.</p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .br-section { padding-top: clamp(24px, 4vw, 48px); }
+  .br-tiger { display: inline-flex; gap: 10px; align-items: center; margin-bottom: 16px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px 999px 999px 6px; background: var(--surface); font-size: 0.9375rem; color: var(--fg-soft); }
+  .br-honesty { width: 100%; }
+  .br-honesty th[scope='row'] { white-space: nowrap; }
+  .br-more { margin-top: 18px; }
+  @media (max-width: 640px) { .br-honesty th[scope='row'] { white-space: normal; } }
+  @media (max-width: 560px) {
+    .br-honesty thead { display: none; }
+    .br-honesty, .br-honesty tbody, .br-honesty tr, .br-honesty th, .br-honesty td { display: block; width: auto; }
+    .br-honesty tr { padding: 10px 0; }
+    .br-honesty th[scope='row'] { white-space: normal; }
+  }
+</style>

@@ -1,0 +1,39 @@
+---
+// Printable résumé: the same component as Recruiter Mode, without switching modes.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Resume from '../components/Resume.astro';
+import { profile } from '../data/index';
+import { localeFromPath, localizePath } from '../i18n/index';
+import { pick } from '../i18n/dict';
+import { RC } from '../i18n/pages/recruiter';
+import { profileText } from '../i18n/content';
+const lang = localeFromPath(Astro.url.pathname);
+const r = pick(RC, lang);
+const P = profileText(lang);
+---
+<BaseLayout title={r('rsTitle')} description={r('rsDescription', { name: profile.name, title: P.title })}>
+  <section class="rs">
+    <div class="shell">
+      <div class="rs-bar no-print">
+        <p class="disclosure"><strong>{r('note')}</strong><span>{r('rsNote')}{!profile.resumePdf && r('rsCv')}</span></p>
+        <div class="rs-actions">
+          <button class="btn btn-primary" type="button" data-print>{r('print')}</button>
+          <a class="btn" href={localizePath('/recruiter/', lang)}>{r('recruiter')}</a>
+        </div>
+      </div>
+      <Resume />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .rs { padding: clamp(24px, 4vw, 48px) 0 clamp(48px, 8vw, 96px); }
+  .rs-bar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .rs-bar .disclosure { flex: 1 1 380px; }
+  .rs-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  @media print { .rs { padding: 0; } @page { size: A4; margin: 14mm 14mm 12mm; } }
+</style>
+
+<script>
+  document.querySelector('[data-print]')?.addEventListener('click', () => window.print());
+</script>

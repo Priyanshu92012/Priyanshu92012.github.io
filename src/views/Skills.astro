@@ -1,0 +1,100 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { localeFromPath, localizePath } from '../i18n/index';
+import { pick } from '../i18n/dict';
+import { SKILLS } from '../i18n/pages/skills';
+import { statusLabel, evidenceLabel, skillLabel } from '../i18n/content';
+import { DOMAIN_DE } from '../data/de';
+import PageHead from '../components/PageHead.astro';
+import Constellation from '../islands/Constellation';
+import SkillTaxonomy from '../components/SkillTaxonomy.astro';
+import { taxonomy } from '../data/capabilities';
+import { domainList, evidencedSkills, projectsWithSkill, projects, EVIDENCE_RANK, EVIDENCE_LABEL, STATUS_LABEL, type Skill } from '../data/index';
+
+const skills = evidencedSkills();
+const byDomain = domainList.map((d) => ({
+  d,
+  skills: skills
+    .filter((s) => s.domain === d.id)
+    .map((s) => ({ s, ps: [...projectsWithSkill(s.id)].sort((a, b) => EVIDENCE_RANK[b.evidence] - EVIDENCE_RANK[a.evidence]) }))
+    .sort((a, b) => b.ps.length - a.ps.length || a.s.label.localeCompare(b.s.label)),
+}));
+const strongest = (ps: ReturnType<typeof projectsWithSkill>) => Math.max(...ps.map((p) => EVIDENCE_RANK[p.evidence]));
+const lang = localeFromPath(Astro.url.pathname);
+const k = pick(SKILLS, lang);
+const L = (x: string) => localizePath(x, lang);
+const label = (s: Skill) => skillLabel(s.id, lang);
+---
+<BaseLayout title={k('title')} description={k('description', { n: skills.length })}>
+  <PageHead num="02" kicker={k('kicker')} title={k('h')} accent={k('accent')} meta={k('meta', { n: skills.length, p: projects.length })} lede={k('lede')} />
+
+  <section class="section cst-section" aria-labelledby="map-h">
+    <div class="shell">
+      <h2 id="map-h" class="sr-only">{k('mapH')}</h2>
+      <Constellation client:idle />
+    </div>
+  </section>
+
+  <section class="section" id="technologies" aria-labelledby="tx-h">
+    <div class="shell">
+      <div class="section-head">
+        <div><p class="num">{k('techNum')}</p><h2 id="tx-h" class="h2">{k('techH')}</h2></div>
+        <p>{k('techLede', { n: taxonomy.reduce((n, g) => n + g.items.length, 0), g: taxonomy.length })}</p>
+      </div>
+      <SkillTaxonomy variant="full" />
+    </div>
+  </section>
+
+  <section class="section" id="evidence-index" aria-labelledby="ei-h">
+    <div class="shell">
+      <div class="section-head">
+        <div><p class="num">{k('eiNum')}</p><h2 id="ei-h" class="h2">{k('eiH')}</h2></div>
+        <p>{k('eiLede')}</p>
+      </div>
+      <div class="ei-grid">
+        {byDomain.map(({ d, skills }) => (
+          <section class={`ei-domain d-${d.id}`} id={`domain-${d.id}`} aria-labelledby={`ei-${d.id}`}>
+            <h3 id={`ei-${d.id}`} class="ei-dh"><span class="swatch" aria-hidden="true"></span>{lang === 'de' ? DOMAIN_DE[d.id]?.label ?? d.label : d.label}<span class="mono muted">{skills.length}</span></h3>
+            <p class="soft ei-blurb">{lang === 'de' ? DOMAIN_DE[d.id]?.blurb ?? d.blurb : d.blurb}</p>
+            <ul class="ei-list">
+              {skills.map(({ s, ps }) => (
+                <li id={`skill-${s.id}`} data-skill-row={s.id}>
+                  <div class="ei-row">
+                    <span class="ei-name">{label(s)}</span>
+                    <span class="evidence" title={k('strongest', { e: evidenceLabel(ps.find((p) => EVIDENCE_RANK[p.evidence] === strongest(ps))!.evidence, lang) })}>
+                      <span class="bars">{[1, 2, 3, 4].map((i) => <i class={i <= strongest(ps) ? 'on' : ''} />)}</span>{ps.length}
+                    </span>
+                  </div>
+                  <ul class="ei-ps">
+                    {ps.map((p) => <li><a href={L(`/work/${p.slug}/`)}>{p.shortTitle}</a><span class="status" data-status={p.status}>{statusLabel(p.status, lang)}</span></li>)}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .cst-section { padding-top: clamp(28px, 5vw, 56px); }
+  .ei-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 4vw, 56px); }
+  .ei-domain { display: grid; gap: 10px; align-content: start; padding-top: 16px; border-top: 1px solid var(--c); }
+  .ei-dh { display: flex; align-items: center; gap: 10px; font-size: var(--fs-h3); }
+  .ei-dh .swatch { width: 10px; height: 10px; border-radius: 50%; background: var(--c); box-shadow: 0 0 12px var(--c); }
+  .ei-dh .mono { margin-left: auto; font-size: 0.75rem; }
+  .ei-blurb { font-size: 0.9rem; }
+  .ei-list { list-style: none; margin: 0; padding: 0; }
+  .ei-list > li { padding: 12px 8px; margin: 0 -8px; border-top: 1px solid var(--line); border-radius: 6px; transition: background 250ms var(--ease); scroll-margin-top: 96px; }
+  .ei-list > li:target, .ei-list > li:global(.is-sel) { background: color-mix(in srgb, var(--c) 10%, transparent); }
+  .ei-row { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+  .ei-name { font-weight: 600; color: var(--fg); }
+  .ei-ps { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.8125rem; }
+  .ei-ps li { display: inline-flex; gap: 8px; align-items: baseline; }
+  .ei-ps a { color: var(--fg-soft); text-decoration: none; }
+  .ei-ps a:hover { color: var(--fg); text-decoration: underline; }
+  .ei-ps .status { font-size: 0.5625rem; }
+  @media (max-width: 860px) { .ei-grid { grid-template-columns: 1fr; } }
+</style>

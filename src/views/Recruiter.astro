@@ -1,0 +1,56 @@
+---
+// Recruiter Mode: the résumé first, with the few actions a recruiter needs. Arriving here turns
+// recruiter mode on, so the rest of the site stays fast and factual (no 3D, no scroll effects).
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Resume from '../components/Resume.astro';
+import { profile } from '../data/index';
+import { localeFromPath, localizePath } from '../i18n/index';
+import { pick } from '../i18n/dict';
+import { RC } from '../i18n/pages/recruiter';
+import { profileText } from '../i18n/content';
+const lang = localeFromPath(Astro.url.pathname);
+const r = pick(RC, lang);
+const P = profileText(lang);
+---
+<BaseLayout title={r('rcTitle')} description={r('rcDescription', { name: profile.name, title: P.title })}>
+  <section class="rc">
+    <div class="shell">
+      <div class="masthead intro no-print">
+        <span><b>{r('rcMast')}</b> · {r('rcFacts')}</span>
+        <span class="rc-state"><span class="rc-dot" aria-hidden="true"></span><span>{r('rcOff')}</span></span>
+      </div>
+      <nav class="rc-actions intro no-print" aria-label={r('rcActions')}>
+        <a class="btn btn-primary" href={profile.links.email}>{r('email', { name: profile.name })} <span class="arrow">→</span></a>
+        <button class="btn" type="button" data-job>{r('job')}</button>
+        <button class="btn" type="button" data-print>{r('print')}</button>
+        <a class="btn btn-quiet" href={localizePath('/work/', lang)}>{r('allCases')}</a>
+        <button class="btn btn-quiet" type="button" data-exit data-home={localizePath('/', lang)}>{r('exit')}</button>
+      </nav>
+      <Resume />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .rc { padding: 14px 0 clamp(48px, 8vw, 96px); }
+  .rc-state { display: inline-flex; align-items: center; gap: 8px; }
+  .rc-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+  .rc-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: clamp(20px, 3vw, 32px) 0 clamp(16px, 2vw, 24px); }
+  .btn-quiet { border-color: transparent; color: var(--fg-soft); }
+  .btn-quiet:hover { color: var(--fg); border-color: var(--line); }
+  @media (max-width: 560px) {
+    .rc-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .rc-actions .btn { justify-content: center; padding: 8px 10px; white-space: normal; text-align: center; height: auto; min-height: 42px; line-height: 1.25; }
+    .rc-actions .btn-primary { grid-column: 1 / -1; }
+  }
+  @media print { .rc { padding: 0; } @page { size: A4; margin: 14mm 14mm 12mm; } }
+</style>
+
+<script>
+  import { emit } from '../lib/bus';
+  import { setPref } from '../lib/prefs';
+  setPref('mode', 'recruiter');
+  document.querySelector('[data-job]')?.addEventListener('click', () => emit('pexe:agent-open', { mode: 'job' }));
+  document.querySelector('[data-print]')?.addEventListener('click', () => window.print());
+  document.querySelector('[data-exit]')?.addEventListener('click', () => { setPref('mode', 'immersive'); location.href = (document.querySelector<HTMLElement>('[data-exit]')?.dataset.home) ?? '/'; });
+</script>

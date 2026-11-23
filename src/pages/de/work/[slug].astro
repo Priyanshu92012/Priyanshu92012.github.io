@@ -1,0 +1,10 @@
+---
+import Case from '../../../views/Case.astro';
+import { projects, type Project } from '../../../data/index';
+export function getStaticPaths() {
+  return projects.map((p, i) => ({ params: { slug: p.slug }, props: { p, prev: projects[i - 1], next: projects[i + 1] } }));
+}
+interface Props { p: Project; prev?: Project; next?: Project }
+const { p, prev, next } = Astro.props;
+---
+<Case p={p} prev={prev} next={next} />

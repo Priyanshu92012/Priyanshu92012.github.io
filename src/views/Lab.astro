@@ -1,0 +1,150 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { localeFromPath, localizePath } from '../i18n/index';
+import { pick } from '../i18n/dict';
+import { LAB } from '../i18n/pages/lab';
+import { statusLabel, evidenceLabel, projectText } from '../i18n/content';
+import PageHead from '../components/PageHead.astro';
+import FeatureVisual from '../components/FeatureVisual.astro';
+import ArenaLab from '../islands/demos/ArenaLab';
+import { projects, getProject, STATUS_LABEL, EVIDENCE_LABEL, type DemoKind } from '../data/index';
+
+const lang = localeFromPath(Astro.url.pathname);
+const l = pick(LAB, lang);
+const L = (x: string) => localizePath(x, lang);
+const DO_LOCAL: Partial<Record<DemoKind, string>> = { scheduler: l('scheduler'), gmre: l('gmre'), securemed: l('securemed'), xai: l('xai'), guide: l('guide'), opticlab: l('opticlab') };
+const DO: Record<DemoKind, string> = {
+  scheduler: 'Run a reservation scheduler, crash agents, take resources offline and compare allocation strategies under identical faults.',
+  gmre: 'Stream nested synthetic archives through a plugin pipeline, re-upload a dump, corrupt a member and backfill only the failed plugin.',
+  securemed: 'Enrol a real TOTP authenticator, attack the login with replayed and stale codes, and push vulnerable commits through security gates.',
+  xai: 'Explain a transparent sentiment model with exact Shapley values and LIME, remove words, and watch the two methods disagree.',
+  basyx: 'Import an .aasx package into a concept-description repository, resolve conflicts and see why the defaults are safe.',
+  arena: 'Read the evaluation protocol and replay a local transcript in the arena-run/1 format.',
+  xray: 'Inspect how this site renders and hydrates, and how the portfolio guide answers, with live numbers from your own browser.',
+  guide: 'Type a question and watch the site’s own guide engine route it: normalisation, guards, project and skill detection, intent scores, then the allowlisted answer.',
+  opticlab: 'Sign a boot image with a real RSA key, tamper with it and watch the boot chain refuse it; bind the driver, inject slot faults and talk to the controller over a strict protocol and mutual TLS.',
+};
+const labs = projects.filter((p) => p.demo && p.demo.kind !== 'arena');
+const arena = getProject('agent-arena');
+const experiments = projects.filter((p) => p.status === 'experiment' || (p.status === 'research' && p.slug !== 'agent-arena'));
+---
+<BaseLayout title={l('title')} description={l('description')}>
+  <PageHead num="03" kicker={l('kicker')} title={l('h')} accent={l('accent')} meta={l('meta', { n: labs.length })} lede={l('lede')} />
+
+  <section class="section labs-pair" aria-labelledby="pair-h">
+    <div class="shell">
+      <h2 id="pair-h" class="sr-only">{l('pairH')}</h2>
+      <div class="pair-grid">
+        <a class="pair-card d-security" href={L('/security-lab/')}><span class="mono">{l('breachKick')}</span><b>BREACH MODE</b><span>{l('breachBody')}</span><span class="pair-go">{l('open')}</span></a>
+        <a class="pair-card d-ai" href={L('/ai-lab/')}><span class="mono">{l('aiKick')}</span><b>{l('aiTitle')}</b><span>{l('aiBody')}</span><span class="pair-go">{l('open')}</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="sim-h">
+    <div class="shell">
+      <div class="section-head">
+        <div><p class="num">{l('simNum')}</p><h2 id="sim-h" class="h2">{l('simH')}</h2></div>
+        <p>{l('simLede')}</p>
+      </div>
+      <ul class="labs">
+        {labs.map((p) => (
+          <li class={`lab-card d-${p.domains[0]}`} data-reveal>
+            <a class="lab-vis" href={L(p.demo!.kind === 'xray' ? '/xray/' : `/work/${p.slug}/#demo`)} tabindex="-1" aria-hidden="true"><FeatureVisual kind={p.demo!.kind} /></a>
+            <div class="lab-copy">
+              <p class="eyebrow"><span class="status" data-status={p.status}>{statusLabel(p.status, lang)}</span></p>
+              <h3 class="h3"><a href={L(p.demo!.kind === 'xray' ? '/xray/' : `/work/${p.slug}/#demo`)}>{projectText(p, lang).demoTitle}</a></h3>
+              <p class="mono muted lab-of">{p.shortTitle}</p>
+              <p class="soft">{DO_LOCAL[p.demo!.kind] ?? DO[p.demo!.kind]}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  {arena && (
+    <section class="section d-ai" id="arena" aria-labelledby="ar-h">
+      <div class="shell">
+        <div class="section-head">
+          <div><p class="num">AGENT ARENA · {STATUS_LABEL[arena.status].toUpperCase()}</p><h2 id="ar-h" class="h2">Comparing coding agents, <em class="accent">without anecdotes</em></h2></div>
+          <p>{arena.problem}</p>
+        </div>
+        <div class="grid-12 ar-grid">
+          <div class="ar-protocol">
+            <h3 class="h3">Protocol</h3>
+            <ol class="ar-rules">{arena.approach.map((a, i) => <li><span class="mono">{String(i + 1).padStart(2, '0')}</span>{a}</li>)}</ol>
+            {arena.decisions.map((d) => <p class="disclosure"><strong>Rule</strong><span><b>{d.decision}.</b> {d.why}</span></p>)}
+            <a class="btn btn-sm" href="/work/agent-arena/">Case study <span class="arrow">→</span></a>
+          </div>
+          <div class="ar-tool">
+            <p class="disclosure"><strong>Disclosure</strong><span>{arena.demo!.disclosure}</span></p>
+            <ArenaLab client:visible />
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {experiments.length > 0 && <section class="section" aria-labelledby="ex-h">
+    <div class="shell">
+      <div class="section-head">
+        <div><p class="num">{l('benchNum')}</p><h2 id="ex-h" class="h2">{l('benchH')}</h2></div>
+        <p>{l('benchLede')}</p>
+      </div>
+      <ul class="bench">
+        {experiments.map((p) => (
+          <li class={`d-${p.domains[0]}`}>
+            <span class="mono muted">{String(p.index).padStart(2, '0')}</span>
+            <div>
+              <h3 class="h3"><a href={L(`/work/${p.slug}/`)}>{p.title}</a></h3>
+              <p class="soft">{projectText(p, lang).summary}</p>
+            </div>
+            <span class="bench-meta"><span class="status" data-status={p.status}>{statusLabel(p.status, lang)}</span><span class="mono muted">{evidenceLabel(p.evidence, lang)}</span></span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>}
+</BaseLayout>
+
+<style>
+  .labs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(16px, 2.5vw, 32px); }
+  .lab-card { display: grid; gap: 16px; padding: clamp(16px, 2vw, 24px); border: 1px solid var(--line); border-radius: var(--radius-lg); background: color-mix(in srgb, var(--surface) 55%, transparent); transition: border-color 300ms var(--ease), transform 400ms var(--ease); }
+  .lab-card:hover { border-color: var(--c); transform: translateY(-3px); }
+  .lab-vis { display: block; padding: 8px; border-radius: 8px; background: var(--bg-deep); }
+  .lab-vis :global(svg) { max-height: 220px; margin-inline: auto; }
+  .lab-copy { display: grid; gap: 8px; }
+  .lab-copy h3 a { text-decoration: none; }
+  .lab-copy h3 a:hover { color: var(--c); }
+  .lab-of { font-size: 0.6875rem; letter-spacing: 0.12em; text-transform: uppercase; }
+  .h2 em { font-style: normal; }
+  .ar-grid { align-items: start; }
+  .ar-protocol { grid-column: 1 / span 4; display: grid; gap: 16px; justify-items: start; position: sticky; top: 96px; }
+  .ar-tool { grid-column: 5 / span 8; display: grid; gap: 12px; }
+  .ar-rules { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .ar-rules li { display: grid; grid-template-columns: 2.4em 1fr; gap: 8px; padding-top: 10px; border-top: 1px solid var(--line); color: var(--fg-soft); }
+  .ar-rules .mono { color: var(--accent); font-size: 0.75rem; padding-top: 3px; }
+  .bench { list-style: none; margin: 0; padding: 0; }
+  .bench li { display: grid; grid-template-columns: 3em minmax(0, 1fr) auto; gap: 16px; padding: 22px 0; border-top: 1px solid var(--line); align-items: baseline; }
+  .bench li:last-child { border-bottom: 1px solid var(--line); }
+  .bench h3 a { text-decoration: none; }
+  .bench h3 a:hover { color: var(--c); }
+  .bench .soft { margin-top: 6px; max-width: 70ch; }
+  .bench-meta { display: grid; gap: 6px; justify-items: end; font-size: 0.6875rem; }
+  @media (max-width: 900px) {
+    .labs { grid-template-columns: 1fr; }
+    .ar-protocol, .ar-tool { grid-column: 1 / -1; position: static; }
+    .bench li { grid-template-columns: 2.4em 1fr; }
+    .bench-meta { grid-column: 2; justify-items: start; }
+  }
+  .labs-pair { padding-bottom: 0; }
+  .pair-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .pair-card { display: grid; gap: 10px; padding: clamp(18px, 3vw, 28px); border: 1px solid var(--line); border-radius: var(--radius-lg); background: linear-gradient(135deg, color-mix(in srgb, var(--c) 9%, transparent), transparent 60%), var(--surface); text-decoration: none; color: var(--fg); transition: border-color 200ms var(--ease), transform 300ms var(--ease); }
+  .pair-card:hover { border-color: var(--c); transform: translateY(-2px); }
+  .pair-card .mono { font-size: var(--fs-micro); letter-spacing: 0.16em; color: var(--c); }
+  .pair-card b { font: 600 clamp(1.3rem, 2.2vw, 1.7rem)/1.1 var(--font-display); letter-spacing: -0.02em; }
+  .pair-card span:not(.mono):not(.pair-go) { color: var(--fg-soft); font-size: 0.9375rem; }
+  .pair-go { font-weight: 600; color: var(--c); }
+  @media (max-width: 760px) { .pair-grid { grid-template-columns: minmax(0, 1fr); } }
+</style>

@@ -1,0 +1,92 @@
+/* Skills Constellation island */
+.cst { display: grid; gap: 16px; }
+.cst-toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: center; }
+.cst-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.cst-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.cst-search { position: relative; }
+.cst-search .field { width: min(240px, 70vw); padding: 8px 12px; min-height: 36px; border-radius: 999px; }
+.cst-results { position: absolute; z-index: 10; top: calc(100% + 6px); left: 0; right: 0; min-width: 240px; list-style: none; margin: 0; padding: 6px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--surface); box-shadow: 0 20px 40px rgba(0,0,0,.35); }
+.cst-results button { display: flex; width: 100%; align-items: center; gap: 8px; padding: 8px; border: 0; border-radius: 6px; background: none; cursor: pointer; text-align: left; font-size: 0.875rem; }
+.cst-results button:hover, .cst-results button:focus-visible { background: var(--surface-2); }
+.cst-results .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.cst-results .mono { margin-left: auto; font-size: 0.6875rem; }
+.cst-view { display: inline-flex; gap: 4px; padding: 3px; border: 1px solid var(--line); border-radius: 999px; }
+.cst-view .btn { border-color: transparent; min-height: 30px; }
+.cst-view .btn[aria-pressed='true'] { background: var(--fg); color: var(--bg); }
+
+.cst-body { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+.cst-stage { position: relative; min-height: 420px; border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden;
+  background: radial-gradient(70% 60% at 50% 45%, color-mix(in srgb, var(--violet) 9%, transparent), transparent 70%), var(--bg-deep); }
+.cst-svg { width: 100%; height: auto; aspect-ratio: 1000 / 760; }
+.view-3d .cst-stage, .view-3d-loading .cst-stage { aspect-ratio: 1000 / 760; }
+.view-3d-loading .cst-svg { position: absolute; inset: 0; opacity: 0.35; transition: opacity 600ms var(--ease); }
+.cst-canvas { position: absolute; inset: 0; animation: fade-in 900ms var(--ease) both; }
+.cst-hint { position: absolute; left: 14px; top: 12px; margin: 0; font-size: 0.6875rem; letter-spacing: 0.06em; }
+.cst-loading { position: absolute; inset: 0; display: grid; place-items: center; font-size: 0.8125rem; }
+.cst-legend { position: absolute; left: 14px; bottom: 10px; display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; font-size: 0.6875rem; pointer-events: none; }
+.cst-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.cst-legend i { display: inline-block; border-radius: 50%; }
+.lg-domain { width: 10px; height: 10px; border: 2px solid var(--fg-soft); }
+.lg-project { width: 9px; height: 9px; background: var(--fg-soft); }
+.lg-skill { width: 5px; height: 5px; background: var(--fg-mute); }
+
+.ce { fill: none; stroke-width: 0.9; transition: opacity 250ms var(--ease), stroke 250ms; }
+.ce-project-skill { stroke: var(--line-strong); opacity: 0.5; }
+.ce-project-domain { stroke: var(--fg-mute); opacity: 0.45; }
+.ce-skill-domain { stroke: var(--line); opacity: 0.35; stroke-dasharray: 2 4; }
+.ce.dim { opacity: 0.08; }
+.ce.on { opacity: 1; stroke-width: 1.6; filter: drop-shadow(0 0 4px currentColor); }
+
+.cn { cursor: pointer; text-decoration: none; }
+.cn .core { fill: var(--c); transition: r 250ms var(--ease), opacity 250ms; }
+.cn .halo { fill: var(--c); opacity: 0; transition: opacity 250ms var(--ease); }
+.cn-domain .core { fill: var(--bg-deep); stroke: var(--c); stroke-width: 2.5; }
+.cn-skill .core { fill: color-mix(in srgb, var(--c) 70%, var(--bg)); }
+.cn-project .core { filter: drop-shadow(0 0 6px var(--c)); }
+.cn text { font: 500 12px var(--font-mono); fill: var(--fg-soft); paint-order: stroke; stroke: var(--bg-deep); stroke-width: 4px; stroke-linejoin: round; transition: opacity 250ms; pointer-events: none; }
+.cn-domain text { font-size: 13px; fill: var(--fg); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
+.cn-project text { fill: var(--fg); }
+.cn-skill text { font-size: 11px; fill: var(--fg-mute); }
+.cn.st-dim { opacity: 0.2; }
+.cn.st-hood .halo { opacity: 0.12; }
+.cn.st-hood text { fill: var(--fg); }
+.cn.st-sel .halo { opacity: 0.25; }
+.cn.st-sel text { fill: var(--c); font-weight: 600; }
+.cn:hover .halo { opacity: 0.2; }
+.is-live .cn { transition: opacity 250ms var(--ease); }
+
+.cst-inspector { position: sticky; top: 88px; max-height: calc(100vh - 110px); overflow: auto; }
+.ci-body { display: grid; gap: 12px; }
+.ci-title { font-size: 1.4rem; letter-spacing: -0.02em; }
+.ci-k { font-size: 0.6875rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.ci-lead { font-size: 0.9rem; color: var(--fg-soft); }
+.ci-lead b { color: var(--fg); font-weight: 600; }
+.ci-sum { font-size: 0.875rem; color: var(--fg-soft); line-height: 1.55; }
+.ci-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.ci-list, .ci-projects { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.ci-list li { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; padding: 8px 0; border-top: 1px solid var(--line); font-size: 0.875rem; }
+.ci-list .linkish { color: var(--fg); text-decoration: none; text-align: left; }
+.ci-list .linkish:hover { color: var(--accent); }
+.ci-projects li { display: grid; gap: 6px; padding: 10px 0; border-top: 1px solid var(--line); }
+.ci-projects a { font-weight: 600; text-decoration: none; }
+.ci-projects a:hover { color: var(--accent); }
+.ci-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.ci-tags .tag { border: 0; cursor: pointer; }
+.ci-tags .tag:hover { color: var(--fg); background: var(--line); }
+
+@media (max-width: 1000px) {
+  .cst-body { grid-template-columns: 1fr; }
+  .cst-inspector { position: static; max-height: none; }
+}
+@media (max-width: 560px) {
+  .cst-stage { min-height: 0; }
+  .cst-legend { position: static; padding: 0 12px 10px; }
+  .cst-tools { width: 100%; justify-content: space-between; }
+}
+/* small screens: the 1000-unit map is scaled to ~0.35×, so enlarge labels and keep only the important ones */
+@media (max-width: 600px) {
+  .cn text { font-size: 24px; stroke-width: 7px; }
+  .cn-domain text { font-size: 26px; }
+  .cn-skill:not(.st-sel):not(.st-hood) text { display: none; }
+  .cn .core { transform-box: fill-box; transform-origin: center; transform: scale(1.6); }
+}

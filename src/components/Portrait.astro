@@ -1,0 +1,25 @@
+---
+// The owner's photograph, as responsive AVIF/WebP generated at build time by astro:assets (sharp,
+// metadata stripped). variant="cutout" is the person-masked copy; "photo" keeps the background.
+import { Picture } from 'astro:assets';
+import cutout from '../assets/portrait/portrait-cutout.webp';
+import photo from '../assets/portrait/portrait-studio.jpg';
+import { PORTRAIT_ALT } from '../data/index';
+
+interface Props { variant?: 'cutout' | 'photo'; sizes: string; class?: string; eager?: boolean; widths?: number[] }
+const { variant = 'cutout', sizes, class: cls, eager = false, widths = [360, 560, 800, 1100, 1254] } = Astro.props;
+const src = variant === 'cutout' ? cutout : photo;
+---
+<Picture
+  src={src}
+  formats={['avif', 'webp']}
+  fallbackFormat={variant === 'cutout' ? 'webp' : 'jpg'}
+  widths={widths}
+  sizes={sizes}
+  alt={PORTRAIT_ALT}
+  class={cls}
+  loading={eager ? 'eager' : 'lazy'}
+  decoding={eager ? 'sync' : 'async'}
+  fetchpriority={eager ? 'high' : 'auto'}
+  quality={variant === 'cutout' ? 64 : 70}
+/>

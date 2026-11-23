@@ -1,0 +1,103 @@
+---
+// Static isometric render of the Spatial Lab, generated at build time from the same
+// data and geometry as the 3D scene. It is the instant first paint, the no-JS /
+// no-WebGL / low-power fallback, and fully keyboard-navigable (each module is a link).
+import { labModules, labTraces, iso, FOOTPRINT } from '../lib/lab';
+import { declutter } from '../lib/labels';
+import { STATUS_LABEL, EVIDENCE_LABEL } from '../data/index';
+
+const SC = 40;
+const f = FOOTPRINT / 2;
+const P = (x: number, y: number, z: number) => iso(x, y, z, SC).map((n) => n.toFixed(1)).join(',');
+const poly = (pts: [number, number, number][]) => pts.map(([x, y, z]) => P(x, y, z)).join(' ');
+const mods = labModules().sort((a, b) => a.x + a.z - (b.x + b.z)); // painter's order: far → near
+// Label positions: same greedy declutter as the 3D overlay, at build time (10.5px mono ≈ 6.4px per glyph).
+const labelY = declutter(mods.map((m) => {
+  const [lx, ly] = iso(m.x, m.h + 0.5, m.z, SC);
+  return { id: m.slug, x: lx, y: ly, w: m.project.shortTitle.length * 6.4 + 10, h: 14, priority: 0, depth: -(m.x + m.z) };
+}), 2);
+const traces = labTraces();
+const gridLines: string[] = [];
+for (let i = -5; i <= 5; i++) {
+  gridLines.push(`M${P(i, 0, -5)}L${P(i, 0, 5)}`);
+  gridLines.push(`M${P(-5, 0, i)}L${P(5, 0, i)}`);
+}
+const zones = [
+  { id: 'systems', label: 'SYSTEMS', at: [-4.3, 0, -4.6] },
+  { id: 'ai', label: 'AI', at: [4.4, 0, -4.6] },
+  { id: 'security', label: 'SECURITY', at: [4.4, 0, 4.2] },
+  { id: 'research', label: 'RESEARCH', at: [-4.3, 0, 4.2] },
+] as const;
+---
+<svg class="lab-poster" viewBox="-400 -300 800 560" role="group" aria-label="Spatial Lab: each project is a module on an engineering workbench. Module height shows how much public evidence backs it." data-poster>
+  <defs>
+    <pattern id="stripes" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="3" height="6" fill="currentColor" opacity=".55" />
+    </pattern>
+    <radialGradient id="floorGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#7A8CFF" stop-opacity=".16" /><stop offset="1" stop-color="#7A8CFF" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <polygon class="floor" points={poly([[-5, 0, -5], [5, 0, -5], [5, 0, 5], [-5, 0, 5]])} />
+  <ellipse cx="0" cy="0" rx="340" ry="200" fill="url(#floorGlow)" />
+  <path class="grid" d={gridLines.join('')} />
+  {zones.map((z) => {
+    const [x, y] = iso(z.at[0], 0, z.at[2], SC);
+    return <text class={`zone d-${z.id}`} x={x.toFixed(1)} y={y.toFixed(1)} text-anchor="middle">{z.label}</text>;
+  })}
+  {traces.map((t) => (
+    <polyline class="trace" data-a={t.a} data-b={t.b} points={t.points.map(([x, z]) => P(x, 0.01, z)).join(' ')} style={`--c:${t.color}`} />
+  ))}
+  {mods.map((m) => {
+    const { x, z, h } = m;
+    const pending = m.project.evidence === 'pending';
+    const top = poly([[x - f, h, z - f], [x + f, h, z - f], [x + f, h, z + f], [x - f, h, z + f]]);
+    const right = poly([[x + f, 0, z - f], [x + f, 0, z + f], [x + f, h, z + f], [x + f, h, z - f]]);
+    const left = poly([[x - f, 0, z + f], [x + f, 0, z + f], [x + f, h, z + f], [x - f, h, z + f]]);
+    const p = m.project;
+    return (
+      <a
+        class={`mod ${pending ? 'is-pending' : ''} ${p.status === 'in-progress' ? 'is-wip' : ''}`}
+        href={`/work/${p.slug}/`}
+        data-slug={p.slug}
+        data-domains={p.domains.join(' ')}
+        style={`--c:${m.color}`}
+        aria-label={`${p.shortTitle}${p.shortTitle !== p.title ? ` (${p.title})` : ''}: ${STATUS_LABEL[p.status]}, ${EVIDENCE_LABEL[p.evidence]}`}
+      >
+        <ellipse class="shadow" cx={iso(x, 0, z, SC)[0].toFixed(1)} cy={iso(x, 0, z, SC)[1].toFixed(1)} rx="44" ry="24" />
+        <polygon class="side-r" points={right} />
+        <polygon class="side-l" points={left} />
+        <polygon class="top" points={top} />
+        {p.status === 'in-progress' && <polygon class="top-stripes" points={top} />}
+      </a>
+    );
+  })}
+  <g class="labels" aria-hidden="true">
+    {mods.map((m) => (
+      <text class="label" data-slug={m.slug} x={iso(m.x, m.h + 0.5, m.z, SC)[0].toFixed(1)} y={labelY.get(m.slug)!.toFixed(1)} text-anchor="middle">{m.project.shortTitle}</text>
+    ))}
+  </g>
+</svg>
+
+<style is:inline set:html={mods.map((m) => `.lab-poster:has(.mod[data-slug='${m.slug}']:is(:hover, :focus-visible, .is-active)) .label[data-slug='${m.slug}'] { fill: var(--accent); }\n.lab-stage.filtering .lab-poster:has(.mod[data-slug='${m.slug}']:not(.is-hit)) .label[data-slug='${m.slug}'] { opacity: 0.25; }`).join('\n')} />
+<style>
+  .lab-poster { width: 100%; height: 100%; overflow: visible; }
+  .floor { fill: #0C111B; stroke: var(--line-strong); stroke-width: 1; }
+  :global(:root[data-theme='paper']) .floor { fill: #E4E0D6; }
+  .grid { stroke: var(--fg-mute); stroke-width: 0.5; opacity: 0.16; fill: none; }
+  .zone { font: 500 10px var(--font-mono); letter-spacing: 0.2em; fill: var(--c); opacity: 0.8; }
+  .trace { fill: none; stroke: var(--c); stroke-width: 1.4; stroke-dasharray: 4 5; opacity: 0.35; transition: opacity 300ms var(--ease); }
+  .trace.on { opacity: 1; stroke-width: 2; }
+  .mod { cursor: pointer; transition: opacity 300ms var(--ease); }
+  .mod .shadow { fill: #000; opacity: 0.35; filter: blur(6px); }
+  .mod .top { fill: color-mix(in srgb, var(--c) 30%, #141B28); stroke: var(--c); stroke-width: 1.2; stroke-linejoin: round; }
+  .mod .side-r { fill: color-mix(in srgb, var(--c) 14%, #0E1420); stroke: var(--c); stroke-width: 0.8; stroke-opacity: 0.6; }
+  .mod .side-l { fill: color-mix(in srgb, var(--c) 9%, #0A0F18); stroke: var(--c); stroke-width: 0.8; stroke-opacity: 0.6; }
+  .mod .top-stripes { fill: url(#stripes); color: var(--c); pointer-events: none; }
+  .mod.is-pending .top, .mod.is-pending .side-r, .mod.is-pending .side-l { fill: transparent; stroke-dasharray: 3 3; }
+  .labels .label { font: 500 10.5px var(--font-mono); fill: var(--fg); paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
+  .mod:hover .top, .mod:focus-visible .top, .mod.is-active .top { fill: color-mix(in srgb, var(--c) 60%, #141B28); filter: drop-shadow(0 0 10px var(--c)); }
+  .mod:focus-visible { outline: none; }
+  .labels .label { transition: fill 200ms, opacity 250ms; }
+  :global(.lab-stage.filtering) .mod:not(.is-hit) { opacity: 0.22; }
+</style>

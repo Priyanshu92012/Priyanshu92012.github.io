@@ -1,0 +1,35 @@
+---
+// Editorial page opener shared by every inner page: masthead rule, section number,
+// display title and lede. Keeps the "Editorial Machine" rhythm consistent.
+interface Props { num: string; kicker: string; title: string; lede?: string; meta?: string; accent?: string }
+const { num, kicker, title, lede, meta, accent } = Astro.props;
+---
+<header class="page-head">
+  <div class="shell">
+    <div class="masthead intro">
+      <span><b>{num}</b> / {kicker}</span>
+      {meta && <span class="ph-meta">{meta}</span>}
+    </div>
+    <div class="ph-grid intro">
+      <h1 class="display ph-title">{title}{accent && <> <em>{accent}</em></>}</h1>
+      <div class="ph-side">
+        {lede && <p class="lede">{lede}</p>}
+        <slot />
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  .page-head { padding: 14px 0 clamp(36px, 6vw, 72px); border-bottom: 1px solid var(--line); position: relative; overflow: clip; }
+  .page-head::before {
+    content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background: radial-gradient(45vw 30vw at 85% 0%, color-mix(in srgb, var(--c, var(--violet)) 14%, transparent), transparent 70%);
+  }
+  .ph-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(20px, 4vw, 64px); align-items: end; margin-top: clamp(28px, 6vh, 64px); }
+  .ph-title { font-size: clamp(2.6rem, 8vw, 7rem); overflow-wrap: break-word; }
+  .ph-title em { font-style: normal; color: var(--c, var(--accent)); }
+  .ph-side { display: grid; gap: 20px; justify-items: start; padding-bottom: 0.6em; }
+  @media (max-width: 900px) { .ph-grid { grid-template-columns: 1fr; } .ph-side { padding-bottom: 0; } }
+  @media (max-width: 560px) { .ph-meta { display: none; } }
+</style>

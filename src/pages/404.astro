@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { projects } from '../data/index';
+const picks = projects.filter((p) => p.tier === 'flagship').slice(0, 4);
+---
+<BaseLayout title="Not found" description="This page does not exist." noindex>
+  <section class="nf">
+    <div class="shell">
+      <div class="masthead"><span><b>404</b> / state not found</span><span class="mono">no transition defined</span></div>
+      <h1 class="display nf-title">This route has <em>no valid state.</em></h1>
+      <p class="lede">The page you asked for doesn’t exist, or it moved when the site was rebuilt.</p>
+      <p class="lede nf-de" lang="de">Diese Seite gibt es nicht, oder sie ist beim Neuaufbau der Website umgezogen. <a href="/de/">Zur deutschen Startseite</a>.</p>
+      <pre class="nf-trace" aria-hidden="true">invalid transition: <span data-path>?</span> → rendered
+  at Router.resolve (site:1)
+  hint: try one of the known states below</pre>
+      <div class="nf-actions">
+        <a class="btn btn-primary" href="/">Home <span class="arrow">→</span></a>
+        <a class="btn" href="/work/">All work</a>
+        <button class="btn" type="button" data-ask>Ask the portfolio guide</button>
+      </div>
+      <ul class="nf-picks">{picks.map((p) => <li><a href={`/work/${p.slug}/`}>{p.title}</a></li>)}</ul>
+    </div>
+  </section>
+</BaseLayout>
+<style>
+  .nf { padding: 14px 0 clamp(64px, 10vw, 120px); }
+  .nf-title { margin: clamp(32px, 8vh, 80px) 0 20px; font-size: clamp(2.4rem, 7vw, 6rem); max-width: 14ch; }
+  .nf-title em { font-style: normal; color: var(--orange); }
+  .nf-trace { margin: 28px 0; padding: 16px; border: 1px dashed var(--line-strong); border-radius: var(--radius); font-size: 0.8125rem; color: var(--fg-soft); overflow-x: auto; }
+  .nf-trace span { color: var(--orange); }
+  .nf-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .nf-picks { list-style: none; margin: 32px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 24px; }
+  .nf-picks a { color: var(--fg-soft); }
+  .nf-de { margin-top: 10px; font-size: 1rem; color: var(--fg-mute); }
+</style>
+<script>
+  import { emit } from '../lib/bus';
+  const el = document.querySelector('[data-path]');
+  if (el) el.textContent = location.pathname.slice(0, 80);
+  document.querySelector('[data-ask]')?.addEventListener('click', () => emit('pexe:agent-open', { prompt: `I was looking for ${location.pathname.slice(0, 80)}` }));
+</script>

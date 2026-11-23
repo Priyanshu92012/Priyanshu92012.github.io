@@ -1,0 +1,75 @@
+---
+import { projects, EVIDENCE_RANK, domainList, projectsInDomain } from '../data/index';
+import { localeFromPath, localizePath } from '../i18n/index';
+import { pick } from '../i18n/dict';
+import { WORK } from '../i18n/pages/work';
+import { statusLabel, evidenceLabel, skillLabel, projectText } from '../i18n/content';
+import { DOMAIN_DE } from '../data/de';
+interface Props { filters?: boolean; limit?: number }
+const { filters = false, limit } = Astro.props;
+const list = limit ? projects.slice(0, limit) : projects;
+const lang = localeFromPath(Astro.url.pathname);
+const w = pick(WORK, lang);
+const L = (p: string) => localizePath(p, lang);
+---
+<div class="work-index" data-work-index>
+  {filters && (
+    <div class="wi-filters" role="group" aria-label={w('filter')}>
+      <button type="button" class="chip" data-filter="" aria-pressed="true">{w('allChip')} <span class="count">{projects.length}</span></button>
+      {domainList.map((d) => (
+        <button type="button" class={`chip d-${d.id}`} data-filter={d.id} aria-pressed="false"><span class="swatch" />{lang === 'de' ? DOMAIN_DE[d.id]?.label ?? d.label : d.label} <span class="count">{projectsInDomain(d.id).length}</span></button>
+      ))}
+    </div>
+  )}
+  <table class="index-table">
+    <caption class="sr-only">{w('caption')}</caption>
+    <thead class="sr-only"><tr><th>{w('colNo')}</th><th>{w('colProject')}</th><th>{w('colStatus')}</th><th>{w('colEvidence')}</th><th>{w('colStack')}</th></tr></thead>
+    <tbody>
+      {list.map((p) => (
+        <tr class={`index-row d-${p.domains[0]}`} data-slug={p.slug} data-domains={p.domains.join(' ')} data-reveal>
+          <td class="no">{String(p.index).padStart(2, '0')}</td>
+          <td class="title">
+            <a href={L(`/work/${p.slug}/`)} style={`view-transition-name: t-${p.slug}`}>{p.title}</a>
+            <span class="org">{projectText(p, lang).org ?? (p.category === 'personal' ? w('personal') : p.category)}{p.demo ? ` · ${w('interactive')}` : ''}</span>
+          </td>
+          <td><span class="status" data-status={p.status}>{statusLabel(p.status, lang)}</span></td>
+          <td class="ev"><span class="evidence"><span class="bars">{[1, 2, 3, 4].map((i) => <i class={i <= EVIDENCE_RANK[p.evidence] ? 'on' : ''} />)}</span>{evidenceLabel(p.evidence, lang)}</span></td>
+          <td class="tech">{p.skills.slice(0, 3).map((s) => skillLabel(s, lang)).join(' · ')}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .wi-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+  .index-row td:nth-child(3), .index-row td:nth-child(4) { white-space: nowrap; }
+  @media (max-width: 760px) {
+    .index-row td:nth-child(3), .index-row td:nth-child(4) { white-space: normal; }
+    .index-row { display: grid; grid-template-columns: 2.6em minmax(0, 1fr); padding: 14px 0; }
+    .index-row .title a { overflow-wrap: anywhere; }
+    .index-row td { padding: 0; }
+    .index-row td:nth-child(3) { grid-column: 2; margin-top: 6px; }
+  }
+</style>
+
+<script>
+  import { emit } from '../lib/bus';
+  for (const root of document.querySelectorAll<HTMLElement>('[data-work-index]')) {
+    const rows = [...root.querySelectorAll<HTMLElement>('.index-row')];
+    // hover/focus a row → highlight the module in the Spatial Lab (if present)
+    rows.forEach((r) => {
+      const f = () => emit('pexe:focus', { target: 'lab', id: r.dataset.slug!, source: 'index' });
+      r.addEventListener('mouseenter', f);
+      r.addEventListener('focusin', f);
+    });
+    root.addEventListener('mouseleave', () => emit('pexe:focus', { target: 'lab', id: null, source: 'index' }));
+    const chips = root.querySelectorAll<HTMLButtonElement>('[data-filter]');
+    chips.forEach((c) => c.addEventListener('click', () => {
+      const d = c.dataset.filter!;
+      chips.forEach((x) => x.setAttribute('aria-pressed', String(x === c)));
+      root.classList.toggle('index-filter-dim', !!d);
+      rows.forEach((r) => r.classList.toggle('is-hit', !d || r.dataset.domains!.split(' ').includes(d)));
+    }));
+  }
+</script>

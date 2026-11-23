@@ -1,0 +1,96 @@
+---
+// Skills & technologies taxonomy (src/data/capabilities.ts). "compact": restrained tags for the homepage,
+// each linking to its evidence row on /skills/. "full": every skill with the projects behind it.
+import { taxonomy, KIND_LABEL, KIND_NOTE, KIND_TITLE, type WorkKind } from '../data/capabilities';
+import { localeFromPath, localizePath } from '../i18n/index';
+import { categoryLabel, skillLabel, skillNote } from '../i18n/content';
+interface Props { variant?: 'compact' | 'full' }
+const { variant = 'compact' } = Astro.props;
+const ABBR: Record<WorkKind, string> = { work: 'N', study: 'D', own: 'O', tool: 'T', exploring: 'E' };
+const MAX = 3;
+const lang = localeFromPath(Astro.url.pathname);
+const L = (p: string) => localizePath(p, lang);
+const KIND_DE: Record<WorkKind, { label: string; note: string; title: string }> = {
+  work: { label: 'Nokia', note: 'berufliche Arbeit', title: 'Berufliche Arbeit bei Nokia' },
+  study: { label: 'DHBW', note: 'Studienprojekt', title: 'Studienprojekt an der DHBW Stuttgart' },
+  own: { label: 'Eigenes', note: 'eigenes Projekt', title: 'Eigenes Projekt oder Open Source' },
+  tool: { label: 'Tool', note: 'Entwicklungstool', title: 'Ein Entwicklungstool, eingesetzt in der verlinkten Arbeit' },
+  exploring: { label: 'Erkundung', note: 'Lernen / Erkundung', title: 'Lernen und Erkunden: als Demonstration gebaut, keine etablierte Kompetenz' },
+};
+const kLabel = (k: WorkKind) => (lang === 'de' ? KIND_DE[k].label : KIND_LABEL[k]);
+const kNote = (k: WorkKind) => (lang === 'de' ? KIND_DE[k].note : KIND_NOTE[k]);
+const kTitle = (k: WorkKind) => (lang === 'de' ? KIND_DE[k].title : KIND_TITLE[k]);
+---
+{variant === 'compact' ? (
+  <>
+    {taxonomy.map((g) => (
+      <section class="tx" aria-labelledby={`tx-${g.id}`} data-reveal>
+        <h3 id={`tx-${g.id}`} class="tx-title">{categoryLabel(g.id, lang)}</h3>
+        <ul class="tx-tags">
+          {g.items.map((it) => (
+            <li>
+              <a class={`tx-tag${it.basis === 'exploration' ? ' is-exploring' : ''}`} href={L(it.href)}>
+                {skillLabel(it.id, lang)}
+                <span class="tx-k" aria-hidden="true">{it.kinds.map((k) => ABBR[k]).join('')}</span>
+                <span class="sr-only"> ({it.kinds.map((k) => kNote(k)).join(', ')})</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </>
+) : (
+  <div class="txf">
+    {taxonomy.map((g) => (
+      <section class="txf-g" aria-labelledby={`txf-${g.id}`}>
+        <h3 id={`txf-${g.id}`} class="txf-title">{categoryLabel(g.id, lang)}<span class="mono muted">{g.items.length}</span></h3>
+        <ul class="txf-list">
+          {g.items.map((it) => (
+            <li class={it.basis === 'exploration' ? 'is-exploring' : ''}>
+              <div class="txf-row">
+                <a class="txf-name" href={L(it.href)}>{skillLabel(it.id, lang)}</a>
+                <span class="txf-kinds">{it.kinds.map((k) => <span class="kind" data-kind={k} title={kTitle(k)}>{kLabel(k)}</span>)}</span>
+              </div>
+              <p class="txf-proof"><span class="sr-only">{lang === 'de' ? 'Nachweis: ' : 'Evidence: '}</span>{it.projects.slice(0, MAX).map((p, n) => <>{n > 0 && ' · '}<a href={L(`/work/${p.slug}/`)}>{p.shortTitle}</a></>)}{it.projects.length > MAX && <a class="txf-more" href={L(it.href)}> +{it.projects.length - MAX}<span class="sr-only">{lang === 'de' ? ' weitere' : ' more'}</span></a>}</p>
+              {skillNote(it.id, lang) && <p class="txf-note">{skillNote(it.id, lang)}</p>}
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+)}
+
+<style>
+  /* compact (homepage) */
+  .tx { display: grid; gap: 12px; align-content: start; padding-top: 14px; border-top: 1px solid var(--line-strong); }
+  .tx-title { font: 600 1rem/1.2 var(--font-display); letter-spacing: -0.01em; }
+  .tx-tags { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+  .tx-tag { display: inline-flex; align-items: baseline; gap: 6px; padding: 4px 9px; border: 1px solid var(--line); border-radius: 6px; font-size: 0.8125rem; line-height: 1.35; color: var(--fg); text-decoration: none; transition: border-color 160ms, background 160ms; }
+  .tx-tag:hover { border-color: var(--fg-mute); background: color-mix(in srgb, var(--fg) 5%, transparent); }
+  .tx-tag.is-exploring { border-style: dashed; color: var(--fg-soft); }
+  .tx-k { font: 500 0.625rem/1 var(--font-mono); letter-spacing: 0.08em; color: var(--fg-mute); }
+
+  /* full (/skills/) */
+  .txf { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 3.4vw, 48px) clamp(20px, 3vw, 44px); }
+  .txf-g { display: grid; gap: 8px; align-content: start; padding-top: 14px; border-top: 1px solid var(--line-strong); }
+  .txf-title { display: flex; justify-content: space-between; align-items: baseline; font: 600 1.125rem/1.2 var(--font-display); }
+  .txf-title .mono { font-size: 0.75rem; }
+  .txf-list { list-style: none; margin: 0; padding: 0; }
+  .txf-list > li { display: grid; gap: 3px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+  .txf-row { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+  .txf-name { font-size: 0.9375rem; color: var(--fg); text-decoration: none; }
+  .txf-name:hover { text-decoration: underline; }
+  .txf-kinds { display: inline-flex; gap: 4px; }
+  .txf-proof { font-size: 0.8125rem; color: var(--fg-mute); }
+  .txf-proof a { color: var(--fg-soft); text-decoration: none; border-bottom: 1px solid var(--line-strong); }
+  .txf-proof a:hover { color: var(--fg); }
+  .txf-more { border: 0 !important; font: 0.75rem var(--font-mono); }
+  .txf-note { font-size: 0.8125rem; color: var(--fg-mute); font-style: italic; }
+  .is-exploring .txf-name { color: var(--fg-soft); }
+  .kind { display: inline-block; padding: 2px 6px; border: 1px solid var(--line-strong); border-radius: 4px; font: 500 0.625rem/1.25 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-soft); white-space: nowrap; }
+  .kind[data-kind='work'] { color: var(--fg); border-color: var(--fg-mute); background: color-mix(in srgb, var(--fg) 8%, transparent); }
+  .kind[data-kind='own'], .kind[data-kind='exploring'] { border-style: dashed; color: var(--fg-mute); }
+  @media (max-width: 860px) { .txf { grid-template-columns: minmax(0, 1fr); } }
+</style>

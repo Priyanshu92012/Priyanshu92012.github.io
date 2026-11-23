@@ -1,0 +1,217 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FeatureVisual from '../components/FeatureVisual.astro';
+import SchedulerLab from '../islands/demos/SchedulerLab';
+import SecureMedLab from '../islands/demos/SecureMedLab';
+import GmreLab from '../islands/demos/GmreLab';
+import BasyxLab from '../islands/demos/BasyxLab';
+import XaiLab from '../islands/demos/XaiLab';
+import ArenaLab from '../islands/demos/ArenaLab';
+import IntentRouterLab from '../islands/demos/IntentRouterLab';
+import OpticLabLab from '../islands/demos/OpticLabLab';
+import SiteCaseStudy from '../components/SiteCaseStudy.astro';
+import { localeFromPath, localizePath, t } from '../i18n/index';
+import { pick } from '../i18n/dict';
+import { CASE } from '../i18n/pages/case';
+import { projectText, statusLabel, evidenceLabel, skillLabel } from '../i18n/content';
+import { DOMAIN_DE } from '../data/de';
+import { projects, getSkill, getDomain, projectUrl, STATUS_LABEL, EVIDENCE_LABEL, EVIDENCE_RANK, type Project } from '../data/index';
+
+// One static page per approved project. Every field comes from src/data/projects.ts (hard rule 2).
+
+interface Props { p: Project; prev?: Project; next?: Project }
+const { p, prev, next } = Astro.props;
+const lang = localeFromPath(Astro.url.pathname);
+const c = pick(CASE, lang);
+const L = (x: string) => localizePath(x, lang);
+const T = projectText(p, lang);
+const BASIS_LABEL = { verified: c('verified'), linked: c('linked'), 'self-reported': c('self') } as const;
+const EN = lang === 'de' ? 'en' : undefined; // English-only blocks on German pages
+const domainLabel = (d: string) => (lang === 'de' ? DOMAIN_DE[d]?.label : undefined) ?? getDomain(d as Project['domains'][number]).label;
+const external = (url: string) => url.startsWith('https://');
+---
+<BaseLayout title={p.title} description={T.summary} type="article">
+  <article class={`case d-${p.domains[0]}`} data-case-slug={p.slug}>
+    <header class="case-head">
+      <div class="shell">
+        <div class="masthead intro">
+          <a href={L('/work/')}>{c('all')}</a>
+          <span class="mono">{String(p.index).padStart(2, '0')} / {String(projects.length).padStart(2, '0')}</span>
+        </div>
+        <p class="eyebrow intro">
+          <span class="status" data-status={p.status}>{statusLabel(p.status, lang)}</span>
+          <span class="evidence"><span class="bars">{[1, 2, 3, 4].map((i) => <i class={i <= EVIDENCE_RANK[p.evidence] ? 'on' : ''} />)}</span>{evidenceLabel(p.evidence, lang)}</span>
+        </p>
+        <h1 class="display case-title intro" style={`view-transition-name: t-${p.slug}`}>{p.title}</h1>
+        {p.slug === 'priyanshu-exe' && <p class="mono case-cat intro">{c('cat')}</p>}
+        <p class="lede intro">{T.summary}</p>
+        <dl class="case-meta intro">
+          <div><dt>{c('role')}</dt><dd>{T.role}</dd></div>
+          <div><dt>{c('context')}</dt><dd>{T.org ?? (p.category === 'personal' ? c('personal') : p.category)}</dd></div>
+          <div><dt>{c('domains')}</dt><dd>{p.domains.map((d) => domainLabel(d)).join(' · ')}</dd></div>
+        </dl>
+      </div>
+    </header>
+
+    {p.demo && (
+      <section class="section case-demo" id="demo" aria-labelledby="demo-h">
+        <div class="shell">
+          <div class="demo-head">
+            <h2 id="demo-h" class="h3">{T.demoTitle}</h2>
+            <span class="mono muted">{p.demo.kind === 'xray' ? c('liveDiag') : p.demo.kind === 'arena' ? c('replay') : p.demo.kind === 'guide' ? c('realEngine') : c('synthetic')}</span>
+          </div>
+          <p class="disclosure"><strong>{c('disclosure')}</strong><span>{T.demoDisclosure}</span></p>
+          {lang === 'de' && <p class="mono muted en-note">{t(lang, 'common.lab.en')}</p>}
+          <div class="panel demo-panel" lang={EN}>
+            <div class="panel-body demo-stage">
+              {p.demo.kind === 'scheduler' && <SchedulerLab client:visible />}
+              {p.demo.kind === 'securemed' && <SecureMedLab client:visible />}
+              {p.demo.kind === 'gmre' && <GmreLab client:visible />}
+              {p.demo.kind === 'basyx' && <BasyxLab client:visible />}
+              {p.demo.kind === 'xai' && <XaiLab client:visible />}
+              {p.demo.kind === 'arena' && <ArenaLab client:visible />}
+              {p.demo.kind === 'guide' && <IntentRouterLab client:visible />}
+              {p.demo.kind === 'opticlab' && <OpticLabLab client:visible />}
+              {p.demo.kind === 'xray' && (
+                <div class="xray-link">
+                  <FeatureVisual kind="xray" />
+                  <a class="btn btn-primary" href={L('/xray/')}>{c('openXray')} <span class="arrow">→</span></a>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+    )}
+
+    <div class="section case-body">
+      <div class="shell grid-12">
+        <div class="case-main prose">
+          {T.problem && (<><h2>{c('problem')}</h2><p>{T.problem}</p></>)}
+          {lang === 'de' && (p.approach.length > 0 || p.decisions.length > 0 || p.outcomes.length > 0) && <p class="en-note">{t(lang, 'common.en.fallback.long')}</p>}
+          {p.approach.length > 0 && (<><h2 id="approach">{c('approach')}</h2><ol lang={EN}>{p.approach.map((a) => <li>{a}</li>)}</ol></>)}
+          {p.decisions.length > 0 && (
+            <>
+              <h2 id="decisions">{c('decisions')}</h2>
+              <dl class="decisions" lang={EN}>
+                {p.decisions.map((d) => <div><dt>{d.decision}</dt><dd>{d.why}</dd></div>)}
+              </dl>
+            </>
+          )}
+          {p.outcomes.length > 0 && (
+            <>
+              <h2 id="outcomes">{c('outcomes')}</h2>
+              <ul class="outcomes" lang={EN}>
+                {p.outcomes.map((o) => (
+                  <li>
+                    <span class="basis" data-basis={o.basis}>{BASIS_LABEL[o.basis]}</span>
+                    {o.url ? <a href={o.url} rel={external(o.url) ? 'noopener noreferrer' : undefined}>{o.claim}</a> : <span>{o.claim}</span>}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          {p.limitations.length > 0 && (<><h2 id="limits">{c('limits')}</h2><ul lang={EN}>{p.limitations.map((l) => <li>{l}</li>)}</ul></>)}
+          {p.confidentiality && <p class="disclosure"><strong>{c('confidential')}</strong><span lang={EN}>{p.confidentiality}</span></p>}
+        </div>
+
+        <aside class="case-side" aria-label={c('facts')}>
+          <section class="panel">
+            <div class="panel-head"><span>{c('skills')}</span><span>{p.skills.length}</span></div>
+            {p.skills.length > 0
+              ? <ul class="panel-body tags">{p.skills.map((s) => <li class="tag">{skillLabel(s, lang)}</li>)}</ul>
+              : <p class="panel-body muted">{c('skillsPending')}</p>}
+          </section>
+          {p.links.length > 0 && (
+            <section class="panel">
+              <div class="panel-head"><span>{c('evidence')}</span><span>{p.links.length}</span></div>
+              <ul class="panel-body links">
+                {p.links.map((l) => (
+                  <li><a href={l.url.startsWith('/') ? L(l.url) : l.url} rel={external(l.url) ? 'noopener noreferrer' : undefined}>{l.title}<span aria-hidden="true">{external(l.url) ? ' ↗' : ' →'}</span></a><span class="mono muted">{l.kind}</span></li>
+                ))}
+              </ul>
+            </section>
+          )}
+          <p class="mono muted reviewed">{c('reviewed', { d: p.lastReviewed })}</p>
+        </aside>
+      </div>
+    </div>
+
+    {p.slug === 'priyanshu-exe' && (lang === 'de' ? <div lang="en"><div class="shell"><p class="en-note">{t(lang, 'common.en.fallback')}</p></div><SiteCaseStudy /></div> : <SiteCaseStudy />)}
+
+    <nav class="case-nav" aria-label={c('more')}>
+      <div class="shell">
+        {prev ? <a class="prev" href={L(projectUrl(prev))}><span class="mono muted">{c('prev')}</span>{prev.title}</a> : <span />}
+        {next ? <a class="next" href={L(projectUrl(next))}><span class="mono muted">{c('next')}</span>{next.title}</a> : <span />}
+      </div>
+    </nav>
+  </article>
+</BaseLayout>
+
+<style>
+  .case-head { padding: 14px 0 clamp(32px, 5vw, 56px); border-bottom: 1px solid var(--line); }
+  .case-head .masthead a { text-decoration: none; }
+  .case-head .masthead a:hover { color: var(--c); }
+  .case-head .eyebrow { display: flex; flex-wrap: wrap; gap: 16px; margin-top: clamp(20px, 4vh, 40px); }
+  .case-title { max-width: 18ch; margin: 14px 0 22px; font-size: clamp(2.1rem, 7vw, 6rem); overflow-wrap: break-word; }
+  .case-meta { display: flex; flex-wrap: wrap; gap: 14px 40px; margin: 28px 0 0; padding-top: 20px; border-top: 1px solid var(--line); }
+  .case-meta dt { font: 500 0.6875rem/1 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-mute); }
+  .case-meta dd { margin: 6px 0 0; color: var(--fg); }
+
+  .case-demo { padding-bottom: 0; padding-top: clamp(40px, 6vw, 72px); }
+  .demo-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 16px; margin-bottom: 12px; }
+  .demo-head .mono { font-size: 0.6875rem; letter-spacing: 0.14em; text-transform: uppercase; }
+  .demo-panel { margin-top: 12px; border-color: color-mix(in srgb, var(--c) 35%, var(--line)); background: color-mix(in srgb, var(--surface) 55%, var(--bg)); }
+  .demo-stage { padding: clamp(12px, 2.2vw, 28px); }
+  .xray-link { display: grid; gap: 20px; justify-items: start; }
+  .xray-link :global(svg) { max-height: 320px; }
+  @media (max-width: 560px) { .demo-stage { padding: 10px; } }
+
+  .case-main { grid-column: 1 / span 7; }
+  .case-main > h2:first-child { margin-top: 0; }
+  .decisions { display: grid; gap: 18px; margin: 0; }
+  .decisions dt { color: var(--fg); font-weight: 600; }
+  .decisions dd { margin: 4px 0 0; }
+  .outcomes { list-style: none; padding-left: 0; }
+  .outcomes li { display: flex; gap: 12px; align-items: baseline; }
+  .outcomes .basis { flex: none; }
+  .case-main .disclosure { margin-top: 2.2em; }
+
+  .case-side { grid-column: 9 / span 4; display: grid; gap: 16px; align-content: start; position: sticky; top: 96px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; }
+  .links { list-style: none; margin: 0; display: grid; gap: 12px; }
+  .links li { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+  .links a { text-decoration: none; color: var(--fg); }
+  .links a:hover { color: var(--c); }
+  .links .mono { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.1em; }
+  .reviewed { font-size: 0.6875rem; letter-spacing: 0.08em; }
+
+  .case-nav { border-top: 1px solid var(--line); }
+  .case-nav .shell { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding-block: clamp(28px, 5vw, 56px); }
+  .case-nav a { display: grid; gap: 8px; text-decoration: none; font: 600 clamp(1.1rem, 2vw, 1.5rem)/1.15 var(--font-display); letter-spacing: -0.02em; color: var(--fg); }
+  .case-nav a:hover { color: var(--accent); }
+  .case-nav .mono { font-size: 0.6875rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500; }
+  .case-nav .next { text-align: right; }
+
+  @media (max-width: 900px) {
+    .case-main, .case-side { grid-column: 1 / -1; }
+    .case-side { position: static; }
+  }
+  .case-cat { font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-top: 6px; }
+  @media (max-width: 560px) {
+    .case-nav .shell { grid-template-columns: 1fr; }
+    .case-nav .next { text-align: left; }
+    .outcomes li { display: grid; gap: 6px; }
+  }
+  .en-note { margin: 0 0 12px; padding: 8px 12px; border-left: 2px solid var(--line-strong); font-size: 0.875rem; color: var(--fg-mute); }
+</style>
+
+<script>
+  import { emitPet } from '../islands/petbot/events';
+  const demo = document.getElementById('demo');
+  const slug = document.querySelector<HTMLElement>('[data-case-slug]')?.dataset.caseSlug;
+  if (demo && slug && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); emitPet({ kind: 'project', slug }); } }, { threshold: 0.35 });
+    io.observe(demo);
+  }
+</script>

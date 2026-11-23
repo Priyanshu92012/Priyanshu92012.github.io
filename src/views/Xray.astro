@@ -1,0 +1,197 @@
+---
+import { execSync } from 'node:child_process';
+import { localeFromPath, t } from '../i18n/index';
+const lang = localeFromPath(Astro.url.pathname);
+const de = lang === 'de';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import XRayLive from '../islands/XRayLive';
+import { projects, evidencedSkills } from '../data/index';
+import { knowledge } from '../lib/agent/knowledge';
+import { SUGGESTED } from '../lib/guide/index';
+
+let commit = 'local';
+try { commit = execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch { /* not a checkout */ }
+const docs = knowledge().length;
+
+const lifecycle = [
+  ['Ask', 'From the tiger’s chat, the terminal or a page button. Nothing is sent anywhere.'],
+  ['Normalise', 'Lower-case, strip punctuation, expand contractions, so “What’s his tech stack?” and “what is his stack” match the same way.'],
+  ['Guard', 'Pasted job descriptions go to the evidence matcher. Requests for private data and attempts to override instructions are declined.'],
+  ['Match', 'A named project or skill goes straight to its record. Otherwise synonym phrases and keywords score the curated topics.'],
+  ['Assemble', 'The answer is built from src/data at that moment: titles, status and evidence labels, outcomes with their basis. No stored prose to drift.'],
+  ['Link', 'Every action and source passes an allowlist: known pages, known projects and skills, and the owner’s own profiles. Nothing else renders.'],
+  ['Fallback', 'No confident match means “not covered”, with the closest suggested questions. The guide never guesses.'],
+];
+const decisions = [
+  ['Static HTML first, islands second', 'Name, copy, index and both 3D posters render without JavaScript. React hydrates only what needs interaction, on idle or when visible.'],
+  ['3D is an enhancement, never a gate', 'The lab and the constellation each have an SVG twin built from the same layout code. No WebGL, low power, reduced motion or recruiter mode: you still get the full data.'],
+  ['One content model', 'src/data is Zod-validated at build time and feeds the pages, the 3D scenes and the portfolio guide. A claim can only appear in one place, so the guide cannot drift from the case studies.'],
+  ['Lexical retrieval, not embeddings', `BM25 over ${docs} small documents with skill aliases is exact, explainable and free. Embeddings would add cost without measurable gain at this size.`],
+  ['A scripted guide, not a paid model', 'Visitors should not spend anyone’s API credits to read a portfolio. Curated intents over typed data are instant, private, testable and cannot invent a claim. An LLM agent Worker exists in the repository, tested against a mocked provider, and is deliberately not deployed.'],
+  ['Custom CSS, not Tailwind', 'An editorial design system with a dozen tokens and two themes is smaller and clearer as plain CSS custom properties.'],
+  ['Synthetic data, real algorithms', 'Demos never touch Nokia systems or private data. Hashing, TOTP, Shapley values and LIME are the real algorithms; the inputs are generated and labelled.'],
+];
+---
+<BaseLayout title="Engineering X-Ray" description={de ? 'Wie PRIYANSHU.EXE gebaut ist: Architektur, wie der Portfolio-Guide im Browser antwortet, Sicherheitsgrenzen, Designentscheidungen und Live-Diagnose aus deinem eigenen Browser.' : 'How PRIYANSHU.EXE is built: architecture, how the in-browser portfolio guide answers, security boundaries, design decisions and live diagnostics from your own browser.'}>
+  <PageHead num="04" kicker="Engineering X-Ray" title={de ? 'Diese Website ist' : 'This site is a'} accent={de ? 'selbst eine Fallstudie.' : 'case study too.'} meta={`build ${commit}`}
+    lede={de ? 'Architektur, Abwägungen und Live-Zahlen. Drücke irgendwo X, um zu sehen, welche Teile einer Seite interaktive React-Islands sind; alles andere ist statisches HTML.' : 'Architecture, trade-offs and live numbers. Press X anywhere to outline which parts of a page are interactive React islands; everything else is static HTML.'}>
+    <a class="btn btn-sm" href={de ? '/de/work/priyanshu-exe/' : '/work/priyanshu-exe/'}>{de ? 'Zur Fallstudie PRIYANSHU.EXE' : 'Read the PRIYANSHU.EXE case study'} <span class="arrow">→</span></a>
+  </PageHead>
+
+  {de && <div class="shell"><p class="en-note">{t(lang, 'common.en.fallback')}</p></div>}
+  <div lang={de ? 'en' : undefined}>
+  <section class="section" aria-labelledby="arch-h">
+    <div class="shell">
+      <div class="section-head">
+        <div><p class="num">01 / ARCHITECTURE</p><h2 id="arch-h" class="h2">One content model, no backend</h2></div>
+        <p>A static Astro site on GitHub Pages. Pages, 3D scenes and the portfolio guide are all built from <code>src/data</code>, and everything runs in your browser.</p>
+      </div>
+      <figure class="arch panel">
+        <svg viewBox="0 0 1000 420" role="img" aria-labelledby="arch-t arch-d">
+          <title id="arch-t">System architecture</title>
+          <desc id="arch-d">The content model in src/data is validated at build time and compiled into the static site. Two gates check the build: a content scan for secrets and private hosts, and a scan proving the bundle contains no AI inference endpoint. The browser loads static HTML from GitHub Pages, hydrates React islands, lazily loads 3D chunks and runs the portfolio guide locally. An experimental LLM agent Worker exists in the repository but is not deployed.</desc>
+          <defs><marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L8 4L0 8z" class="ah" /></marker></defs>
+          <g class="zone"><rect x="10" y="10" width="300" height="400" rx="10" /><text x="26" y="36">BUILD TIME</text></g>
+          <g class="zone"><rect x="340" y="10" width="330" height="400" rx="10" /><text x="356" y="36">VISITOR’S BROWSER</text></g>
+          <g class="zone off"><rect x="700" y="10" width="290" height="400" rx="10" /><text x="716" y="36">REPOSITORY ONLY · NOT DEPLOYED</text></g>
+
+          <g class="box b-data"><rect x="40" y="60" width="240" height="70" rx="8" /><text x="56" y="88">src/data · content model</text><text x="56" y="110" class="s">{projects.length} projects · {evidencedSkills().length} skills · Zod</text></g>
+          <g class="box"><rect x="40" y="170" width="240" height="56" rx="8" /><text x="56" y="203">Astro build → static HTML</text></g>
+          <g class="box s2"><rect x="40" y="262" width="240" height="56" rx="8" /><text x="56" y="286" class="s">gate: secrets / private hosts</text><text x="56" y="304" class="s">gate: no inference endpoints</text></g>
+
+          <g class="box"><rect x="370" y="60" width="270" height="56" rx="8" /><text x="386" y="93">HTML + CSS (GitHub Pages)</text></g>
+          <g class="box"><rect x="370" y="150" width="270" height="56" rx="8" /><text x="386" y="183">React islands (idle / visible)</text></g>
+          <g class="box"><rect x="370" y="240" width="270" height="56" rx="8" /><text x="386" y="273">Lazy R3F scenes · SVG twins</text></g>
+          <g class="box b-ai"><rect x="370" y="330" width="270" height="56" rx="8" /><text x="386" y="356">Portfolio guide (in-browser)</text><text x="386" y="376" class="s">intent matching · allowlisted links</text></g>
+
+          <g class="box ghost"><rect x="730" y="150" width="230" height="110" rx="8" /><text x="746" y="178">LLM agent Worker</text><text x="746" y="200" class="s">7 read-only tools</text><text x="746" y="218" class="s">rate limits · spend guard</text><text x="746" y="236" class="s">tested with a mock model</text></g>
+          <g class="box ghost"><rect x="730" y="310" width="230" height="56" rx="8" /><text x="746" y="343">Model API: not used</text></g>
+
+          <path class="fl" d="M160 130 V170" marker-end="url(#ah)" data-draw />
+          <path class="fl" d="M160 226 V262" marker-end="url(#ah)" data-draw />
+          <path class="fl" d="M280 198 H370 V88" marker-end="url(#ah)" data-draw />
+          <path class="fl" d="M505 116 V150" marker-end="url(#ah)" data-draw />
+          <path class="fl" d="M505 206 V240" marker-end="url(#ah)" data-draw />
+          <path class="fl hot" d="M505 296 V330" marker-end="url(#ah)" data-draw />
+          <path class="fl dashed" d="M280 95 C 520 -10, 700 40, 845 150" marker-end="url(#ah)" />
+          <path class="fl dashed" d="M845 260 V310" />
+        </svg>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section" id="guide" aria-labelledby="life-h">
+    <div class="shell grid-12">
+      <div class="life-copy">
+        <p class="num mono muted">02 / PORTFOLIO GUIDE</p>
+        <h2 id="life-h" class="h2">What happens when you ask</h2>
+        <p class="lede">A scripted guide, not a language model. {SUGGESTED.length} curated topics, every project and skill by name, and an honest “not covered” for everything else. Press <kbd>/</kbd> to try it.</p>
+      </div>
+      <ol class="life">
+        {lifecycle.map(([t, d], i) => <li data-reveal><span class="mono">{String(i + 1).padStart(2, '0')}</span><b>{t}</b><p class="soft">{d}</p></li>)}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="live-h">
+    <div class="shell">
+      <div class="section-head">
+        <div><p class="num">03 / LIVE</p><h2 id="live-h" class="h2">Measured, not claimed</h2></div>
+        <p>Real numbers from this page load and this session. Nothing on this panel is precomputed.</p>
+      </div>
+      <XRayLive client:visible />
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="bound-h">
+    <div class="shell grid-12">
+      <div class="life-copy">
+        <p class="num mono muted">04 / SECURITY BOUNDARIES</p>
+        <h2 id="bound-h" class="h2">What ships, and what doesn’t exist</h2>
+      </div>
+      <div class="bounds">
+        <section class="panel">
+          <div class="panel-head"><span>In the public bundle</span><span>by design</span></div>
+          <ul class="panel-body blist">
+            <li>The approved content model and its labels</li>
+            <li>The guide engine, its allowlist and the job matcher</li>
+            <li>Static HTML, CSS, fonts and lazy 3D chunks</li>
+          </ul>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><span>Server-side</span><span>nothing</span></div>
+          <ul class="panel-body blist">
+            <li>No backend, no database, no cookies, no analytics</li>
+            <li>No AI service: the build fails if an inference endpoint reaches the bundle</li>
+            <li>The experimental LLM Worker in <code>worker/</code> is not deployed, and no workflow deploys it</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="dec-h">
+    <div class="shell">
+      <div class="section-head">
+        <div><p class="num">05 / DECISIONS</p><h2 id="dec-h" class="h2">Trade-offs, written down</h2></div>
+      </div>
+      <dl class="decs">
+        {decisions.map(([d, w]) => <div data-reveal><dt>{d}</dt><dd>{w}</dd></div>)}
+      </dl>
+    </div>
+  </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .arch { margin: 0; padding: clamp(10px, 2vw, 24px); overflow-x: auto; }
+  .arch svg { min-width: 720px; width: 100%; height: auto; }
+  .arch .zone rect { fill: none; stroke: var(--line); stroke-dasharray: 4 6; }
+  .arch .zone text { font: 500 11px var(--font-mono); letter-spacing: 0.14em; fill: var(--fg-mute); }
+  .arch .box rect { fill: var(--surface); stroke: var(--line-strong); }
+  .arch .box text { font: 500 14px var(--font-body); fill: var(--fg); }
+  .arch .box text.s { font: 11px var(--font-mono); fill: var(--fg-mute); }
+  .arch .b-data rect { stroke: var(--violet); }
+  .arch .b-ai rect { stroke: color-mix(in srgb, var(--bio) 70%, var(--line)); }
+  .arch .b-sec rect { stroke: var(--orange); }
+  .arch .s2 rect { stroke-dasharray: 3 4; }
+  .arch .zone.off rect { stroke-dasharray: 2 6; }
+  .arch .ghost { opacity: 0.45; }
+  .arch .ghost rect { stroke-dasharray: 4 4; fill: none; }
+  .arch .fl.dashed { stroke-dasharray: 4 5; opacity: 0.5; }
+  .arch .fl { fill: none; stroke: var(--fg-mute); stroke-width: 1.4; }
+  .arch .fl.hot { stroke: var(--accent); stroke-width: 2; }
+  .arch .ah { fill: var(--fg-mute); }
+  .life-copy { grid-column: 1 / span 4; display: grid; gap: 18px; align-content: start; }
+  .life { grid-column: 6 / span 7; list-style: none; margin: 0; padding: 0; }
+  .life li { display: grid; grid-template-columns: 3em 1fr; gap: 4px 12px; padding: 16px 0; border-top: 1px solid var(--line); }
+  .life li .mono { grid-row: span 2; color: var(--accent); font-size: 0.75rem; padding-top: 4px; }
+  .life b { font: 600 1.1rem var(--font-display); }
+  .bounds { grid-column: 6 / span 7; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .blist { list-style: none; margin: 0; display: grid; gap: 10px; font-size: 0.9rem; color: var(--fg-soft); }
+  .blist li { padding-left: 16px; position: relative; }
+  .blist li::before { content: ''; position: absolute; left: 0; top: 0.6em; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .rules { grid-column: 1 / -1; }
+  .rules summary { cursor: pointer; list-style: none; }
+  .rules summary::-webkit-details-marker { display: none; }
+  .rules ol { margin: 0; padding-left: 36px; display: grid; gap: 8px; font-size: 0.9rem; color: var(--fg-soft); }
+  .decs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 clamp(24px, 4vw, 64px); margin: 0; }
+  .decs div { padding: 20px 0; border-top: 1px solid var(--line); }
+  .decs dt { font: 600 1.15rem var(--font-display); letter-spacing: -0.01em; }
+  .decs dd { margin: 8px 0 0; color: var(--fg-soft); }
+  :global(.xr-two) { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  :global(.xr-modes) { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  :global(.xr-toggle) { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: none; cursor: pointer; text-align: left; font-size: 0.875rem; }
+  :global(.xr-toggle kbd) { margin-left: auto; }
+  :global(.xr-toggle .sw) { width: 30px; height: 18px; border-radius: 999px; background: var(--line-strong); position: relative; flex: none; transition: background 200ms; }
+  :global(.xr-toggle .sw i) { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--fg); transition: transform 200ms var(--ease); }
+  :global(.xr-toggle[aria-checked='true'] .sw) { background: var(--accent); }
+  :global(.xr-toggle[aria-checked='true'] .sw i) { transform: translateX(12px); background: var(--on-accent); }
+  @media (max-width: 900px) {
+    .life-copy, .life, .bounds { grid-column: 1 / -1; }
+    .bounds, .decs, :global(.xr-two) { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) { :global(.xr-modes) { grid-template-columns: 1fr; } }
+  .en-note { margin: 0; padding: 8px 12px; border-left: 2px solid var(--line-strong); font-size: 0.875rem; color: var(--fg-mute); }
+</style>

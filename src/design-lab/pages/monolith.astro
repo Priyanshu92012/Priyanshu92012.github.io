@@ -1,0 +1,173 @@
+---
+// CONCEPT A · MONOLITH: the quiet future. Charcoal, platinum, one lime signal; a computational
+// sculpture behind the portrait; projects as editorial feature stories.
+import LabLayout from '../LabLayout.astro';
+import Portrait from '../../components/Portrait.astro';
+import MonolithStage from '../three/MonolithStage';
+import FlagshipViz from '../visuals/FlagshipViz';
+import { flagships, intro, explore, capabilities, contact, nav, moreNav } from '../content';
+import { DOMAIN_LABEL } from '../labels';
+import interFont from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import '../styles/monolith.css';
+
+const words = (s: string) => s.split(' ');
+---
+<LabLayout title="Monolith · V3 concept A" description={`${intro.name}: ${intro.role}. ${intro.headline}`} concept="monolith" preload={[interFont]} themeColor="#0b0b0c">
+  <header slot="nav" class="m-nav">
+    <a class="m-brand" href="/design-lab/monolith/" aria-label="Priyanshu, home">Priyanshu</a>
+    <nav aria-label="Primary" class="m-nav-links">
+      {nav.map((l) => <a href={l.href}>{l.label}</a>)}
+      <a href="#contact">Contact</a>
+    </nav>
+    <button type="button" class="m-menu-btn" data-menu-btn aria-expanded="false" aria-controls="m-menu">Menu</button>
+    <div class="m-menu" id="m-menu" data-menu hidden>
+      <nav aria-label="Mobile">
+        {[...nav, ...moreNav].map((l) => <a href={l.href}>{l.label}</a>)}
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 1 · HERO -->
+  <section class="m-hero" aria-labelledby="m-name">
+    <div class="m-hero-copy">
+      <p class="m-kicker"><span class="m-dot" aria-hidden="true"></span>{intro.role} — {intro.affiliation}</p>
+      <h1 id="m-name" class="m-name">{intro.name}</h1>
+      <p class="m-headline">
+        <span>{intro.headlineParts[0]}</span>
+        <span class="m-plat">{intro.headlineParts[1]}</span>
+      </p>
+      <div class="m-ctas">
+        <a class="m-btn m-btn-primary" href="#work">Selected work <span aria-hidden="true">↓</span></a>
+        <a class="m-btn" href={explore.href}>Explore all projects <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+    <div class="m-figure" data-allow-overflow>
+      <div class="m-object"><MonolithStage client:idle /></div>
+      <Portrait variant="cutout" eager class="m-portrait" sizes="(max-width: 760px) 78vw, (max-width: 1100px) 70vw, 48vw" />
+      <span class="m-figure-rule" aria-hidden="true"></span>
+    </div>
+    <div class="m-hero-foot" aria-hidden="true">
+      <span class="m-scroll">Scroll</span>
+    </div>
+  </section>
+
+  <!-- 2 · INTRODUCTION -->
+  <section class="m-intro" aria-labelledby="m-intro-h">
+    <p class="m-label" id="m-intro-h">01 — Introduction</p>
+    <p class="m-lede" data-words>
+      {intro.ledeParts.map((part, pi) => (
+        <span class={pi === 0 ? 'm-lede-a' : 'm-lede-b'}>{words(part).map((w) => <span class="w">{w} </span>)}</span>
+      ))}
+    </p>
+    <ol class="m-principles">
+      {intro.principles.map((p, i) => (
+        <li data-rv style={`--d:${i * 90}ms`}>
+          <span class="m-p-no">0{i + 1}</span>
+          <h2 class="m-p-title">{p.title}</h2>
+          <p>{p.body}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <!-- 3 · SELECTED WORK -->
+  <section class="m-work" id="work" aria-labelledby="m-work-h">
+    <div class="m-work-head">
+      <p class="m-label">02 — Selected work</p>
+      <h2 id="m-work-h" class="m-h2">Three flagship projects.<br /><span class="m-dim">Each with a working lab.</span></h2>
+    </div>
+    {flagships.map((f, i) => (
+      <article class={`m-feature d-${f.domain}${i % 2 ? ' is-flip' : ''}`} data-fs={f.slug} aria-labelledby={`m-f-${f.slug}`}>
+        <div class="m-f-copy">
+          <p class="m-f-meta"><span class="m-f-no">{f.no}</span><span>{f.kicker}</span><span>{DOMAIN_LABEL[f.domain]}</span></p>
+          <h3 class="m-f-title" data-rv id={`m-f-${f.slug}`}><a href={f.caseHref}>{f.title}</a></h3>
+          <p class="m-f-line">{f.line}</p>
+          <ul class="m-f-tech" aria-label="Technologies">{f.tech.map((t) => <li>{t}</li>)}</ul>
+          <button type="button" class="m-f-toggle" data-fs-toggle aria-expanded="false" aria-controls={`m-more-${f.slug}`} data-open="Read the story" data-close="Close the story">
+            <span data-fs-label>Read the story</span><span class="m-f-plus" aria-hidden="true"></span>
+          </button>
+          <div class="m-f-more" id={`m-more-${f.slug}`}>
+            <div class="m-f-more-in">
+              {f.problem && (<><h4>The problem</h4><p>{f.problem}</p></>)}
+              {f.approach.length > 0 && (<><h4>The approach</h4><ul>{f.approach.map((a) => <li>{a}</li>)}</ul></>)}
+              {f.note && <p class="m-f-note">{f.note}</p>}
+              <p class="m-f-links"><a href={f.caseHref}>Full case study <span aria-hidden="true">→</span></a><a href={f.labHref}>Open the interactive lab <span aria-hidden="true">→</span></a></p>
+            </div>
+          </div>
+        </div>
+        <figure class="m-f-visual" data-rv>
+          <figcaption class="m-f-cap"><span>Live · {f.demoTitle}</span><span>Synthetic</span></figcaption>
+          <FlagshipViz client:visible kind={f.visual} slug={f.slug} />
+          <p class="m-f-honesty">{f.honesty}</p>
+        </figure>
+      </article>
+    ))}
+  </section>
+
+  <!-- 4 · EXPLORE MORE -->
+  <section class="m-explore" aria-label="All projects">
+    <a class="m-explore-link" href={explore.href}>
+      <span class="m-explore-k">{explore.projects} projects · {explore.labs} interactive labs · filters &amp; full case studies</span>
+      <span class="m-explore-t" data-rv>Explore All Projects <span class="m-explore-arrow" aria-hidden="true">↗</span></span>
+    </a>
+  </section>
+
+  <!-- 5 · CAPABILITIES -->
+  <section class="m-cap" aria-labelledby="m-cap-h">
+    <div class="m-work-head">
+      <p class="m-label">03 — Capabilities</p>
+      <h2 id="m-cap-h" class="m-h2">Four disciplines.<br /><span class="m-dim">Every skill wired to proof.</span></h2>
+    </div>
+    <ul class="m-cap-grid">
+      {capabilities.map((c, i) => (
+        <li data-rv style={`--d:${i * 80}ms`}>
+          <a href={c.href} class="m-cap-item">
+            <span class="m-cap-n">{String(c.projects).padStart(2, '0')} projects</span>
+            <span class="m-cap-t">{c.label}</span>
+            <span class="m-cap-b">{c.blurb}</span>
+            <span class="m-cap-s">{c.skills.join(' · ')}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- 6 · CONTACT -->
+  <section class="m-contact" id="contact" aria-labelledby="m-contact-h">
+    <p class="m-label">04 — Contact</p>
+    <h2 id="m-contact-h" class="m-contact-t">Let’s build something <span class="m-lime">reliable</span>.</h2>
+    <a class="m-mail" href={contact.email}>{contact.emailLabel}</a>
+    <div class="m-contact-row">
+      <a href={contact.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+      <a href={contact.github} target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+      <a href="/recruiter/">Recruiter mode</a>
+      <button type="button" data-ask="">Ask the pet bot 🐯</button>
+    </div>
+  </section>
+
+  <footer slot="footer" class="m-foot">
+    <span>© {new Date().getFullYear()} {intro.name} · {intro.location}</span>
+    <span>Concept A · Monolith · Astro, React islands, Three.js</span>
+  </footer>
+</LabLayout>
+
+<script>
+  import { bootShowcases, bootAsk, bootMenu, bootReveal, afterLoad, loadGsap, reducedMotion } from '../scripts/common';
+  bootShowcases(); bootAsk(); bootMenu(); bootReveal();
+
+  const nav = document.querySelector<HTMLElement>('.m-nav');
+  const onScroll = () => nav?.classList.toggle('is-scrolled', scrollY > 24);
+  onScroll(); addEventListener('scroll', onScroll, { passive: true });
+
+  if (!reducedMotion()) afterLoad(async () => {
+    const { gsap } = await loadGsap();
+    // portrait drifts slower than the page; the name loosens as the hero leaves
+    gsap.to('.m-portrait', { yPercent: 8, ease: 'none', scrollTrigger: { trigger: '.m-hero', start: 'top top', end: 'bottom top', scrub: true } });
+    gsap.to('.m-name', { letterSpacing: '-0.02em', opacity: 0.25, ease: 'none', scrollTrigger: { trigger: '.m-hero', start: 'top top', end: 'bottom top', scrub: true } });
+    // the introduction brightens word by word as it is read (muted → full; both pass WCAG contrast)
+    const st = { trigger: '.m-lede', start: 'top 82%', end: 'bottom 42%', scrub: true };
+    gsap.fromTo('.m-lede-a .w', { color: '#8d8d88' }, { color: '#ededeb', stagger: 0.04, ease: 'none', scrollTrigger: st });
+    gsap.fromTo('.m-lede-b .w', { color: '#8d8d88' }, { color: '#cfcfca', stagger: 0.04, ease: 'none', scrollTrigger: { ...st, start: 'top 60%' } });
+  });
+</script>

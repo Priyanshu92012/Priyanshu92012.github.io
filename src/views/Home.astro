@@ -1,0 +1,390 @@
+---
+// Homepage view (EN at /, DE at /de/; the language comes from the URL). Homepage (V2): portrait hero → introduction → three featured projects + the rest of the public set →
+// the Spatial Lab as the way into all projects → skills & languages with the constellation → contact (footer).
+import BaseLayout from '../layouts/BaseLayout.astro';
+import LabPoster from '../components/LabPoster.astro';
+import FeatureVisual from '../components/FeatureVisual.astro';
+import ConstellationMini from '../components/ConstellationMini.astro';
+import Portrait from '../components/Portrait.astro';
+import HeroLab from '../islands/HeroLab';
+import { profile, projects, domainList, projectsInDomain, EVIDENCE_RANK } from '../data/index';
+import SkillTaxonomy from '../components/SkillTaxonomy.astro';
+import { KIND_ORDER } from '../data/capabilities';
+import { localeFromPath, localizePath } from '../i18n/index';
+import { pick } from '../i18n/dict';
+import { HOME } from '../i18n/pages/home';
+import { profileText, projectText, statusLabel, evidenceLabel, skillLabel } from '../i18n/content';
+import { DOMAIN_DE } from '../data/de';
+
+const lang = localeFromPath(Astro.url.pathname);
+const h = pick(HOME, lang);
+const L = (p: string) => localizePath(p, lang);
+const P = profileText(lang);
+
+/** The three projects featured prominently; the rest of the public set follows in a compact list. */
+const FEATURED = ['test-resource-scheduler', 'gmre-log-parser', 'securemed'];
+const featured = FEATURED.map((s) => projects.find((p) => p.slug === s)!).filter(Boolean);
+const more = projects.filter((p) => !FEATURED.includes(p.slug));
+const labs = projects.filter((p) => p.demo && p.demo.kind !== 'xray');
+const headParts = P.headline.split(/(?<=,)\s+/);
+const COUNT = lang === 'de'
+  ? ['null', 'eins', 'zwei', 'drei', 'vier', 'fünf', 'sechs', 'sieben', 'acht', 'neun', 'zehn', 'elf', 'zwölf']
+  : ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+const count = COUNT[projects.length] ?? String(projects.length);
+const edu = P.edu;
+const [sigHead, sigTail] = P.signature.split(/:\s+/);
+const [sigFirst, ...sigRest] = sigHead.split(' ');
+const ABBR = { work: 'N', study: 'D', own: 'O', tool: 'T', exploring: 'E' } as const;
+const LEGEND = { work: h('lgWork'), study: h('lgStudy'), own: h('lgOwn'), tool: h('lgTool'), exploring: h('lgExploring') } as const;
+const domainShort = (d: { id: string; short: string }) => (lang === 'de' ? DOMAIN_DE[d.id]?.short ?? d.short : d.short);
+---
+<BaseLayout title="PRIYANSHU.EXE" description={h('description', { name: profile.name, positioning: P.positioning, count: `${count[0].toUpperCase()}${count.slice(1)}` })}>
+  <!-- ═════ HERO ═════ -->
+  <section class="hero" aria-labelledby="hero-name">
+    <div class="shell hero-shell">
+      <h1 id="hero-name" class="mega hero-name intro" data-hero-name>{profile.name}</h1>
+
+      <div class="hero-copy intro">
+        <p class="hero-headline">{headParts.map((h, i) => (i === headParts.length - 1 ? <em>{h}</em> : <span>{h}</span>))}</p>
+        <p class="hero-role mono">{P.positioning}</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="#work">{h('ctaWork')} <span class="arrow">→</span></a>
+          <a class="btn" href={L('/lab/')}>{h('ctaLabs')}</a>
+          <a class="btn btn-quiet" href={L('/recruiter/')} data-recruiter-link>{h('ctaRecruiter')}</a>
+        </div>
+      </div>
+    </div>
+
+    <figure class="hero-portrait" data-allow-overflow>
+      <span class="hp-grid" aria-hidden="true"></span>
+      <span class="hp-scan" aria-hidden="true"></span>
+      <Portrait variant="cutout" eager class="hp-img" sizes="(max-width: 760px) 92vw, (max-width: 1100px) 64vw, 54vw" />
+    </figure>
+  </section>
+
+  <!-- ═════ INTRODUCTION ═════ -->
+  <section class="section intro-sec" aria-labelledby="intro-h">
+    <div class="shell grid-12">
+      <p class="num mono muted intro-num" id="intro-h">{h('introNum')}</p>
+      <div class="intro-body">
+        <p class="intro-lede">{P.intro[0]}</p>
+        <div class="intro-cols">
+          {P.intro.slice(1).map((t) => <p data-reveal>{t}</p>)}
+        </div>
+        <p class="intro-sig"><b>{sigFirst}</b> {sigRest.join(' ')}.<span>{sigTail[0].toUpperCase()}{sigTail.slice(1)}</span></p>
+        <dl class="intro-facts">
+          <div>
+            <dt>{h('focus')}</dt>
+            <dd><ul class="intro-tags">{P.tags.map((t) => <li>{t}</li>)}</ul><p class="intro-areas">{P.focusAreas.join(' · ')}</p></dd>
+          </div>
+          <div>
+            <dt>{h('education')}</dt>
+            <dd><span lang="de">{edu.programDe}</span> — {edu.org}<span class="intro-focus"> · {edu.focus}</span></dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════ SELECTED WORK ═════ -->
+  <section class="section" id="work" aria-labelledby="work-h">
+    <div class="shell">
+      <div class="section-head">
+        <div>
+          <p class="num">{h('workNum')}</p>
+          <h2 id="work-h" class="h2">{h('workH1')} <br />{h('workH2')}</h2>
+        </div>
+        <p set:html={h('workLede')} />
+      </div>
+      <ol class="feature-list">
+        {featured.map((p) => (
+          <li class={`feature d-${p.domains[0]}`} data-reveal>
+            <span class="feature-num" data-parallax aria-hidden="true">{String(p.index).padStart(2, '0')}</span>
+            <div class="feature-copy">
+              <p class="eyebrow"><span class="status" data-status={p.status}>{statusLabel(p.status, lang)}</span> · {p.org} · {evidenceLabel(p.evidence, lang)}</p>
+              <h3 class="feature-title"><a href={L(`/work/${p.slug}/`)} style={`view-transition-name: t-${p.slug}`}>{p.title}</a></h3>
+              <p class="feature-sum">{projectText(p, lang).summary}</p>
+              <p class="feature-tech mono">{p.skills.slice(0, 4).map((s) => skillLabel(s, lang)).join(' · ')}</p>
+              <div class="feature-ctas">
+                <a class="btn btn-sm" href={L(`/work/${p.slug}/`)}>{h('caseStudy')} <span class="arrow">→</span></a>
+                {p.demo && <a class="btn btn-sm btn-quiet" href={L(`/work/${p.slug}/#demo`)}>{h('openLab')}<span class="sr-only">: {projectText(p, lang).demoTitle}</span> <span class="arrow">→</span></a>}
+              </div>
+            </div>
+            <a class="feature-visual" href={L(`/work/${p.slug}/#demo`)} tabindex="-1" aria-hidden="true">
+              <FeatureVisual kind={p.demo!.kind} />
+            </a>
+          </li>
+        ))}
+      </ol>
+
+      <div class="more">
+        <p class="num mono muted">{h('alsoIndex')}</p>
+        <ul class="more-list">
+          {more.map((p) => (
+            <li class={`more-row d-${p.domains[0]}`} data-reveal>
+              <span class="mono muted more-no">{String(p.index).padStart(2, '0')}</span>
+              <div class="more-main">
+                <a class="more-title" href={L(`/work/${p.slug}/`)}>{p.title}</a>
+                <span class="more-sum">{projectText(p, lang).summary.split(/(?<=\.)\s/)[0]}</span>
+              </div>
+              <span class="more-meta">
+                <span class="status" data-status={p.status}>{statusLabel(p.status, lang)}</span>
+                <span class="evidence"><span class="bars">{[1, 2, 3, 4].map((i) => <i class={i <= EVIDENCE_RANK[p.evidence] ? 'on' : ''} />)}</span>{evidenceLabel(p.evidence, lang)}</span>
+                {p.demo && <a class="mono more-lab" href={L(`/work/${p.slug}/#demo`)}>{h('lab')} →</a>}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════ EXPLORE: THE SPATIAL LAB ═════ -->
+  <section class="section explore" id="lab-map" aria-labelledby="explore-h">
+    <div class="shell">
+      <div class="explore-grid">
+        <div class="explore-copy">
+          <p class="num mono muted">{h('exploreNum')}</p>
+          <h2 id="explore-h" class="h2">{h('exploreH1', { count })} <br /><em>{h('exploreH2')}</em></h2>
+          <p class="soft">{h('exploreLede')}</p>
+          <div class="hero-domains" role="group" aria-label={h('filterDomain')}>
+            {domainList.filter((d) => projectsInDomain(d.id).length).map((d) => (
+              <button type="button" class={`chip d-${d.id}`} data-domain-chip={d.id} aria-pressed="false">
+                <span class="swatch"></span>{domainShort(d)}<span class="count">{projectsInDomain(d.id).length}</span>
+              </button>
+            ))}
+          </div>
+          <div class="explore-ctas">
+            <a class="btn btn-primary explore-all" href={L('/work/')}>{h('allProjects')} <span class="arrow" aria-hidden="true">↗</span></a>
+            <a class="btn" href={L('/lab/')}>{h('nLabs', { n: labs.length })} <span class="arrow">→</span></a>
+          </div>
+        </div>
+        <div class="lab-stage" data-lab-stage>
+          <div class="poster-wrap"><LabPoster /></div>
+          <HeroLab client:visible />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════ SKILLS & LANGUAGES ═════ -->
+  <section class="section skills-sec" id="skills" aria-labelledby="skills-h">
+    <div class="shell">
+      <div class="section-head">
+        <div>
+          <p class="num">{h('skillsNum')}</p>
+          <h2 id="skills-h" class="h2">{h('skillsH1')} <br />{h('skillsH2')}</h2>
+        </div>
+        <div class="sk-intro">
+          <p>{h('skillsLede')}</p>
+          <ul class="sk-legend" aria-label={h('kinds')}>
+            {KIND_ORDER.map((k) => <li><span class="sk-abbr" aria-hidden="true">{ABBR[k]}</span>{LEGEND[k]}</li>)}
+          </ul>
+        </div>
+      </div>
+
+      <div class="cap-grid">
+        <SkillTaxonomy variant="compact" />
+        <section class="tx sk-map" aria-labelledby="map-h">
+          <h3 id="map-h" class="tx-title">{h('mapH')}</h3>
+          <a class="sk-map-visual" href={L('/skills/')} tabindex="-1" aria-hidden="true"><ConstellationMini /></a>
+          <a class="btn btn-sm" href={L('/skills/')}>{h('mapCta')} <span class="arrow">→</span></a>
+        </section>
+      </div>
+
+      <dl class="sk-langs">
+        <dt id="lang-h">{h('languages')}</dt>
+        <dd>
+          <ul aria-labelledby="lang-h">
+            {P.languages.map((l) => <li><span class="cap-name">{l.name}</span>{l.level && <span class="cap-level"> · {l.level}</span>}{l.note && <span class="cap-note">, {l.note}</span>}</li>)}
+          </ul>
+        </dd>
+      </dl>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* ── hero: name, portrait, headline ───────────────────────────── */
+  /* Geometry (desktop): the portrait is a square of side --ps anchored bottom-right; the head starts 31% into it.
+     The name is sized so it ends where the hair begins, overlapping the last letter by ~0.08em: the face stays
+     the focal point and the name stays whole at every width (it used to run behind the face on wide screens). */
+  .hero {
+    --hero-h: min(max(640px, calc(100svh - var(--header-h))), 980px);
+    /* 2026-11-21: the portrait aligns to the grid's right edge (no bleed) and the name is ~20% smaller,
+       still ending where the hair begins so the two stay layered. */
+    --ps: min(calc(var(--hero-h) * 0.92), 56vw);
+    --sl: calc(max(0px, (100vw - var(--max)) / 2) + var(--gutter));
+    --pr: var(--sl);
+    --hn: clamp(3.4rem, min(12vw, (100vw - var(--pr) - 0.69 * var(--ps) - var(--sl)) / 4.16), 12.5rem);
+    position: relative; min-height: var(--hero-h); padding: 14px 0 clamp(36px, 6vh, 64px); overflow: clip; isolation: isolate;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none; z-index: -2;
+    background:
+      radial-gradient(42vw 36vw at 74% 58%, rgba(122, 140, 255, 0.14), transparent 65%),
+      radial-gradient(26vw 22vw at 86% 30%, rgba(139, 255, 176, 0.07), transparent 60%);
+  }
+  :global(:root[data-theme='paper']) .hero::before { background: radial-gradient(42vw 36vw at 74% 58%, rgba(63, 79, 216, 0.07), transparent 65%); }
+  /* no stacking context here: name (1) < portrait (2) < copy (4) layer against each other */
+  .hero-shell { display: grid; align-content: start; }
+  .hero-name { position: relative; z-index: 1; margin-top: clamp(40px, 9vh, 104px); font-size: var(--hn); padding-bottom: 0.06em; }
+  .hero-copy {
+    position: relative; z-index: 4; display: grid; gap: 18px; justify-items: start; margin-top: clamp(18px, 3vh, 34px);
+    /* stays left of the portrait's shoulder line */
+    max-width: clamp(21rem, calc(100vw - var(--pr) - 0.9 * var(--ps) - var(--sl) - 16px), 32rem);
+  }
+  .hero-headline { display: grid; font: 600 clamp(1.7rem, 2.9vw, 2.6rem)/1.04 var(--font-display); letter-spacing: -0.04em; }
+  .hero-headline em { font-style: normal; color: var(--accent); }
+  .hero-role { font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-soft); }
+  .hero-ctas { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+  .btn-quiet { border-color: transparent; color: var(--fg-soft); padding-inline: 10px; }
+  .btn-quiet:hover { color: var(--fg); border-color: var(--line); }
+
+  /* the portrait: monochrome, editorial, in front of the name, inside a faint lab grid */
+  .hero-portrait { position: absolute; z-index: 2; margin: 0; right: var(--pr); bottom: 0; height: var(--ps); aspect-ratio: 1; pointer-events: none; }
+  .hero-portrait :global(.hp-img) {
+    position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: bottom;
+    filter: grayscale(1) contrast(1.08) brightness(0.98);
+    -webkit-mask-image: linear-gradient(to bottom, #000 74%, transparent 99%), linear-gradient(to right, transparent 0, #000 12%, #000 90%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to bottom, #000 74%, transparent 99%), linear-gradient(to right, transparent 0, #000 12%, #000 90%, transparent 100%);
+    mask-composite: intersect;
+  }
+  .hp-grid {
+    position: absolute; inset: 6% -6% 0; z-index: -1;
+    background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 48px 48px; background-position: center bottom;
+    -webkit-mask-image: radial-gradient(ellipse 58% 62% at 52% 52%, #000 30%, transparent 75%); mask-image: radial-gradient(ellipse 58% 62% at 52% 52%, #000 30%, transparent 75%);
+    opacity: 0.7;
+  }
+  .hp-scan { position: absolute; left: -2%; right: 0; top: 38%; height: 1px; z-index: 0; /* behind the portrait: it never crosses the face */ background: linear-gradient(90deg, transparent, var(--accent) 22%, var(--accent) 78%, transparent); opacity: 0.55; box-shadow: 0 0 12px var(--accent); animation: hp-scan 9s var(--ease-in-out) infinite alternate; }
+  @keyframes hp-scan { from { transform: translateY(-14vh); opacity: 0.15; } 50% { opacity: 0.55; } to { transform: translateY(16vh); opacity: 0.15; } }
+
+  /* ── introduction ─────────────────────────────────────────────── */
+  .intro-num { grid-column: 1 / span 3; padding-top: 0.7em; font-size: var(--fs-micro); letter-spacing: 0.16em; }
+  .intro-body { grid-column: 4 / span 9; display: grid; gap: clamp(26px, 3.4vw, 44px); }
+  .intro-lede { font: 500 clamp(1.45rem, 2.5vw, 2.25rem)/1.2 var(--font-display); letter-spacing: -0.03em; max-width: 30ch; text-wrap: pretty; }
+  .intro-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(20px, 3vw, 44px); }
+  .intro-cols p { padding-top: 16px; border-top: 1px solid var(--line-strong); color: var(--fg-soft); font-size: 1.0625rem; line-height: 1.6; max-width: 46ch; text-wrap: pretty; }
+  .intro-sig { font: 500 clamp(1.15rem, 1.6vw, 1.4rem)/1.35 var(--font-display); letter-spacing: -0.015em; color: var(--fg); }
+  .intro-sig b { font-weight: 600; color: var(--accent); }
+  .intro-sig span { display: block; margin-top: 4px; color: var(--fg-mute); font: 400 0.9375rem/1.5 var(--font-body); letter-spacing: 0; }
+  .intro-facts { margin: 0; display: grid; gap: 14px; padding-top: 18px; border-top: 1px solid var(--line); }
+  .intro-facts > div { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 6px 16px; align-items: baseline; }
+  .intro-facts dt { font: 500 var(--fs-micro)/1.6 var(--font-mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg-mute); }
+  .intro-facts dd { margin: 0; font-size: 0.9375rem; }
+  .intro-focus { color: var(--fg-soft); }
+  .intro-areas { margin-top: 8px; font-size: 0.875rem; color: var(--fg-mute); }
+  .intro-tags { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+  .intro-tags li { padding: 4px 9px; border: 1px solid var(--line-strong); border-radius: 999px; font: 500 0.6875rem/1.3 var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg-soft); }
+
+  /* ── selected work ───────────────────────────────────────────── */
+  .feature-list { list-style: none; margin: 0; padding: 0; }
+  .feature { position: relative; display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(24px, 5vw, 80px); align-items: center; padding: clamp(36px, 6vw, 72px) 0; border-top: 1px solid var(--line); }
+  .feature:nth-child(even) .feature-copy { order: 2; }
+  .feature-num { position: absolute; left: -0.06em; top: 50%; translate: 0 -50%; font: 700 clamp(7rem, 20vw, 17rem)/0.8 var(--font-display); letter-spacing: -0.08em; color: transparent; -webkit-text-stroke: 1px var(--line); pointer-events: none; z-index: -1; }
+  .feature:nth-child(even) .feature-num { left: auto; right: -0.04em; }
+  .feature-copy { display: grid; gap: 14px; justify-items: start; }
+  .feature-title { font-size: clamp(1.9rem, 3.6vw, 3.1rem); letter-spacing: -0.04em; line-height: 1; }
+  .feature-title a { text-decoration: none; }
+  .feature-title a:hover { color: var(--c); }
+  .feature-sum { color: var(--fg-soft); max-width: 54ch; }
+  .feature-tech { font-size: 0.75rem; color: var(--fg-mute); }
+  .feature-ctas { display: flex; flex-wrap: wrap; gap: 8px; }
+  .feature-visual { display: block; padding: clamp(16px, 2.5vw, 28px); border: 1px solid var(--line); border-radius: var(--radius-lg); background: color-mix(in srgb, var(--surface) 70%, transparent); transition: border-color 300ms var(--ease), transform 500ms var(--ease); }
+  .feature-visual:hover { border-color: var(--c); transform: translateY(-4px); }
+
+  .more { display: grid; gap: 14px; margin-top: clamp(28px, 4vw, 48px); }
+  .more .num { font-size: var(--fs-micro); letter-spacing: 0.16em; }
+  .more-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line-strong); }
+  .more-row { display: grid; grid-template-columns: 3em minmax(0, 1fr) auto; gap: 16px; align-items: baseline; padding: 18px 0; border-bottom: 1px solid var(--line); transition: background 200ms var(--ease); }
+  .more-row:hover { background: linear-gradient(90deg, color-mix(in srgb, var(--c) 7%, transparent), transparent 70%); }
+  .more-no { font-size: 0.75rem; padding-left: 4px; }
+  .more-main { display: grid; gap: 4px; min-width: 0; }
+  .more-title { font: 600 clamp(1.15rem, 1.9vw, 1.45rem)/1.15 var(--font-display); letter-spacing: -0.02em; text-decoration: none; }
+  .more-title:hover { color: var(--c); }
+  .more-sum { color: var(--fg-mute); font-size: 0.875rem; }
+  .more-meta { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: flex-end; }
+  .more-lab { font-size: 0.75rem; color: var(--c); text-decoration: none; }
+  .more-lab:hover { text-decoration: underline; }
+
+  /* ── explore: the spatial lab ────────────────────────────────── */
+  .explore { background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--bg-deep) 70%, transparent)); }
+  .explore-grid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: clamp(20px, 3vw, 48px); align-items: center; }
+  .explore-copy { position: relative; z-index: 2; display: grid; gap: 20px; justify-items: start; }
+  .explore-copy .num { font-size: var(--fs-micro); letter-spacing: 0.16em; }
+  .h2 em { font-style: normal; color: var(--accent); }
+  .hero-domains { display: flex; flex-wrap: wrap; gap: 8px; }
+  .explore-ctas { display: flex; flex-wrap: wrap; gap: 10px; }
+  .explore-all { min-height: 52px; padding: 0 22px; font-size: 1rem; }
+  .lab-stage { position: relative; height: clamp(460px, 62vh, 660px); }
+  .poster-wrap { position: absolute; inset: 0 110px 40px -30px; display: grid; place-items: center; transition: opacity 900ms var(--ease), filter 900ms var(--ease); }
+  .lab-stage.is-3d .poster-wrap { opacity: 0; filter: blur(8px); pointer-events: none; }
+  .lab-stage :global(.lab-canvas) { position: absolute; inset: -60px -60px -20px -40px; animation: fade-in 1200ms var(--ease) both; -webkit-mask-image: radial-gradient(ellipse 72% 70% at 50% 50%, #000 62%, transparent 100%); mask-image: radial-gradient(ellipse 72% 70% at 50% 50%, #000 62%, transparent 100%); }
+  .lab-stage :global(.inspector) {
+    position: absolute; right: 0; bottom: 0; z-index: 5; width: min(380px, 100%);
+    border: 1px solid var(--line-strong); border-radius: var(--radius-lg); background: color-mix(in srgb, var(--bg) 92%, transparent);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+  }
+
+  /* ── skills & languages ──────────────────────────────────────── */
+  .sk-intro { display: grid; gap: 14px; max-width: 36rem; }
+  .sk-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 0.8125rem; color: var(--fg-mute); }
+  .sk-legend li { display: inline-flex; align-items: center; gap: 8px; }
+  .cap-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(28px, 3.4vw, 44px) clamp(20px, 3vw, 44px); }
+  .sk-abbr { display: inline-grid; place-items: center; min-width: 1.6em; padding: 1px 4px; border: 1px solid var(--line-strong); border-radius: 4px; font: 500 0.625rem/1.3 var(--font-mono); color: var(--fg-soft); }
+  .cap-note { color: var(--fg-mute); font-size: 0.875rem; }
+  .cap-name { font-size: 0.9375rem; color: var(--fg); }
+  .cap-level { color: var(--fg-mute); font-size: 0.875rem; }
+  .sk-map { display: grid; gap: 12px; align-content: start; justify-items: start; padding-top: 14px; border-top: 1px solid var(--line-strong); }
+  .sk-map .tx-title { font: 600 1rem/1.2 var(--font-display); letter-spacing: -0.01em; }
+  .sk-map-visual { display: block; width: 100%; max-width: 420px; margin: -4px 0 -8px; }
+  .sk-langs { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 6px 16px; align-items: baseline; margin: clamp(32px, 4vw, 48px) 0 0; padding-top: 16px; border-top: 1px solid var(--line-strong); }
+  .sk-langs dt { font: 500 var(--fs-micro)/1.6 var(--font-mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg-mute); }
+  .sk-langs dd { margin: 0; }
+  .sk-langs ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 28px; }
+
+  /* ── responsive ──────────────────────────────────────────────── */
+  @media (max-width: 1100px) {
+    .explore-grid { grid-template-columns: minmax(0, 1fr); }
+    .poster-wrap { inset: 0 0 40px 0; }
+    .lab-stage { height: clamp(420px, 70vw, 620px); }
+    .intro-num, .intro-body { grid-column: 1 / -1; }
+    .cap-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 900px) {
+    .feature { grid-template-columns: minmax(0, 1fr); }
+    .feature:nth-child(even) .feature-copy { order: 0; }
+    .intro-cols { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 900px) {
+    /* phones and tablets: name → portrait → headline and actions */
+    .hero { --hn: clamp(2.9rem, 16vw, 8.2rem); min-height: 0; padding-bottom: 32px; display: flex; flex-direction: column; }
+    .hero-shell { display: contents; }
+    .hero-shell > * { margin-inline: var(--gutter); }
+    .hero-name { order: 1; margin-top: clamp(28px, 7vw, 56px); }
+    /* the hair tucks just under the baseline: only the letters' lowest edge meets it */
+    .hero-portrait { position: relative; order: 2; right: auto; bottom: auto; height: auto; width: min(calc(100% - 2 * var(--gutter)), 540px); margin: calc(var(--hn) * -0.31) auto 0; }
+    .hero-copy { order: 3; margin-top: 8px; max-width: 32rem; }
+  }
+  @media (max-width: 760px) {
+    .lab-stage { height: auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+    .poster-wrap { position: relative; inset: auto; height: 340px; width: 100%; overflow: hidden; }
+    .poster-wrap :global(svg) { width: 100%; height: 100%; }
+    .lab-stage :global(.lab-canvas) { inset: 0 -16px auto -16px; height: 360px; }
+    .lab-stage :global(.inspector) { position: relative; width: 100%; }
+    .hide-sm { display: none; }
+    .more-row { grid-template-columns: 2.4em minmax(0, 1fr); }
+    .more-meta { grid-column: 2; justify-content: flex-start; }
+    .cap-grid { grid-template-columns: minmax(0, 1fr); }
+    .intro-facts > div { grid-template-columns: minmax(0, 1fr); }
+  }
+  :global(:root[data-mode='recruiter']) .hp-scan { display: none; }
+  @media (min-width: 1101px) { .hero-role { white-space: nowrap; } }
+</style>
+
+<script>
+  import { setPref } from '../lib/prefs';
+  document.querySelector('[data-recruiter-link]')?.addEventListener('click', () => setPref('mode', 'recruiter'));
+</script>

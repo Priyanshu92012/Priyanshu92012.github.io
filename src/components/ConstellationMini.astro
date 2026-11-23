@@ -1,0 +1,52 @@
+---
+// Static radial preview of the knowledge graph (domains → projects → skills).
+// Generated at build time from the same graph the interactive constellation uses.
+import { knowledgeGraph, domainList } from '../data/index';
+import { DOMAIN_HEX } from '../lib/lab';
+
+const { nodes, edges } = knowledgeGraph();
+const angleOf: Record<string, number> = { systems: -2.3, ai: -0.75, security: 0.85, research: 2.4 };
+const R = { domain: 70, project: 165, skill: 265 } as const;
+const groups: Record<string, string[]> = {};
+for (const n of nodes) (groups[`${n.kind}:${n.domain}`] ??= []).push(n.id);
+const pos = new Map<string, [number, number]>();
+for (const n of nodes) {
+  const g = groups[`${n.kind}:${n.domain}`];
+  const i = g.indexOf(n.id), k = g.length;
+  const spread = n.kind === 'domain' ? 0 : n.kind === 'project' ? 0.32 : 0.16;
+  const a = angleOf[n.domain] + (i - (k - 1) / 2) * spread;
+  const r = R[n.kind] + (n.kind === 'skill' ? (i % 2) * 22 : 0);
+  pos.set(n.id, [Math.cos(a) * r, Math.sin(a) * r]);
+}
+---
+<svg class="cmini" viewBox="-320 -300 640 600" role="img" aria-label={`Knowledge graph preview: ${nodes.filter((n) => n.kind === 'project').length} projects connected to ${nodes.filter((n) => n.kind === 'skill').length} evidenced skills across ${domainList.length} domains.`}>
+  <g class="edges">
+    {edges.map((e) => {
+      const [x1, y1] = pos.get(e.source)!; const [x2, y2] = pos.get(e.target) ?? [0, 0];
+      return <path d={`M${x1.toFixed(1)} ${y1.toFixed(1)} Q${((x1 + x2) / 4).toFixed(1)} ${((y1 + y2) / 4).toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`} class={`e-${e.kind}`} data-draw />;
+    })}
+  </g>
+  {nodes.map((n) => {
+    const [x, y] = pos.get(n.id)!;
+    const r = n.kind === 'domain' ? 9 : n.kind === 'project' ? 3 + n.weight : 2 + Math.min(n.weight, 4) * 0.8;
+    return (
+      <g class={`n n-${n.kind}`} style={`--c:${DOMAIN_HEX[n.domain]}`}>
+        <circle cx={x.toFixed(1)} cy={y.toFixed(1)} r={r} />
+        {(n.kind !== 'skill' || n.weight >= 3) && <text x={(x + (x >= 0 ? r + 5 : -r - 5)).toFixed(1)} y={(y + 3).toFixed(1)} text-anchor={x >= 0 ? 'start' : 'end'}>{n.label}</text>}
+      </g>
+    );
+  })}
+</svg>
+<style>
+  .cmini { width: 100%; height: auto; overflow: visible; }
+  .cmini path { fill: none; stroke-width: 0.6; }
+  .e-project-skill { stroke: var(--line-strong); opacity: 0.55; }
+  .e-project-domain { stroke: var(--fg-mute); opacity: 0.45; }
+  .e-skill-domain { stroke: var(--line); opacity: 0.4; }
+  .n circle { fill: var(--c); filter: drop-shadow(0 0 6px var(--c)); }
+  .n-skill circle { fill: color-mix(in srgb, var(--c) 60%, var(--bg)); filter: none; }
+  .n-domain circle { fill: var(--bg); stroke: var(--c); stroke-width: 2; }
+  .n text { font: 500 9px var(--font-mono); fill: var(--fg-soft); }
+  .n-domain text { font-size: 11px; fill: var(--fg); letter-spacing: 0.08em; text-transform: uppercase; }
+  .n-skill text { fill: var(--fg-mute); font-size: 8px; }
+</style>

@@ -1,0 +1,245 @@
+---
+// Header: logo · EN/DE · Recruiter · menu. Navigation lives in a right-side drawer (a modal dialog:
+// focus is trapped, Escape and the scrim close it, scroll is locked and restored, focus returns).
+import { localeFromPath, localizePath, basePath, useT } from '../i18n/index';
+
+const path = Astro.url.pathname;
+const lang = localeFromPath(path);
+const t = useT(lang);
+const here = basePath(path);
+const L = (p: string) => localizePath(p, lang);
+const groups = [
+  { title: t('nav.explore'), items: [
+    { href: '/work/', label: t('nav.work'), hint: t('nav.work.hint') },
+    { href: '/skills/', label: t('nav.skills'), hint: t('nav.skills.hint') },
+    { href: '/lab/', label: t('nav.labs'), hint: t('nav.labs.hint') },
+  ] },
+  { title: t('nav.advanced'), items: [
+    { href: '/security-lab/', label: t('nav.breach'), hint: t('nav.breach.hint') },
+    { href: '/ai-lab/', label: t('nav.ailab'), hint: t('nav.ailab.hint') },
+    { href: '/xray/', label: t('nav.xray'), hint: t('nav.xray.hint') },
+  ] },
+  { title: t('nav.personal'), items: [
+    { href: '/about/', label: t('nav.about'), hint: t('nav.about.hint') },
+    { href: '/about/#contact', label: t('nav.contact'), hint: t('nav.contact.hint') },
+  ] },
+];
+const current = (href: string) => !href.includes('#') && (href === '/' ? here === '/' : here.startsWith(href));
+---
+<div class="rc-bar no-print" role="region" aria-label={t('nav.recruiter')}>
+  <div class="shell rc-inner">
+    <span>{t('rc.bar')}</span>
+    <span class="rc-links"><a href={L('/recruiter/')}>{t('rc.summary')}</a><button type="button" data-rc-exit>{t('rc.exit')}</button></span>
+  </div>
+</div>
+<header class="site-header" data-header>
+  <div class="shell bar">
+    <a class="brand" href={L('/')} aria-label={t('nav.home.aria')}>
+      <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2 21 7v10l-9 5-9-5V7z" fill="none" stroke="currentColor" stroke-width="1.5" />
+        <path d="M12 12 21 7M12 12v10M12 12 3 7" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".55" />
+      </svg>
+      <span>PRIYANSHU<span class="exe">.EXE</span></span>
+    </a>
+
+    <div class="actions">
+      <nav class="lang" aria-label={t('nav.lang')}>
+        <a href={localizePath(path, 'en')} hreflang="en" lang="en" aria-current={lang === 'en' ? 'true' : undefined} data-set-lang="en">EN</a>
+        <span aria-hidden="true">/</span>
+        <a href={localizePath(path, 'de')} hreflang="de" lang="de" aria-current={lang === 'de' ? 'true' : undefined} data-set-lang="de">DE</a>
+      </nav>
+      <button class="icon-btn theme-btn" type="button" data-action="theme" aria-label={t('nav.theme.label')} title={t('nav.theme.label')}>
+        <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" /></svg>
+        <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.6" /><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+      </button>
+      <a class="btn btn-sm recruiter-btn" href={L('/recruiter/')} data-action="recruiter"><span class="long">{t('nav.recruiter')}</span><span class="short">{t('nav.recruiter.short')}</span></a>
+      <button class="icon-btn menu-btn" type="button" data-action="menu" aria-expanded="false" aria-controls="site-menu" aria-label={t('nav.open')}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M8 16h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="drawer" id="site-menu" role="dialog" aria-modal="true" aria-labelledby="menu-title" hidden data-drawer>
+  <div class="drawer-scrim" data-close></div>
+  <div class="drawer-panel">
+    <div class="drawer-head">
+      <p id="menu-title" class="mono">{t('nav.menu')}</p>
+      <button class="icon-btn" type="button" data-close aria-label={t('nav.close')}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+      </button>
+    </div>
+    <nav class="drawer-nav" aria-label={t('nav.primary')}>
+      {groups.map((g, gi) => (
+        <section class="drawer-group" style={`--i:${gi}`}>
+          <h2 class="drawer-h mono">{g.title}</h2>
+          <ul>
+            {g.items.map((it) => (
+              <li><a href={L(it.href)} aria-current={current(it.href) ? 'page' : undefined}><span class="dn">{it.label}</span><span class="dh">{it.hint}</span></a></li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </nav>
+    <div class="drawer-foot">
+      <a class="drawer-home" href={L('/')} aria-current={here === '/' ? 'page' : undefined}>{t('nav.home')}</a>
+      <button class="btn btn-sm" type="button" data-action="theme" aria-label={t('nav.theme.label')}>{t('nav.theme')}</button>
+      <a class="btn btn-sm" href={localizePath(path, lang === 'en' ? 'de' : 'en')} hreflang={lang === 'en' ? 'de' : 'en'} data-set-lang={lang === 'en' ? 'de' : 'en'}>{t('nav.lang.switch')}</a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .rc-bar { background: var(--accent); color: var(--on-accent); font: 500 0.75rem/1.2 var(--font-mono); letter-spacing: 0.04em; }
+  .rc-inner { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 32px; flex-wrap: wrap; padding-block: 4px; }
+  .rc-links { display: inline-flex; gap: 14px; align-items: center; }
+  .rc-links a, .rc-links button { color: inherit; background: none; border: 0; padding: 4px 0; font: inherit; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+  .site-header {
+    position: sticky; top: 0; z-index: 70; height: var(--header-h);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    border-bottom: 1px solid transparent;
+    transition: border-color 300ms var(--ease), background 300ms var(--ease);
+  }
+  .site-header.scrolled { border-bottom-color: var(--line); background: color-mix(in srgb, var(--bg) 96%, transparent); }
+  .bar { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font: 600 0.8125rem/1 var(--font-mono); letter-spacing: 0.1em; white-space: nowrap; }
+  .brand-mark { width: 22px; height: 22px; color: var(--accent); transition: transform 600ms var(--ease); }
+  .brand:hover .brand-mark { transform: rotate(60deg); }
+  .exe { color: var(--accent); }
+  .actions { display: flex; align-items: center; gap: 10px; }
+  .lang { display: inline-flex; align-items: center; gap: 2px; font: 500 0.75rem/1 var(--font-mono); letter-spacing: 0.08em; color: var(--fg-mute); }
+  .lang a { display: inline-grid; place-items: center; min-width: 32px; min-height: 32px; border-radius: 6px; color: var(--fg-mute); text-decoration: none; }
+  .lang a:hover { color: var(--fg); }
+  .lang a[aria-current='true'] { color: var(--fg); text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 5px; }
+  .recruiter-btn { min-height: 32px; padding: 0 12px; font-size: 0.8125rem; }
+  .recruiter-btn .short { display: none; }
+  :global(:root[data-mode='recruiter']) .recruiter-btn { border-color: var(--accent); color: var(--accent); }
+  .icon-btn { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 999px; border: 1px solid var(--line); background: none; color: var(--fg); cursor: pointer; transition: border-color 160ms, background 160ms; }
+  .icon-btn:hover { border-color: var(--fg-mute); background: var(--surface); }
+  .icon-btn svg { width: 18px; height: 18px; }
+  /* light (paper) is the default: show the moon to switch to dark, the sun to switch back */
+  .theme-btn { width: 36px; height: 36px; border-color: transparent; color: var(--fg-soft); }
+  .theme-btn .i-sun { display: none; }
+  :global(:root[data-theme='dark']) .theme-btn .i-sun { display: block; }
+  :global(:root[data-theme='dark']) .theme-btn .i-moon { display: none; }
+
+  /* drawer */
+  .drawer { position: fixed; inset: 0; z-index: 140; } /* above the tiger (z 100) and its chat */
+  .drawer[hidden] { display: none; }
+  .drawer-scrim { position: absolute; inset: 0; background: color-mix(in srgb, var(--bg-deep) 62%, transparent); backdrop-filter: blur(6px); opacity: 0; transition: opacity 260ms var(--ease); }
+  .drawer-panel {
+    position: absolute; top: 0; right: 0; bottom: 0; width: min(420px, 100%); display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+    background: var(--surface); border-left: 1px solid var(--line-strong); box-shadow: -30px 0 80px rgba(0, 0, 0, 0.35);
+    transform: translateX(100%); transition: transform 360ms var(--ease);
+  }
+  :global(:root[data-theme='paper']) .drawer-panel { box-shadow: -20px 0 50px rgba(14, 19, 28, 0.12); }
+  .drawer.is-open .drawer-scrim { opacity: 1; }
+  .drawer.is-open .drawer-panel { transform: none; }
+  .drawer-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px 14px 24px; border-bottom: 1px solid var(--line); }
+  .drawer-head p { font-size: var(--fs-micro); letter-spacing: 0.18em; text-transform: uppercase; color: var(--fg-mute); }
+  .drawer-nav { overflow-y: auto; overscroll-behavior: contain; padding: 8px 24px 20px; display: grid; gap: 22px; align-content: start; }
+  .drawer-group { opacity: 0; transform: translateX(14px); transition: opacity 320ms var(--ease) calc(80ms + var(--i) * 60ms), transform 420ms var(--ease) calc(80ms + var(--i) * 60ms); }
+  .drawer.is-open .drawer-group { opacity: 1; transform: none; }
+  .drawer-h { margin: 14px 0 6px; font-size: var(--fs-micro); letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
+  .drawer-group ul { list-style: none; margin: 0; padding: 0; }
+  .drawer-group a { display: grid; gap: 2px; padding: 11px 10px; margin: 0 -10px; border-radius: 10px; text-decoration: none; color: var(--fg); transition: background 160ms; }
+  .drawer-group a:hover { background: color-mix(in srgb, var(--fg) 6%, transparent); }
+  .dn { font: 600 1.25rem/1.15 var(--font-display); letter-spacing: -0.02em; }
+  .dh { font-size: 0.8125rem; color: var(--fg-mute); }
+  .drawer-group a[aria-current='page'] .dn { color: var(--accent); }
+  .drawer-group a[aria-current='page'] .dn::after { content: ''; display: inline-block; width: 6px; height: 6px; margin-left: 10px; border-radius: 50%; background: var(--accent); vertical-align: middle; }
+  .drawer-foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 14px 24px calc(14px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); }
+  .drawer-home { margin-right: auto; font-size: 0.875rem; color: var(--fg-soft); text-decoration: none; }
+  .drawer-home[aria-current='page'] { color: var(--accent); }
+  :global(:root[data-motion='reduce']) .drawer-scrim, :global(:root[data-motion='reduce']) .drawer-panel, :global(:root[data-motion='reduce']) .drawer-group { transition: none; }
+  @media (prefers-reduced-motion: reduce) { .drawer-scrim, .drawer-panel, .drawer-group { transition: none; } }
+
+  @media (max-width: 520px) {
+    .recruiter-btn .long { display: none; }
+    .recruiter-btn .short { display: inline; }
+    /* phones: the switch shows only the other language (EN ↔ DE) */
+    .lang a[aria-current='true'], .lang span { display: none; }
+  }
+  @media (max-width: 380px) {
+    .bar { gap: 6px; }
+    .brand { gap: 7px; font-size: 0.6875rem; letter-spacing: 0.05em; }
+    .brand-mark { width: 18px; height: 18px; }
+    .actions { gap: 4px; }
+    .lang a { min-width: 28px; }
+    .recruiter-btn { padding: 0 9px; }
+    .icon-btn { width: 36px; height: 36px; }
+    .theme-btn { width: 30px; height: 30px; }
+  }
+</style>
+
+<script>
+  import { getPrefs, setPref } from '../lib/prefs';
+
+  const header = document.querySelector<HTMLElement>('[data-header]')!;
+  const drawer = document.querySelector<HTMLElement>('[data-drawer]')!;
+  const panel = drawer.querySelector<HTMLElement>('.drawer-panel')!;
+  const menuBtn = header.querySelector<HTMLButtonElement>('[data-action="menu"]')!;
+  const reduce = () => document.documentElement.dataset.motion === 'reduce';
+  const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 8);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  let lastFocus: HTMLElement | null = null;
+  let closing = 0;
+  const focusables = () => [...panel.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')];
+
+  function lockScroll(on: boolean) {
+    const root = document.documentElement;
+    if (on) {
+      const sb = window.innerWidth - root.clientWidth;
+      root.style.overflow = 'hidden';
+      if (sb > 0) root.style.paddingRight = `${sb}px`;
+    } else { root.style.overflow = ''; root.style.paddingRight = ''; }
+  }
+
+  function open() {
+    clearTimeout(closing);
+    lastFocus = document.activeElement as HTMLElement | null;
+    drawer.hidden = false;
+    lockScroll(true);
+    menuBtn.setAttribute('aria-expanded', 'true');
+    requestAnimationFrame(() => requestAnimationFrame(() => drawer.classList.add('is-open')));
+    (panel.querySelector<HTMLElement>('a[aria-current="page"]') ?? focusables()[1] ?? focusables()[0])?.focus({ preventScroll: true });
+  }
+
+  function close(restore = true) {
+    if (drawer.hidden) return;
+    drawer.classList.remove('is-open');
+    menuBtn.setAttribute('aria-expanded', 'false');
+    const done = () => { drawer.hidden = true; lockScroll(false); };
+    if (reduce()) done(); else closing = window.setTimeout(done, 360);
+    if (restore) (lastFocus ?? menuBtn).focus({ preventScroll: true });
+  }
+
+  menuBtn.addEventListener('click', () => (drawer.hidden ? open() : close()));
+  drawer.addEventListener('click', (e) => {
+    const el = e.target as HTMLElement;
+    if (el.closest('[data-close]')) close();
+    else if (el.closest('a[href]')) close(false); // navigating away
+  });
+  drawer.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if (e.key !== 'Tab') return;
+    const f = focusables(); if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+
+  document.addEventListener('click', (e) => {
+    const el = (e.target as HTMLElement).closest<HTMLElement>('[data-action], [data-set-lang]');
+    if (!el) return;
+    if (el.dataset.setLang) { try { localStorage.setItem('pexe:lang', el.dataset.setLang); } catch { /* private mode */ } return; }
+    if (el.dataset.action === 'theme') setPref('theme', getPrefs().theme === 'paper' ? 'dark' : 'paper');
+    if (el.dataset.action === 'recruiter') setPref('mode', 'recruiter'); // the link continues to the résumé
+  });
+  document.querySelector('[data-rc-exit]')?.addEventListener('click', () => {
+    setPref('mode', 'immersive');
+    if (/^\/(de\/)?recruiter/.test(location.pathname)) location.href = location.pathname.startsWith('/de/') ? '/de/' : '/';
+  });
+</script>

@@ -1,0 +1,40 @@
+---
+// Source of /og.png (1200×630). Render and capture with: see DEPLOY.md → "Social card".
+// noindex and excluded from the sitemap; it is a template, not a page.
+import '../styles/fonts.css';
+import '../styles/global.css';
+import LabPoster from '../components/LabPoster.astro';
+import { profile, projects } from '../data/index';
+---
+<!doctype html>
+<html lang="en" data-theme="dark" data-motion="reduce">
+  <head><meta charset="utf-8" /><meta name="robots" content="noindex" /><title>OG card</title></head>
+  <body class="og">
+    <div class="card">
+      <div class="masthead"><span><b>PRIYANSHU.EXE</b> · field notes on systems &amp; AI</span><span>{projects.length} projects · evidence-labelled</span></div>
+      <div class="grid">
+        <div class="copy">
+          <h1 class="mega">{profile.name}</h1>
+          <p class="role">{profile.role} · Nokia · DHBW Stuttgart</p>
+          <p class="head">Reliable systems.<br /><em>Evidence-first</em> AI.</p>
+          <p class="url mono">priyanshu92012.github.io</p>
+        </div>
+        <div class="art"><LabPoster /></div>
+      </div>
+    </div>
+  </body>
+</html>
+<style is:global>
+  body.og { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: radial-gradient(700px 420px at 78% 62%, rgba(122,140,255,.16), transparent 65%), radial-gradient(380px 300px at 92% 22%, rgba(139,255,176,.08), transparent 60%), var(--bg); }
+  body.og::after { display: none; }
+  .og .card { box-sizing: border-box; width: 1200px; height: 630px; padding: 44px 56px; display: grid; grid-template-rows: auto 1fr; }
+  .og .grid { display: grid; grid-template-columns: 560px 1fr; align-items: center; gap: 12px; }
+  .og .mega { font-size: 132px; line-height: .86; }
+  .og .role { margin-top: 22px; font: 500 15px/1.4 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--fg-soft); }
+  .og .head { margin-top: 26px; font: 600 40px/1.05 var(--font-display); letter-spacing: -.035em; }
+  .og .head em { font-style: normal; color: var(--accent); }
+  .og .url { margin-top: 30px; font-size: 16px; color: var(--fg-mute); }
+  .og .art { height: 520px; display: grid; place-items: center; }
+  .og .art svg { width: 640px; height: auto; }
+  .og .lab-poster text { display: none; }
+</style>

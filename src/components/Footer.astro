@@ -1,0 +1,50 @@
+---
+import { execSync } from 'node:child_process';
+import { profile } from '../data/index';
+import { localeFromPath, useT } from '../i18n/index';
+import { ANALYTICS_ON, ANALYTICS_ORIGIN, COUNTER_SINCE } from '../lib/analytics';
+
+let commit = 'local';
+try { commit = execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch { /* not a git checkout */ }
+const built = new Date().toISOString().slice(0, 10);
+const lang = localeFromPath(Astro.url.pathname);
+const t = useT(lang);
+const showCounter = ANALYTICS_ON && COUNTER_SINCE.length > 0;
+---
+<footer class="site-footer">
+  <div class="shell">
+    <div class="signoff" id="contact-cta">
+      <p class="eyebrow"><span class="dot"></span> {t('foot.open')}</p>
+      <p class="big">{t('foot.big.a')} <em>{t('foot.big.b')}</em>.</p>
+      <div class="contact-row">
+        <a class="btn btn-primary" href={profile.links.email}>{t('foot.email')} <span class="arrow">→</span></a>
+        <a class="btn" href={profile.links.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <a class="btn" href={profile.links.github} target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </div>
+    <div class="colophon">
+      <span>© {new Date().getFullYear()} {profile.name} · {profile.location}</span>
+      {showCounter && <span class="mono views" data-visitor-count data-origin={ANALYTICS_ORIGIN} hidden>{t('foot.views', { since: COUNTER_SINCE })}: <b data-count></b> <small>(GoatCounter)</small></span>}
+      <span class="mono">{t('foot.build')} <a href={lang === 'de' ? '/de/xray/' : '/xray/'}>{commit}</a> · {built} · {t('foot.stack')}</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer { border-top: 1px solid var(--line); background: var(--bg-deep); padding: clamp(64px, 10vw, 120px) 0 28px; }
+  .signoff { display: grid; gap: 22px; padding-bottom: clamp(48px, 8vw, 96px); }
+  .big { font: 650 clamp(2.6rem, 7.5vw, 6.4rem)/0.95 var(--font-display); letter-spacing: -0.05em; max-width: 14ch; }
+  .big em { font-style: normal; color: var(--accent); }
+  .contact-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  .colophon { display: flex; flex-wrap: wrap; gap: 10px 28px; justify-content: space-between; padding-top: 20px; border-top: 1px solid var(--line); font-size: 0.8125rem; color: var(--fg-mute); }
+  .colophon .mono { font-size: 0.75rem; }
+  .views b { color: var(--fg-soft); font-weight: 500; }
+</style>
+
+{showCounter && (
+  <script>
+    import { fetchTotal } from '../scripts/beacon';
+    const el = document.querySelector<HTMLElement>('[data-visitor-count]');
+    if (el?.dataset.origin) fetchTotal(el.dataset.origin).then((n) => { if (n) { el.querySelector('[data-count]')!.textContent = n; el.hidden = false; } });
+  </script>
+)}

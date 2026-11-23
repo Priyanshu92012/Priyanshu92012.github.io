@@ -1,0 +1,158 @@
+/* PRIYANSHU.EXE V2 — Phase 1 prototype tokens (draft, not locked).
+   Palette from master plan §4. Contrast ratios are in prototypes/hero/README.md. */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --midnight: #090C12;
+  --elevated: #151C29;
+  --elevated-2: #1C2536;
+  --paper: #E9EEF6;
+  --paper-soft: #B7C1D1;
+  --paper-mute: #8C97AA;
+  --line: #263044;
+  --bio: #8BFFB0;      /* bioelectric */
+  --violet: #7A8CFF;   /* electric violet */
+  --orange: #FF885E;   /* controlled orange */
+
+  --bg: var(--midnight);
+  --fg: var(--paper);
+  --fg-soft: var(--paper-soft);
+  --fg-mute: var(--paper-mute);
+  --surface: var(--elevated);
+
+  --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --gutter: clamp(16px, 4vw, 40px);
+  --max: 1240px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  color-scheme: dark;
+}
+
+/* Paper / print presentation (plan §4: optional light presentation for recruiters) */
+:root[data-theme="paper"] {
+  --bg: #F3F5F9;
+  --fg: #0E131C;
+  --fg-soft: #344055;
+  --fg-mute: #56627A;
+  --surface: #FFFFFF;
+  --line: #D3DAE6;
+  --bio: #0A7A3E;
+  --violet: #3F4FD8;
+  --orange: #B4441C;
+  color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--bio); outline-offset: 3px; border-radius: 4px; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.skip-link {
+  position: absolute; left: 12px; top: -48px; z-index: 100;
+  background: var(--fg); color: var(--bg); padding: 8px 12px; border-radius: 6px;
+  font: 500 14px var(--font-body); text-decoration: none;
+}
+.skip-link:focus { top: 12px; }
+
+/* ── Global header (plan §3) ─────────────────────────────── */
+.site-header {
+  position: relative; z-index: 20;
+  max-width: var(--max); margin: 0 auto;
+  padding: 20px var(--gutter);
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.brand {
+  font: 600 14px/1 var(--font-mono); letter-spacing: 0.08em;
+  text-decoration: none; color: var(--fg); white-space: nowrap;
+}
+.brand span { color: var(--bio); }
+.site-nav { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.site-nav a, .chip-btn {
+  font: 500 13px/1 var(--font-body);
+  color: var(--fg-soft); text-decoration: none;
+  padding: 9px 12px; border-radius: 999px; border: 1px solid transparent;
+  background: none; cursor: pointer;
+  transition: color 160ms, border-color 160ms, background 160ms;
+}
+.site-nav a:hover, .chip-btn:hover { color: var(--fg); border-color: var(--line); }
+.chip-btn[aria-pressed="true"] { color: var(--bg); background: var(--fg); border-color: var(--fg); }
+.chip-btn.ask { border-color: var(--line); color: var(--fg); }
+.chip-btn.ask::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--bio); margin-right: 8px; vertical-align: 1px; }
+@media (max-width: 720px) {
+  .site-nav .nav-link { display: none; }
+}
+@media (max-width: 480px) {
+  .hide-sm { display: none; }
+  .site-nav { gap: 2px; flex-wrap: nowrap; }
+  .site-nav a, .chip-btn { padding: 8px 10px; }
+}
+
+/* ── Status labels (plan §6: used literally) ─────────────── */
+.status {
+  display: inline-flex; align-items: center; gap: 6px;
+  font: 500 11px/1 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--fg-mute);
+}
+.status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.status[data-status="verified"] { color: var(--bio); }
+.status[data-status="in-progress"] { color: var(--orange); }
+.status[data-status="research"] { color: var(--violet); }
+.status[data-status="pending"] { color: var(--fg-mute); }
+
+/* ── Recruiter Mode (shared, rendered by proto.js) ────────── */
+.recruiter { display: none; }
+:root[data-mode="recruiter"] .recruiter { display: block; }
+:root[data-mode="recruiter"] .immersive { display: none !important; }
+.recruiter {
+  max-width: 880px; margin: 0 auto; padding: 24px var(--gutter) 80px;
+}
+.recruiter h1 { font: 600 clamp(36px, 6vw, 56px)/1.05 var(--font-display); margin: 16px 0 12px; letter-spacing: -0.02em; }
+.recruiter .lede { font-size: 18px; color: var(--fg-soft); max-width: 640px; margin: 0 0 28px; }
+.recruiter .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 40px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 18px; border-radius: 10px; border: 1px solid var(--line);
+  font: 500 14px/1 var(--font-body); text-decoration: none; color: var(--fg);
+  background: var(--surface); cursor: pointer;
+  transition: border-color 160ms, transform 160ms;
+}
+.btn:hover { border-color: var(--fg-mute); transform: translateY(-1px); }
+.btn.primary { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.r-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.r-list li { padding: 18px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; gap: 6px 20px; }
+.r-list h3 { margin: 0; font: 600 17px/1.3 var(--font-display); }
+.r-list p { margin: 0; grid-column: 1 / -1; color: var(--fg-soft); font-size: 14.5px; }
+.r-list .meta { grid-column: 1 / -1; font: 12px var(--font-mono); color: var(--fg-mute); }
+.r-list a { color: var(--fg); }
+
+/* ── Prototype badge ─────────────────────────────────────── */
+.proto-badge {
+  position: fixed; left: 12px; bottom: 12px; z-index: 50;
+  font: 500 11px/1.3 var(--font-mono); color: var(--fg-mute);
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
+  max-width: calc(100vw - 24px);
+}
+.proto-badge a { color: var(--fg-soft); }
+@media (max-width: 720px) { .proto-badge { position: static; display: inline-block; margin: 0 var(--gutter) 24px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+:root[data-motion="reduce"] *, :root[data-motion="reduce"] *::before, :root[data-motion="reduce"] *::after {
+  animation-duration: 0.001ms !important; transition-duration: 0.001ms !important;
+}

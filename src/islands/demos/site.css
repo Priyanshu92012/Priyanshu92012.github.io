@@ -1,0 +1,42 @@
+/* PRIYANSHU.EXE case study: intent-routing lab and component explorer */
+.ir { display: grid; gap: 18px; }
+.ir-ask { display: grid; gap: 10px; }
+.ir-row { display: flex; gap: 8px; }
+.ir-row .field { flex: 1; min-width: 0; }
+.ir-samples { display: flex; flex-wrap: wrap; gap: 6px; }
+.ir-samples .chip { min-height: 30px; font-size: 0.75rem; }
+.ir-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 20px; align-items: start; }
+.ir-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; border-left: 1px solid var(--line-strong); }
+.ir-steps li { display: grid; grid-template-columns: 14px 9.5em minmax(0, 1fr); gap: 8px; align-items: baseline; padding: 6px 0 6px 10px; margin-left: -6px; font-size: 0.8125rem; color: var(--fg-mute); }
+.ir-dot { width: 11px; height: 11px; border-radius: 50%; border: 1px solid var(--line-strong); background: var(--bg); align-self: center; }
+.ir-steps li.hit { color: var(--fg); }
+.ir-steps li.hit .ir-dot { background: var(--accent); border-color: var(--accent); }
+.ir-step { font-size: 0.6875rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.ir-detail { overflow-wrap: anywhere; }
+.ir-out { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--bg-deep); }
+.ir-bubble { padding: 10px 12px; border-radius: 14px 14px 14px 4px; background: var(--surface-2); color: var(--fg); font-size: 0.9rem; line-height: 1.45; }
+.ir-acts { display: flex; flex-wrap: wrap; gap: 6px; }
+.ir-check { font-size: 0.6875rem; color: var(--fg-mute); }
+@media (max-width: 900px) { .ir-grid { grid-template-columns: minmax(0, 1fr); } .ir-steps li { grid-template-columns: 14px minmax(0, 1fr); } .ir-steps li .ir-detail { grid-column: 2; } }
+
+.cx { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 20px; align-items: start; }
+.cx-list { display: grid; gap: 14px; }
+.cx-group { display: grid; gap: 4px; }
+.cx-layer { font-size: 0.6875rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-mute); }
+.cx-item { display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 0 12px; border: 1px solid transparent; border-radius: 8px; background: none; color: var(--fg-soft); font: 500 0.875rem var(--font-body); text-align: left; cursor: pointer; }
+.cx-item:hover { color: var(--fg); background: var(--surface); }
+.cx-item[aria-selected='true'] { color: var(--fg); border-color: var(--line-strong); background: var(--surface); }
+.cx-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex: none; }
+.cx-item.s-build-time .cx-dot, .cx-status.s-build-time { color: var(--violet); }
+.cx-item.s-build-time .cx-dot { background: var(--violet); }
+.cx-item.s-disabled .cx-dot { background: none; border: 1px dashed var(--orange); }
+.cx-panel { position: sticky; top: 96px; display: grid; gap: 12px; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); }
+.cx-status { font-size: 0.6875rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
+.cx-status.s-disabled { color: var(--orange); }
+.cx-facts { margin: 0; display: grid; gap: 10px; }
+.cx-facts div { display: grid; grid-template-columns: 7em minmax(0, 1fr); gap: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 0.875rem; }
+.cx-facts dt { color: var(--fg-mute); font: 500 0.6875rem/1.6 var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; }
+.cx-facts dd { margin: 0; display: flex; flex-wrap: wrap; gap: 6px; color: var(--fg-soft); overflow-wrap: anywhere; }
+.cx-facts code { font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; background: var(--surface-2); color: var(--fg); }
+@media (max-width: 900px) { .cx { grid-template-columns: minmax(0, 1fr); } .cx-panel { position: static; } .cx-list { grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); } }
+@media (max-width: 480px) { .cx-facts div { grid-template-columns: minmax(0, 1fr); gap: 4px; } }

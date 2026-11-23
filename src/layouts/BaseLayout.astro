@@ -1,0 +1,81 @@
+---
+import '../styles/fonts.css';
+import '../styles/global.css';
+import displayFont from '@fontsource-variable/space-grotesk/files/space-grotesk-latin-wght-normal.woff2?url';
+import bodyFont from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import Seo from '../components/Seo.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import GlobalUI from '../islands/GlobalUI';
+import PetBot from '../islands/petbot/PetBot';
+import { validateContent } from '../data/validate';
+import { localeFromPath, isLocalized, t } from '../i18n/index';
+import { ANALYTICS_ON, ANALYTICS_ORIGIN, COUNTED_HOST } from '../lib/analytics';
+
+validateContent(); // build fails on any invalid content record
+
+interface Props { title: string; description: string; image?: string; noindex?: boolean; type?: 'website' | 'article'; bare?: boolean }
+const { title, description, image, noindex, type, bare = false } = Astro.props;
+const lang = localeFromPath(Astro.url.pathname);
+const localized = isLocalized(Astro.url.pathname);
+---
+<!doctype html>
+<html lang={lang} class="no-js" data-theme="paper" data-localized={localized ? '1' : undefined}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#F3F1EC" />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <!-- The first screen is set in these two faces: fetch them before the CSS discovers them (LCP). -->
+    <link rel="preload" href={displayFont} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={bodyFont} as="font" type="font/woff2" crossorigin />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <Seo title={title} description={description} image={image} noindex={noindex} type={type} />
+    <!-- Apply modes before first paint (no flash). Mirrors src/lib/prefs.ts. -->
+    <script is:inline>
+      (function () {
+        var r = document.documentElement, s = {};
+        r.classList.remove('no-js'); r.classList.add('js');
+        try { s = JSON.parse(localStorage.getItem('pexe:prefs') || '{}'); } catch (e) {}
+        var q = new URLSearchParams(location.search);
+        var osReduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+        r.dataset.theme = (q.get('theme') || s.theme) === 'dark' ? 'dark' : 'paper'; // light by default
+        r.dataset.motion = q.get('motion') === 'reduce' || s.motion === 'reduce' || (s.motion !== 'full' && osReduce) ? 'reduce' : 'full';
+        var path = location.pathname, base = path.replace(/^\/de(?=\/|$)/, '') || '/';
+        r.dataset.mode = s.mode === 'recruiter' || base.indexOf('/recruiter') === 0 ? 'recruiter' : 'immersive';
+        // An explicit EN/DE choice (stored by the switch) is honoured on later visits. The browser's
+        // language alone never redirects.
+        var chosen = null; try { chosen = localStorage.getItem('pexe:lang'); } catch (e) {}
+        var here = path === '/de' || path.indexOf('/de/') === 0 ? 'de' : 'en';
+        if (r.dataset.localized === '1' && (chosen === 'de' || chosen === 'en') && chosen !== here && !q.has('lang')) {
+          location.replace((chosen === 'de' ? '/de' + base : base) + location.search + location.hash);
+        }
+      })();
+    </script>
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{t(lang, 'skip')}</a>
+    {!bare && <Header />}
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    {!bare && <Footer />}
+    {import.meta.env.PUBLIC_STAGING === '1' && <div class="staging-badge" role="note">Staging preview · not public</div>}
+    <GlobalUI client:afterpaint guide="external" lang={lang} /> <!-- after the first painted frame (off the LCP path); UI-opening events before hydration are queued in src/lib/bus.ts -->
+    {!bare && <PetBot client:afterpaint variant="v2" lang={lang} />} <!-- the tiger's chat answers '/', ⌘J and ?ask= -->
+    <script>
+      import { bootMotion } from '../scripts/motion';
+      bootMotion();
+    </script>
+    {ANALYTICS_ON && <div hidden data-analytics={ANALYTICS_ORIGIN} data-host={COUNTED_HOST}></div>}
+    {ANALYTICS_ON && (
+      <script>
+        import { sendBeacon } from '../scripts/beacon';
+        const a = document.querySelector<HTMLElement>('[data-analytics]');
+        if (a?.dataset.analytics && a.dataset.host) sendBeacon(a.dataset.analytics, a.dataset.host);
+      </script>
+    )}
+  </body>
+</html>

@@ -1,0 +1,50 @@
+# Production deploy of the V2 static site to GitHub Pages. (There is no Worker deployment anywhere in CI.)
+# MANUAL ONLY (workflow_dispatch) and only from main: nothing deploys on merge or push.
+# Before the first run the owner must switch Settings → Pages → Source to "GitHub Actions".
+# Rollback: see DEPLOY.md (tag portfolio-v1-backup).
+name: Deploy site
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "deploy" to publish main to production'
+        required: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main' && inputs.confirm == 'deploy'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check && npm test
+      - run: npm run build   # includes the dist gate: fails if any AI inference endpoint is in the bundle
+        env:
+          # Optional, privacy-conscious analytics (docs/ANALYTICS.md). Unset = off: no beacon, no counter.
+          PUBLIC_GOATCOUNTER_CODE: ${{ vars.GOATCOUNTER_CODE }}
+          PUBLIC_COUNTER_SINCE: ${{ vars.COUNTER_SINCE }}
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

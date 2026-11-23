@@ -1,0 +1,57 @@
+---
+// AI Systems Lab: retrieval, tool calling, a multi-role pipeline and evaluation over the approved
+// records, in the browser. Every module states what is real and what is simulated.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import AiLab from '../islands/ai/AiLab';
+import { localeFromPath, t } from '../i18n/index';
+import { pick } from '../i18n/dict';
+import { AIL } from '../i18n/pages/labs2';
+
+const lang = localeFromPath(Astro.url.pathname);
+const x = pick(AIL, lang);
+const TIERS: [string, string, string][] = ([1, 2, 3, 4] as const).map((n) => [x(`m${n}`), x(`k${n}`), x(`d${n}`)]);
+---
+<BaseLayout title={x('title')} description={x('description')}>
+  <PageHead num="06" kicker={x('kicker')} title={x('h')} accent={x('accent')} meta={x('meta')} lede={x('lede')} />
+
+  <section class="section ai-section" aria-labelledby="ai-h">
+    <div class="shell">
+      <h2 id="ai-h" class="sr-only">{x('expH')}</h2>
+      {lang === 'de' && <p class="mono muted en-note">{t(lang, 'common.lab.en')}</p>}
+      <div lang={lang === 'de' ? 'en' : undefined}><AiLab client:afterpaint /></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="tiers-h">
+    <div class="shell">
+      <div class="section-head">
+        <div><p class="num">{x('tiersNum')}</p><h2 id="tiers-h" class="h2">{x('tiersH')}</h2></div>
+        <p>{x('tiersLede')}</p>
+      </div>
+      <table class="index-table ai-tiers">
+        <thead><tr><th scope="col">{x('colModule')}</th><th scope="col">{x('colLabel')}</th><th scope="col">{x('colMeans')}</th></tr></thead>
+        <tbody>{TIERS.map(([m, k, d]) => <tr><th scope="row">{m}</th><td class="mono">{k}</td><td>{d}</td></tr>)}</tbody>
+      </table>
+      <div class="ai-next">
+        <p class="num mono muted">{x('nextNum')}</p>
+        <h3 class="h3">{x('nextH')}</h3>
+        <p class="soft">{x('nextBody')}</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .ai-section { padding-top: clamp(24px, 4vw, 48px); }
+  .ai-tiers { width: 100%; }
+  .ai-next { display: grid; gap: 10px; max-width: 70ch; margin-top: clamp(32px, 5vw, 56px); padding-top: 20px; border-top: 1px dashed var(--line-strong); }
+  .ai-next .num { font-size: var(--fs-micro); letter-spacing: 0.16em; }
+  @media (max-width: 560px) {
+    .ai-tiers thead { display: none; }
+    .ai-tiers, .ai-tiers tbody, .ai-tiers tr, .ai-tiers th, .ai-tiers td { display: block; width: auto; }
+    .ai-tiers tr { padding: 10px 0; }
+    .ai-tiers th[scope='row'] { white-space: normal; }
+  }
+  .en-note { margin-bottom: 12px; font-size: 0.75rem; }
+</style>
