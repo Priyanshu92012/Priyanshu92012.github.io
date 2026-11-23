@@ -1,7 +1,7 @@
 // Build gate: scans publishable sources for secrets and private identifiers,
 // and reports content that still needs owner review (CONTENT_APPROVAL.md).
 // Structural validation of the content model runs in src/data/index.ts (Zod) and Vitest.
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, extname } from 'node:path';
 import { findConfidential } from './confidential.mjs';
 
@@ -19,6 +19,7 @@ const RULES = [
 ];
 
 function* walk(dir) {
+  if (!existsSync(dir)) return; // e.g. docs/ is local-only (Markdown is git-ignored), so CI may not have it
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);
     const st = statSync(p);
