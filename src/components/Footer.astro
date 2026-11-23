@@ -25,6 +25,7 @@ const showCounter = ANALYTICS_ON && COUNTER_SINCE.length > 0;
     <div class="colophon">
       <span>© {new Date().getFullYear()} {profile.name} · {profile.location}</span>
       {showCounter && <span class="mono views" data-visitor-count data-origin={ANALYTICS_ORIGIN} hidden>{t('foot.views', { since: COUNTER_SINCE })}: <b data-count></b> <small>(GoatCounter)</small></span>}
+      <a class="mono" href={lang === 'de' ? '/de/privacy/' : '/privacy/'}>{t('foot.privacy')}</a>
       <span class="mono">{t('foot.build')} <a href={lang === 'de' ? '/de/xray/' : '/xray/'}>{commit}</a> · {built} · {t('foot.stack')}</span>
     </div>
   </div>
@@ -39,6 +40,7 @@ const showCounter = ANALYTICS_ON && COUNTER_SINCE.length > 0;
   .colophon { display: flex; flex-wrap: wrap; gap: 10px 28px; justify-content: space-between; padding-top: 20px; border-top: 1px solid var(--line); font-size: 0.8125rem; color: var(--fg-mute); }
   .colophon .mono { font-size: 0.75rem; }
   .views b { color: var(--fg-soft); font-weight: 500; }
+  .colophon a.mono { font-size: 0.75rem; color: var(--fg-mute); }
 </style>
 
 {showCounter && (

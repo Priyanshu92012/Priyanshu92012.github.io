@@ -10,7 +10,7 @@ export const LOCALE_NAME: Record<Locale, string> = { en: 'English', de: 'Deutsch
 export const OG_LOCALE: Record<Locale, string> = { en: 'en_GB', de: 'de_DE' };
 
 /** Routes that exist in both languages (German at /de + path). Anything else is English-only. */
-export const LOCALIZED_ROUTES = ['/', '/work/', '/skills/', '/lab/', '/about/', '/recruiter/', '/resume/', '/security-lab/', '/ai-lab/', '/xray/'];
+export const LOCALIZED_ROUTES = ['/', '/work/', '/skills/', '/lab/', '/about/', '/recruiter/', '/resume/', '/security-lab/', '/ai-lab/', '/xray/', '/privacy/'];
 
 export function localeFromPath(pathname: string): Locale {
   return pathname === '/de' || pathname.startsWith('/de/') ? 'de' : 'en';

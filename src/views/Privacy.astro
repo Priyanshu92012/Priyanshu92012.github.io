@@ -1,0 +1,37 @@
+---
+// Privacy notice (EN/DE). The statistics paragraph follows the build: it describes GoatCounter only when
+// the build enables it (src/lib/analytics.ts). Factual description, not a compliance claim.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { profile } from '../data/index';
+import { localeFromPath } from '../i18n/index';
+import { pick } from '../i18n/dict';
+import { PRIVACY } from '../i18n/pages/privacy';
+import { profileText } from '../i18n/content';
+import { ANALYTICS_ON, ANALYTICS_ORIGIN } from '../lib/analytics';
+const lang = localeFromPath(Astro.url.pathname);
+const x = pick(PRIVACY, lang);
+const P = profileText(lang);
+const UPDATED = '2026-11-23';
+const email = profile.links.emailLabel;
+---
+<BaseLayout title={x('title')} description={x('description')}>
+  <PageHead num="—" kicker={x('kicker')} title={x('h')} accent={x('accent')} meta={x('updated', { d: UPDATED })} />
+  <section class="section pv">
+    <div class="shell pv-body">
+      <section><h2>{x('whoH')}</h2><p>{x('whoB', { name: profile.name, location: P.location, email })}</p></section>
+      <section><h2>{x('statsH')}</h2><p data-analytics-state={ANALYTICS_ON ? 'on' : 'off'}>{ANALYTICS_ON ? x('statsOn', { origin: ANALYTICS_ORIGIN! }) : x('statsOff')}</p></section>
+      <section><h2>{x('localH')}</h2><p>{x('localB')}</p></section>
+      <section><h2>{x('labsH')}</h2><p>{x('labsB')}</p></section>
+      <section><h2>{x('hostH')}</h2><p>{x('hostB')}</p></section>
+      <section><h2>{x('rightsH')}</h2><p>{x('rightsB', { email })} <a href={profile.links.email}>{email}</a></p></section>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .pv { padding-top: clamp(24px, 4vw, 48px); }
+  .pv-body { display: grid; gap: 28px; max-width: 72ch; }
+  .pv-body h2 { font: 600 1.125rem/1.3 var(--font-display); margin-bottom: 6px; }
+  .pv-body p { color: var(--fg-soft); }
+</style>

@@ -1,6 +1,7 @@
 // Facts about this website's own architecture, for the PRIYANSHU.EXE case study. Every entry points at
 // real files in this repository; statuses distinguish what visitors use, what runs at build time, and
 // what exists but is switched off. Numbers carry the date and context of the run that produced them.
+import { ANALYTICS_ON } from '../lib/analytics';
 export type SiteComponent = {
   id: string;
   name: string;
@@ -103,7 +104,9 @@ export const SITE_EVIDENCE: { label: string; value: string; context: string }[] 
   { label: 'Accessibility', value: '0 serious or critical axe findings', context: 'WCAG 2.2 AA rules on every route in dark and paper themes, same run' },
   { label: 'Lighthouse, homepage (mobile)', value: 'Performance 98–99 · Accessibility 100 · Best practices 100 · SEO 100', context: 'Lighthouse 12, simulated slow 4G, single runs on 2026-11-22: / 99, /de/ 98' },
   { label: 'Largest Contentful Paint', value: '2.1–2.3 s (target 2.5 s, met)', context: 'Same runs; the LCP element is the hero portrait' },
-  { label: 'Requests to other hosts', value: '0', context: 'Asserted by every browser test; the build fails if an AI endpoint reaches the output' },
+  ANALYTICS_ON
+    ? { label: 'Requests to other hosts', value: '1 per page view (privacy-friendly counting)', context: 'An image request to GoatCounter on the live site, skipped with Do Not Track or Global Privacy Control; 0 in the browser tests; the build fails if an AI endpoint reaches the output' }
+    : { label: 'Requests to other hosts', value: '0', context: 'Asserted by every browser test; the build fails if an AI endpoint reaches the output' },
 ];
 
 export const ROADMAP: { title: string; note: string }[] = [

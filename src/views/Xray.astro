@@ -1,6 +1,7 @@
 ---
 import { execSync } from 'node:child_process';
 import { localeFromPath, t } from '../i18n/index';
+import { ANALYTICS_ON } from '../lib/analytics';
 const lang = localeFromPath(Astro.url.pathname);
 const de = lang === 'de';
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -122,7 +123,7 @@ const decisions = [
         <section class="panel">
           <div class="panel-head"><span>Server-side</span><span>nothing</span></div>
           <ul class="panel-body blist">
-            <li>No backend, no database, no cookies, no analytics</li>
+            <li>{ANALYTICS_ON ? <>No backend, no database, no cookies; page views are counted by GoatCounter (<a href="/privacy/">privacy</a>)</> : 'No backend, no database, no cookies, no analytics'}</li>
             <li>No AI service: the build fails if an inference endpoint reaches the bundle</li>
             <li>The experimental LLM Worker in <code>worker/</code> is not deployed, and no workflow deploys it</li>
           </ul>

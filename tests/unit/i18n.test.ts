@@ -13,6 +13,7 @@ import { SKILLS } from '../../src/i18n/pages/skills';
 import { ABOUT } from '../../src/i18n/pages/about';
 import { RC } from '../../src/i18n/pages/recruiter';
 import { SEC, AIL } from '../../src/i18n/pages/labs2';
+import { PRIVACY } from '../../src/i18n/pages/privacy';
 import { PROJECT_DE, STATUS_DE, EVIDENCE_DE, CATEGORY_DE, PROFILE_DE } from '../../src/data/de';
 import { projects, profile, STATUS_LABEL, EVIDENCE_LABEL } from '../../src/data/index';
 import { SKILL_CATEGORIES } from '../../src/data/constants';
@@ -20,9 +21,9 @@ import { PET } from '../../src/islands/petbot/copy';
 import { chat, ALL_TOPICS, quickLabel } from '../../src/islands/petbot/chat';
 import { isAllowedHref } from '../../src/lib/guide/links';
 
-const DICTS = { UI, HOME, WORK, CASE, LAB, SKILLS, ABOUT, RC, SEC, AIL, PET };
+const DICTS = { UI, HOME, WORK, CASE, LAB, SKILLS, ABOUT, RC, SEC, AIL, PET, PRIVACY };
 /** Keys whose German text may legitimately equal the English (names and technical terms). */
-const SAME_OK = /^(nav\.(breach|ailab|xray|skills)|nav\.recruiter\.short|foot\.stack|common\.lab|title|kicker|h|skills|status|colStack|lgWork|lgStudy|lgTool|k[1-7]|m5|moreSm|moreOl|breachKick|ctaRecruiter|recruiter|kPortfolio|aiTitle|cat|evidence|m1|m2|panelTitle|send|askQ)$/;
+const SAME_OK = /^(nav\.(breach|ailab|xray|skills)|nav\.recruiter\.short|foot\.stack|common\.lab|title|kicker|h|skills|status|colStack|lgWork|lgStudy|lgTool|k[1-7]|m5|moreSm|moreOl|breachKick|ctaRecruiter|recruiter|kPortfolio|aiTitle|cat|evidence|m1|m2|panelTitle|send|askQ|hostH|whoB)$/;
 
 describe('dictionaries', () => {
   it('German has exactly the English keys, none empty', () => {

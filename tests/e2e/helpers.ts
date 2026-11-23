@@ -4,7 +4,7 @@ export const ROUTES = [
   '/', '/work/', '/skills/', '/lab/', '/xray/', '/about/', '/recruiter/', '/resume/',
   '/work/test-resource-scheduler/', '/work/gmre-log-parser/', '/work/securemed/', '/work/finbert-xai/',
   '/work/opticlab/', '/work/ticket-reporting-pipeline/', '/work/priyanshu-exe/', '/work/infrastructure-capacity/', '/security-lab/', '/ai-lab/',
-  '/de/', '/de/work/', '/de/work/securemed/', '/de/skills/', '/de/lab/', '/de/about/', '/de/recruiter/', '/de/resume/', '/de/security-lab/', '/de/ai-lab/', '/de/xray/',
+  '/de/', '/de/work/', '/de/work/securemed/', '/de/skills/', '/de/lab/', '/de/about/', '/de/recruiter/', '/de/resume/', '/de/security-lab/', '/de/ai-lab/', '/de/xray/', '/privacy/', '/de/privacy/',
 ];
 
 // Library noise that is not ours (React Three Fiber still references THREE.Clock).
